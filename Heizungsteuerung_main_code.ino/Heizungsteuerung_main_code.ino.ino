@@ -1,4 +1,4 @@
-// // ------------Bibliotheken------------ 
+// // ------------Bibliotheken------------ // Hinzufügen des LCDs
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
