@@ -1,4 +1,4 @@
-// // ------------Bibliotheken------------ // GIT Test Experimente
+// // ------------Bibliotheken------------ 
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
