@@ -10,6 +10,7 @@ const int ds18b20Pin = 5;
 const int outputrelaisPin = 4;
 const int TRAPin = 6;
 const int TRBPin = 7;
+const int encoderswPin =8;
 
 // //-------------Bibliotheken verknüpfen--------
 OneWire oneWire(ds18b20Pin);
@@ -89,8 +90,9 @@ void setup() {
   pinMode(switchmodePin, INPUT_PULLUP);
   pinMode(ds18b20Pin, INPUT);  // externer Pullup
   pinMode(outputrelaisPin, OUTPUT);
-  pinMode(TRAPin, INPUT_PULLUP);
-  pinMode(TRBPin, INPUT_PULLUP);
+  pinMode(TRAPin, INPUT);
+  pinMode(TRBPin, INPUT);
+  pinMode (encoderswPin, INPUT_PULLUP);
   digitalWrite(outputrelaisPin, LOW);
 
   Serial.begin(9600);
@@ -313,6 +315,9 @@ void temperaturschaltung(unsigned long now) {
   lastHandledRaumtemperatur = Raumtemperatur;
 }
 
+void tratest(){
+  if (digitalRead(TRAPin))Serial.println("TRA");
+}
 void loop() {
   unsigned long now = millis();
   anaus_Schalter(now);
