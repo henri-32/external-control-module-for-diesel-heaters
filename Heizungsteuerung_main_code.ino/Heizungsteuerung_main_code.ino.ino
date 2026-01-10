@@ -90,8 +90,8 @@ void setup() {
   pinMode(switchmodePin, INPUT_PULLUP);
   pinMode(ds18b20Pin, INPUT);  // externer Pullup
   pinMode(outputrelaisPin, OUTPUT);
-  pinMode(TRAPin, INPUT);
-  pinMode(TRBPin, INPUT);
+  pinMode(TRAPin, INPUT_PULLUP);
+  pinMode(TRBPin, INPUT_PULLUP);
   pinMode (encoderswPin, INPUT_PULLUP);
   digitalWrite(outputrelaisPin, LOW);
 
@@ -315,9 +315,6 @@ void temperaturschaltung(unsigned long now) {
   lastHandledRaumtemperatur = Raumtemperatur;
 }
 
-void tratest(){
-  if (digitalRead(TRAPin))Serial.println("TRA");
-}
 void loop() {
   unsigned long now = millis();
   anaus_Schalter(now);
