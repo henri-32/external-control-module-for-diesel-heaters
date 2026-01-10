@@ -1,6 +1,7 @@
 // // ------------Bibliotheken------------ // Hinzufügen des LCDs
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <Encoder.h>
 
 // // ------------Ein- und Ausgänge-------------
 const int switchanausPin = 2;
@@ -16,10 +17,12 @@ DallasTemperature sensors(&oneWire);
 
 // ------------Bools-----------------
 bool tempRequestPending = false;  //Temperaturmessung angefordert Ergebnis ausstehend
+
 // ------------Variablen---------------
 float tempC;
 float Solltemperatur = 20.0;
 const float Toleranz_Solltemperatur = 1.5;
+Encoder encoder(TRAPin, TRBPin);
 
 //-------------Zeitvariablen ------------
 unsigned long lastDebounceTimeanaus = 0;
@@ -71,8 +74,7 @@ enum class ART_DES_SCHALTENS : uint8_t { nichtgesetzt,
 ART_DES_SCHALTENS Art_des_Schaltens = ART_DES_SCHALTENS::nichtgesetzt;
 
 enum class TEMPERATURSPERRE : uint8_t { nichtaktiv,
-                                        aktiv,
-                                        abgelaufen };
+                                        aktiv };
 TEMPERATURSPERRE Temperatursperre = TEMPERATURSPERRE::nichtaktiv;
 
 enum class DEBUGMODE : uint8_t { running,
@@ -81,7 +83,6 @@ enum class DEBUGMODE : uint8_t { running,
 DEBUGMODE debugmode = DEBUGMODE::debug;
 
 // ------------ Allgemeine Funktionen------------
-constexpr uint16_t key_temp(HEIZUNGSZUSTAND h, RAUMTEMPERATUR r);  // optional löschen, wenn nicht verwendet
 
 void setup() {
   pinMode(switchanausPin, INPUT_PULLUP);
@@ -97,16 +98,16 @@ void setup() {
   sensors.requestTemperatures();
   tempC = sensors.getTempCByIndex(0);
 
-   Heizung_startbereit = HEIZUNG_STARTBEREIT::bereit;
+  Heizung_startbereit = HEIZUNG_STARTBEREIT::bereit;
 
-   if (debugmode == DEBUGMODE::debug) {
-      Serial.println("Startup abgeschlossen");
-      Serial.print("Temperatur ");
-      Serial.println(tempC);
-    }
+  if (debugmode == DEBUGMODE::debug) {
+    Serial.println("Startup abgeschlossen");
+    Serial.print("Temperatur ");
+    Serial.println(tempC);
+  }
 }
 
-void debug(unsigned long now) {
+void debugprint(unsigned long now) {
   if (debugmode != DEBUGMODE::debug) return;
   if (now - lastdebugprint < debugprintintervall) return;
 
@@ -250,51 +251,20 @@ void mode_Schalter(unsigned long now) {
   }
 }
 
-uint8_t encoderauslesen() {
-  static bool initialized = false;
-  uint8_t encoderposition = 0;
-  static uint8_t lastencoderposition = 0;
-  uint8_t encodertrigger = 0;  // Die Rückgabe der Funktion ist entweder triggerup oder fiktiv trigger down. Es gibt keine anderen Aktionen. Deswegen als bool
-  static bool lastTRAVal;
-  bool TRAVal = digitalRead(TRAPin);
-  bool TRBVal = digitalRead(TRBPin);
+void interpretencoder() {             // Drehaktionen lösen je nach Modus andere Aktionen aus, müssen daher in Kontext gesetzt werden
+  long encoderwert = encoder.read();  // Die Funktion gibt einen Wert zurück, der mit jeder Drehung aktualisiert wird. Aufgrund des physischen encoders sind es vier Schritte für einen Klick
+  static long lastencoderwert = 0;    // Es muss beides long sein, weil die Bibliothek, long zurückgeben kann
+  if (encoderwert == lastencoderwert) return;
 
-  if (!initialized) {
-    lastTRAVal = TRAVal;
-    initialized = true;
-    return;
+  int8_t encoderaction = (encoderwert - lastencoderwert) / 4;  // Die vier Schritte eines Klicks werden auf eine action heruntergebrochen.
+
+
+  if (Heizungsmode == HEIZUNGSMODE::TEMP) {                 // Im TEMP Mode wird die Solltemperatur eingestellt noch keine Weiteren Funktionen da kein LCD Display
+    Solltemperatur = Solltemperatur + encoderaction * 0.5;  // Die Solltemperatur wird um die Anzahl der Klicks auf dem Encoder in 0,5 grad Schritten eingestellt. Es ist keine Unterscheidungen mehr nötig, da encoderaction bereits signed ist
+    if(Solltemperatur > 30) Solltemperatur =30; // Begrenzung der maximalen Werte der Solltemperatur
+    else if (Solltemperatur <5) Solltemperatur =5;
   }
-
-  else {
-    if (TRAVal != lastTRAVal) {
-      if (TRAVal == TRBVal) encoderposition--;
-      else encoderposition++;
-    }
-    lastTRAVal = TRAVal;
-
-    if (encoderposition - lastencoderposition == 2 || encoderposition - lastencoderposition == -2) {  //Wenn sich die Encoderposition um  2 verändert (Hardwarebedingt ein klick zwei Werte)
-      if (encoderposition < lastencoderposition) {
-        lastencoderposition = encoderposition;
-        return encodertrigger = -1;  // -1 ist verringern 1 ist vergrößern und 0 ist keine änderung (nur zur Sicherheit eigentlich sollte bei keiner änderung vorher die funktion returned werden)
-      } else {
-        lastencoderposition = encoderposition;
-        return encodertrigger = 1;
-      }
-    } else {
-      lastencoderposition = encoderposition;
-      return 0;
-    }
-  }
-}
-
-void interpretencoder() {  // Drehaktionen lösen je nach Modus andere Aktionen aus, müssen daher in Kontext gesetzt werden
-  uint8_t encodertrigger = encoderauslesen();
-  if (encodertrigger == 0) return;  // Nur wenn es eine Encoderaktion gibt muss diese interpretiert werden.
-
-  if (Heizungsmode == HEIZUNGSMODE::TEMP) {  // Im TEMP Mode wird die Solltemperatur eingestellt
-    if (encodertrigger == -1) Solltemperatur = Solltemperatur - 0, 5;
-    else Solltemperatur = Solltemperatur + 0, 5;
-  }
+  lastencoderwert = encoderwert;
 }
 
 
@@ -352,5 +322,5 @@ void loop() {
   checktemperatursperre(now);
   temperaturmessung(now);
   temperaturschaltung(now);
-  debug(now);
+  debugprint(now);
 }
