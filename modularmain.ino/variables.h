@@ -1,8 +1,5 @@
 // variables.h
-
-#ifndef VARIABLES_H
-#define VARIABLES_H
-
+#pragma once
 #include <Encoder.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -84,5 +81,3 @@ extern const unsigned long dauersperre;
 
 extern unsigned long lastTempRequest;
 extern const unsigned long tempMeasurementDelay;
-
-#endif

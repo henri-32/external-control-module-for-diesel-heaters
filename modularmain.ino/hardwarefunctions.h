@@ -1,7 +1,5 @@
 // hardwarefunctions.h
-#ifndef HARDWAREFUNCTIONS_H
-#define HARDWAREFUNCTIONS_H
-
+#pragma once
 #include "variables.h"
 #include "logicfunctions.h"
 #include <Arduino.h>
@@ -14,5 +12,3 @@ void anaus_Schalter(unsigned long now);
 void mode_Schalter(unsigned long now);
 void startTemperatureRequest(unsigned long now);
 void readTemperature(unsigned long now);
-
-#endif

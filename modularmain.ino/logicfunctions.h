@@ -1,12 +1,9 @@
 //logicfunction.h
+#pragma once
 #include "hardwarefunctions.h"
 #include "variables.h"
 #include <Arduino.h>
 #include <Encoder.h>
-
-
-#ifndef LOGICFUNCTIONS_H
-#define LOGICFUNCTIONS_H
 
 bool requestrelais(unsigned long now, RELAISZUSTAND zielzustand, ART_DES_SCHALTENS quelle = ART_DES_SCHALTENS::Schalter);
 void interpretencoder(); 
@@ -17,7 +14,3 @@ void checktemperatursperre(unsigned long now);
 void temperatursperre(unsigned long now);
 void temperatursperre_reset();
 
-
-
-
-#endif
