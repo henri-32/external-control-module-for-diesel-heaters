@@ -1,11 +1,5 @@
 //hardwarefunctions.cpp
 #include "hardwarefunctions.h"
-#include "variables.h"
-
-#include <Arduino.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
-
 
 //Bibliotheken verknüpfen
 OneWire oneWire(ds18b20Pin);

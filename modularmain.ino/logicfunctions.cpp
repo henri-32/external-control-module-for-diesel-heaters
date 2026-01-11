@@ -1,11 +1,5 @@
 //logicfunctions.cpp
 #include "logicfunctions.h"
-#include "hardwarefunctions.h"
-#include "variables.h"
-
-#include <Arduino.h>
-#include <Encoder.h>
-
 
 // ---------------- KOMMANDOZENTRALE ----------------
 bool requestrelais(unsigned long now, RELAISZUSTAND zielzustand, ART_DES_SCHALTENS quelle = ART_DES_SCHALTENS::Schalter) {
@@ -31,21 +25,34 @@ bool requestrelais(unsigned long now, RELAISZUSTAND zielzustand, ART_DES_SCHALTE
   return false;
 }
 
-void interpretencoder() {             // Drehaktionen lösen je nach Modus andere Aktionen aus, müssen daher in Kontext gesetzt werden
-  long encoderwert = encoder.read();  // Die Funktion gibt einen Wert zurück, der mit jeder Drehung aktualisiert wird. Aufgrund des physischen encoders sind es vier Schritte für einen Klick
-  static long lastencoderwert = 0;    // Es muss beides long sein, weil die Bibliothek, long zurückgeben kann
-  if (encoderwert == lastencoderwert) return;
+void interpretencoder() {
+  long encoderwert = encoder.read();  // Bibliothek liefert long, inkrementiert bei jeder "Zähleinheit" des Encoders
+  static long lastencoderwert = 0;    // vorheriger Wert, um Differenz zu bestimmen
+  static float deltaSumme = 0;
+  long diff = encoderwert - lastencoderwert;  // Diese Bibliotheksfunktion gibt den Wert in 4er Schritten aus!
 
-  int8_t encoderaction = (encoderwert - lastencoderwert) / 4;  // Die vier Schritte eines Klicks werden auf eine action heruntergebrochen.
+  if (diff == 0) return;  // nichts bewegt, also nichts tun
 
+  deltaSumme += diff * 0.125;  // Wird quasi geviertelt um einzelne Schritte Herauszubekommen (Vorher habe ich einfach durch vier geteilt, aber wenn da null raus kommt läuft die ganze Funktion nicht mehr)
 
-  if (Heizungsmode == HEIZUNGSMODE::TEMP) {                 // Im TEMP Mode wird die Solltemperatur eingestellt noch keine Weiteren Funktionen da kein LCD Display
-    Solltemperatur = Solltemperatur + encoderaction * 0.5;  // Die Solltemperatur wird um die Anzahl der Klicks auf dem Encoder in 0,5 grad Schritten eingestellt. Es ist keine Unterscheidungen mehr nötig, da encoderaction bereits signed ist
-    if(Solltemperatur > 30) Solltemperatur =30; // Begrenzung der maximalen Werte der Solltemperatur
-    else if (Solltemperatur <5) Solltemperatur =5;
+  if (Heizungsmode == HEIZUNGSMODE::TEMP) {  // Im TEMP Mode
+    while (deltaSumme >= 0.5) {              // while Schleife, damit der code das ganze Delta abarbeitet bevor er weiter läuft (Vorher habe ich if genutzt aber dann wurde pro loop nur um 0,5 angepasst, was bei schnellen Drehungen sehr langsame reaktionen ausgelöst hat.)
+      Solltemperatur += 0.5;
+      deltaSumme -= 0.5;
+    }
+
+    while (deltaSumme <= -0.5) {            // Der wert in der Bedingung ist auch eine Empfindlichkeitsdarstellung, da sie einen minimalen delta Impuls vorraussetzt. 
+      Solltemperatur -= 0.5;
+      deltaSumme += 0.5;
+    }
   }
+
+  if (Solltemperatur > 30) Solltemperatur = 30;
+  else if (Solltemperatur < 5) Solltemperatur = 5;
+
   lastencoderwert = encoderwert;
 }
+
 
 void debugprint(unsigned long now) {
   if (debugmode != DEBUGMODE::debug) return;
@@ -113,12 +120,12 @@ void checktemperatursperre(unsigned long now) {
     temperatursperre_reset();
   }
 }
-static void temperatursperre(unsigned long now) {
+void temperatursperre(unsigned long now) {
   Temperatursperre = TEMPERATURSPERRE::aktiv;
   beginnsperretimer = now;
 }
 
-static void temperatursperre_reset() {
+void temperatursperre_reset() {
   Temperatursperre = TEMPERATURSPERRE::nichtaktiv;
   beginnsperretimer = 0;
 }

@@ -3,6 +3,10 @@
 #ifndef VARIABLES_H
 #define VARIABLES_H
 
+#include <Encoder.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
 enum class HEIZUNGSZUSTAND : uint8_t { AUS,
                                        AN };
 
@@ -34,6 +38,11 @@ enum class DEBUGMODE : uint8_t { running,
                                  debug,
                                  oledprint };
 
+
+
+extern OneWire oneWire;
+extern DallasTemperature sensors;
+
 extern HEIZUNGSZUSTAND Heizungszustand;
 extern HEIZUNGSMODE Heizungsmode;
 extern RELAISZUSTAND Relaiszustand;
@@ -41,7 +50,7 @@ extern HEIZUNG_STARTBEREIT Heizung_startbereit;
 extern RAUMTEMPERATUR Raumtemperatur;
 extern ART_DES_SCHALTENS Art_des_Schaltens;
 extern TEMPERATURSPERRE Temperatursperre;
-extern DEBUGMODE Debugmode;
+extern DEBUGMODE debugmode;
 
 extern const int switchanausPin;
 extern const int switchmodePin;

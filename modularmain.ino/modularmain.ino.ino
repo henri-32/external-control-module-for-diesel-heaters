@@ -1,8 +1,14 @@
 //modularmain.ino.ino
+#pragma once 
+#include "variables.h"
+#include "hardwarefunctions.h"
+#include "logicfunctions.h"
 
-#include <variables.h>
-#include <hardewarefunctions.h>
-#include <logicfunctions.h>
+#include <Arduino.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+//Bibliotheken verknüpfen
 
 
 void setup() {
@@ -37,5 +43,5 @@ void loop() {
   checktemperatursperre(now);
   temperaturmessung(now);
   temperaturschaltung(now);
-  debug(now);
+  debugprint(now);
 }

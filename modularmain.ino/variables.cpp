@@ -1,7 +1,5 @@
-#include <variables.h>
-#include <Encoder.h>
 //variables.cpp
-
+#include "variables.h"
 
 // --------- Ein- und Ausgänge---------
 const int switchanausPin = 2;
@@ -27,7 +25,7 @@ unsigned long lastDebounceTimemode = 0;
 const unsigned long debounceDelay = 50;
 
 unsigned long lastdebugprint = 0;
-const unsigned long debugprintintervall = 3000;
+const unsigned long debugprintintervall = 1500;
 
 unsigned long lastrelais2000time = 0;
 unsigned long lastrelais500time = 0;
