@@ -1,8 +1,9 @@
 //modularmain.ino.ino
-#pragma once 
+#pragma once
 #include "variables.h"
 #include "hardwarefunctions.h"
 #include "logicfunctions.h"
+#include "lcddisplay.h"
 
 #include <Arduino.h>
 #include <OneWire.h>
@@ -44,4 +45,4 @@ void loop() {
   temperaturmessung(now);
   temperaturschaltung(now);
   debugprint(now);
-}
+  display_update_wrapper(now)
