@@ -1,6 +1,6 @@
 #include "lcddisplay.h"
 #include <string.h>
-
+#include "variables.h"
 enum class DISPLAYSTATUS { standard,
                            passive };
 DISPLAYSTATUS displaystatus = DISPLAYSTATUS::standard;
@@ -52,28 +52,28 @@ void display_update(unsigned long now,
 void display_content() {
   switch (displaystatus) {
     case DISPLAYSTATUS::standard:
-      snprintf(content[0], 21, "Temperatur %.1f", TempC);
+      snprintf(content[0], 21, "Temperatur %.1f", tempC);
       snprintf(content[1], 21, "Solltemperatur %.1f", Solltemperatur);
-      snprintf(content[2], 21, "%s", zustandsstring[0]);
+      snprintf(content[2], 21, "%s", zustandsstrings[0]);
       snprintf(content[3], 21, "%s", zustandsstrings[1]);
       break;
   }
 }
 
-const char ZustaendetoString() {
+void ZustaendetoString() {
   switch (Heizungszustand) {
     case HEIZUNGSZUSTAND::AN:
-      zustandsstrings[0] = "AN";
+      zustandsstrings[0][0] = "AN";
       break;
     case HEIZUNGSZUSTAND::AUS:
-      zustandsstrings[0] = "AUS"
+      zustandsstrings[0][0] = "AUS";
   }
   switch (Heizungsmode) {
     case HEIZUNGSMODE::TEMP:
-      zustandsstrings[1] = "TEMP";
+      zustandsstrings[1][0] = "TEMP";
       break;
     case HEIZUNGSMODE::POWER:
-      zustandsstrings[1] = "POWER";
+      zustandsstrings[1][0] = "POWER";
       break;
   }
 }
