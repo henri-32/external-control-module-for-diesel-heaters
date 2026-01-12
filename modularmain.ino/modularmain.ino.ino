@@ -45,4 +45,6 @@ void loop() {
   temperaturmessung(now);
   temperaturschaltung(now);
   debugprint(now);
-  display_update_wrapper(now)
+  display_update_wrapper(now);
+
+}
