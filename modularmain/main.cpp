@@ -1,52 +1,25 @@
-//modularmain.ino.ino
+// modularmain.ino.ino
 #pragma once
-#include "variables.h"
 #include "functions.h"
 #include "lcddisplay.h"
-
 #include <Arduino.h>
-#include <OneWire.h>
 #include <DallasTemperature.h>
-
-
+#include <OneWire.h>
 
 void setup() {
-  pinMode(switchanausPin, INPUT_PULLUP);
-  pinMode(switchmodePin, INPUT_PULLUP);
-  pinMode(ds18b20Pin, INPUT);  // externer Pullup
-  pinMode(outputrelaisPin, OUTPUT);
-  pinMode(TRAPin, INPUT_PULLUP);
-  pinMode(TRBPin, INPUT_PULLUP);
-  pinMode(encoderswPin, INPUT_PULLUP);
-  digitalWrite(outputrelaisPin, LOW);
-
-  Serial.begin(9600);
-  sensors.begin();
-  sensors.requestTemperatures();
-  tempC = sensors.getTempCByIndex(0);
-
-  Heizung_startbereit = HEIZUNG_STARTBEREIT::bereit;
-
-  if (debugmode == DEBUGMODE::debug) {
-    Serial.println("Startup abgeschlossen");
-    Serial.print("Temperatur ");
-    Serial.println(tempC);
-  }
-
-  display_init();
+  pinSettings();
+  initSystems();
 }
 
 void loop() {
   unsigned long now = millis();
-  anaus_Schalter(now);
-  modeSwitch(now);
-  displayModeSwitch(now);
-  interpretencoder();
+  readOnOfSwitch(now);
+  readModeSwitch(now);
+  readDisplayModeSwitch(now);
+  readAndInterpretEncoder();
   relaischeck_loesen(now);
   checktemperatursperre(now);
   temperaturmessung(now);
   temperaturschaltung(now);
-  debugPrint(now);
   lcdDisplay(now);
-
 }

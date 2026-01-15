@@ -1,0 +1,10 @@
+{
+  "C_Cpp.intelliSenseEngine": "Disabled",
+  "editor.defaultFormatter": "xaver.clang-format",
+  "files.associations": {
+    "*.ino": "cpp"
+  },
+  "[cpp]": {
+    "editor.formatOnSave": true
+  }
+}

@@ -1,5 +1,4 @@
 #include "lcddisplay.h"
-#include <string.h>
 #include "variables.h"
 
 // Display Status Variable wird auf passive gesetzt damit das Display im Startmodus ausgeschaltet ist
