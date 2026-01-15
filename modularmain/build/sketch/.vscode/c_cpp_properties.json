@@ -1,0 +1,13 @@
+#line 1 "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git/modularmain/.vscode/c_cpp_properties.json"
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": []
+        }
+    ],
+    "version": 4
+}
