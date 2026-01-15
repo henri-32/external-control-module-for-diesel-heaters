@@ -1,0 +1,9 @@
+{
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.autocomplete": "Disabled",
+  "C_Cpp.errorSquiggles": "Disabled",
+  "clangd.arguments": [
+    "--background-index",
+    "--clang-tidy=false"
+  ]
+}
