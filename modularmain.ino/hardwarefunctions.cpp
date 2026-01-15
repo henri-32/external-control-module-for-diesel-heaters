@@ -1,5 +1,6 @@
 //hardwarefunctions.cpp
 #include "hardwarefunctions.h"
+#include "lcddisplay.h"
 
 //Bibliotheken verknüpfen
 OneWire oneWire(ds18b20Pin);
@@ -79,6 +80,25 @@ void mode_Schalter(unsigned long now) {
     if (debugmode == DEBUGMODE::debug) Serial.println("Schalter Mode gedrückt");
   }
 }
+void display_switch(unsigned long now) {
+  bool current = digitalRead(encoderswPin);
+  static bool last = HIGH;
+  static unsigned long lastdebounce = 0;
+
+  if (current != last) {
+    if (current == LOW) {  // Taste gedrückt (bei Pullup)
+      if (now - lastdebounce > 50) {
+        lastdebounce = now;
+        displaystatus =
+          (displaystatus == DISPLAYSTATUS::passive)
+            ? DISPLAYSTATUS::standard
+            : DISPLAYSTATUS::passive;
+      }
+    }
+  }
+  last = current;
+}
+
 
 void startTemperatureRequest(unsigned long now) {  //Beginn der Temperaturmessung
   if (now - lastTempRequest < 1000) return;

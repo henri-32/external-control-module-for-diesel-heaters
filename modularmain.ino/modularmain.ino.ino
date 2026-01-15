@@ -19,6 +19,7 @@ void setup() {
   pinMode(outputrelaisPin, OUTPUT);
   pinMode(TRAPin, INPUT_PULLUP);
   pinMode(TRBPin, INPUT_PULLUP);
+  pinMode(encoderswPin, INPUT_PULLUP);
   digitalWrite(outputrelaisPin, LOW);
 
   Serial.begin(9600);
@@ -33,12 +34,15 @@ void setup() {
     Serial.print("Temperatur ");
     Serial.println(tempC);
   }
+
+  display_init();
 }
 
 void loop() {
   unsigned long now = millis();
   anaus_Schalter(now);
   mode_Schalter(now);
+  display_switch(now);
   interpretencoder();
   relaischeck_loesen(now);
   checktemperatursperre(now);

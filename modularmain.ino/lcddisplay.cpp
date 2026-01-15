@@ -1,13 +1,12 @@
 #include "lcddisplay.h"
 #include <string.h>
 #include "variables.h"
-enum class DISPLAYSTATUS { standard,
-                           passive };
-DISPLAYSTATUS displaystatus = DISPLAYSTATUS::standard;
+#include "hardwarefunctions.h"
+
+DISPLAYSTATUS displaystatus = DISPLAYSTATUS::passive;
 
 char content[4][21];
 char zustandsstrings[2][21];
-
 
 // LCD Adresse und Größe anpassen
 static LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -34,51 +33,69 @@ void display_update(unsigned long now,
 
   static char lastLine[4][21] = { "", "", "", "" };
 
-  static char lines[4][21];
   for (uint8_t i = 0; i < 4; i++) {
-    strncpy(lines[i], content[i], 21);
-  }
-  for (uint8_t i = 0; i < 4; i++) {
-    if (strcmp(lines[i], lastLine[i]) != 0) {  // Nur schreiben, wenn sich etwas geändert hat
+    if (strcmp(content[i], lastLine[i]) != 0) {  // Nur schreiben, wenn sich etwas geändert hat
       clearLine(i);
-      lcd.print(lines[i]);
-      strncpy(lastLine[i], lines[i], 21);
+      lcd.print(content[i]);
+      strncpy(lastLine[i], content[i], 21);
       lastLine[i][20] = '\0';
     }
   }
 }
 
 //Inhaltsfunktion
-void display_content() {
+void display_create_content() {
   switch (displaystatus) {
     case DISPLAYSTATUS::standard:
-      snprintf(content[0], 21, "Temperatur %.1f", tempC);
-      snprintf(content[1], 21, "Solltemperatur %.1f", Solltemperatur);
-      snprintf(content[2], 21, "%s", zustandsstrings[0]);
-      snprintf(content[3], 21, "%s", zustandsstrings[1]);
-      break;
+      {
+        lcd.backlight();
+        lcd.display();
+        int t_int = int(tempC);                    // Hier ist eine manuelle Zerlegung der Variablen nötig
+        int t_frac = abs((int)(tempC * 10) % 10);  // da Arduino die fragmentierung von snprintf() nicht akzeptiert
+        int s_int = int(Solltemperatur);
+        int s_frac = abs((int)(Solltemperatur * 10) % 10);
+
+        snprintf(content[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
+        snprintf(content[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
+        snprintf(content[2], 21, "Zustand:   %s", zustandsstrings[0]);
+        snprintf(content[3], 21, "Mode:      %s", zustandsstrings[1]);
+        break;
+      }
+
+    case DISPLAYSTATUS::passive:
+      {
+        lcd.noBacklight();
+        lcd.noDisplay();
+        break;
+      }
   }
 }
 
 void ZustaendetoString() {
   switch (Heizungszustand) {
     case HEIZUNGSZUSTAND::AN:
-      zustandsstrings[0][0] = "AN";
+      strncpy(zustandsstrings[0], "ON", 21);
+      zustandsstrings[0][20] = '\0';
       break;
     case HEIZUNGSZUSTAND::AUS:
-      zustandsstrings[0][0] = "AUS";
+      strncpy(zustandsstrings[0], "OFF", 21);
+      zustandsstrings[0][20] = '\0';
+      break;
   }
   switch (Heizungsmode) {
     case HEIZUNGSMODE::TEMP:
-      zustandsstrings[1][0] = "TEMP";
+      strncpy(zustandsstrings[1], "TEMP", 21);
+      zustandsstrings[0][20] = '\0';
       break;
     case HEIZUNGSMODE::POWER:
-      zustandsstrings[1][0] = "POWER";
+      strncpy(zustandsstrings[1], "POWER", 21);
+      zustandsstrings[0][20] = '\0';
       break;
   }
 }
 //Update_Wrapper Funktion
 void display_update_wrapper(unsigned long now) {
-
+  ZustaendetoString();
+  display_create_content();
   display_update(now, content);
 }
