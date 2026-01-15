@@ -1,5 +1,4 @@
 {
-  "additionalFiles": "../../..,../..,../..,../..,../..,../..,../..,../..,../..,../..,../..",
   "compiler.optimization_flags": "",
   "customBuildProperties": "",
   "fqbn": "arduino:avr:uno",

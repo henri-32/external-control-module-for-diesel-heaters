@@ -1,17 +1,18 @@
-//variables.cpp
+// variables.cpp
 #include "variables.h"
 
 // --------- Ein- und Ausgänge---------
-const int switchanausPin = 2;
-const int switchmodePin = 3;
+const int OnOffSwitchPin = 2;
+const int modeSwitchPin = 3;
 const int ds18b20Pin = 5;
-const int outputrelaisPin = 4;
+const int outputRelaisPin = 4;
 const int TRAPin = 6;
 const int TRBPin = 7;
 const int encoderswPin = 8;
 
 //--------- Bools --------------
-bool tempRequestPending = false;  //Temperaturmessung angefordert Ergebnis ausstehend
+bool tempRequestPending =
+    false; // Temperaturmessung angefordert Ergebnis ausstehend
 
 // Variablen
 float tempC;
@@ -36,7 +37,7 @@ unsigned long beginnsperretimer = 0;
 const unsigned long dauersperre = 360000;
 
 unsigned long lastTempRequest = 0;
-const unsigned long tempMeasurementDelay = 750;  // für 12-Bit DS18B20
+const unsigned long tempMeasurementDelay = 750; // für 12-Bit DS18B20
 
 // ------------ Zustansvariablen (enum classes) --------------
 

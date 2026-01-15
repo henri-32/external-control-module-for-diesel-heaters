@@ -1,41 +1,24 @@
 // variables.h
 #pragma once
+#include <DallasTemperature.h>
 #include <Encoder.h>
 #include <OneWire.h>
-#include <DallasTemperature.h>
 
-enum class HEIZUNGSZUSTAND : uint8_t { AUS,
-                                       AN };
+enum class HEIZUNGSZUSTAND : uint8_t { AUS, AN };
 
+enum class HEIZUNGSMODE : uint8_t { TEMP, POWER };
 
-enum class HEIZUNGSMODE : uint8_t { TEMP,
-                                    POWER };
+enum class RELAISZUSTAND : uint8_t { AUS, AN500, AN2000 };
 
-enum class RELAISZUSTAND : uint8_t { AUS,
-                                     AN500,
-                                     AN2000 };
+enum class HEIZUNG_STARTBEREIT : uint8_t { nichtbereit, bereit };
 
-enum class HEIZUNG_STARTBEREIT : uint8_t { nichtbereit,
-                                           bereit };
+enum class RAUMTEMPERATUR : uint8_t { richtig, kalt, warm, Fehler };
 
-enum class RAUMTEMPERATUR : uint8_t { richtig,
-                                      kalt,
-                                      warm,
-                                      Fehler };
+enum class ART_DES_SCHALTENS : uint8_t { nichtgesetzt, Schalter, Temperatur };
 
-enum class ART_DES_SCHALTENS : uint8_t { nichtgesetzt,
-                                         Schalter,
-                                         Temperatur };
+enum class TEMPERATURSPERRE : uint8_t { nichtaktiv, aktiv, abgelaufen };
 
-enum class TEMPERATURSPERRE : uint8_t { nichtaktiv,
-                                        aktiv,
-                                        abgelaufen };
-
-enum class DEBUGMODE : uint8_t { running,
-                                 debug,
-                                 oledprint };
-
-
+enum class DEBUGMODE : uint8_t { running, debug, oledprint };
 
 extern OneWire oneWire;
 extern DallasTemperature sensors;
@@ -43,16 +26,16 @@ extern DallasTemperature sensors;
 extern HEIZUNGSZUSTAND Heizungszustand;
 extern HEIZUNGSMODE Heizungsmode;
 extern RELAISZUSTAND Relaiszustand;
-extern HEIZUNG_STARTBEREIT Heizung_startbereit;
 extern RAUMTEMPERATUR Raumtemperatur;
 extern ART_DES_SCHALTENS Art_des_Schaltens;
 extern TEMPERATURSPERRE Temperatursperre;
 extern DEBUGMODE debugmode;
 
-extern const int switchanausPin;
-extern const int switchmodePin;
+// Pin Definitionen
+extern const int OnOffSwitchPin;
+extern const int modeSwitchPin;
 extern const int ds18b20Pin;
-extern const int outputrelaisPin;
+extern const int outputRelaisPin;
 extern const int TRAPin;
 extern const int TRBPin;
 extern const int encoderswPin;

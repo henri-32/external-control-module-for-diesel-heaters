@@ -1,0 +1,7 @@
+Alles was mit der Temperatursperre zusammenhängt löschen. Dazu gehört vor allem auch die Quelle des Schaltens 
+OOP für Relais als Klasse mit entsprechenden Methoden 
+OOP für alle Temperatur Funktionen ? 
+
+Heizungsstartbereit prüfen, ob wirklich nötig
+
+In der Logik von Raumzustand auf TempC ändern
