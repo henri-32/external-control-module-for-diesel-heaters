@@ -7,7 +7,7 @@
 DISPLAYSTATUS displaystatus = DISPLAYSTATUS::passive;
 
 char content[4][21];
-char zustandsstrings[2][21];
+char stringsOfStates[2][21];
 
 // LCD Adresse und Größe anpassen
 static LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -45,7 +45,7 @@ void display_update(unsigned long now,
 }
 
 //Inhaltsfunktion
-void display_create_content() {
+void createDisplayContent() {
   switch (displaystatus) {
     case DISPLAYSTATUS::standard:
       {
@@ -58,8 +58,8 @@ void display_create_content() {
 
         snprintf(content[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
         snprintf(content[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
-        snprintf(content[2], 21, "Zustand:   %s", zustandsstrings[0]);
-        snprintf(content[3], 21, "Mode:      %s", zustandsstrings[1]);
+        snprintf(content[2], 21, "Zustand:   %s", stringsOfStates[0]);
+        snprintf(content[3], 21, "Mode:      %s", stringsOfStates[1]);
         break;
       }
 
@@ -72,31 +72,31 @@ void display_create_content() {
   }
 }
 
-void ZustaendetoString() {
+void statesToStrings() {
   switch (Heizungszustand) {
     case HEIZUNGSZUSTAND::AN:
-      strncpy(zustandsstrings[0], "ON", 21);
-      zustandsstrings[0][20] = '\0';
+      strncpy(stringsOfStates[0], "ON", 21);
+      stringsOfStates[0][20] = '\0';
       break;
     case HEIZUNGSZUSTAND::AUS:
-      strncpy(zustandsstrings[0], "OFF", 21);
-      zustandsstrings[0][20] = '\0';
+      strncpy(stringsOfStates[0], "OFF", 21);
+      stringsOfStates[0][20] = '\0';
       break;
   }
   switch (Heizungsmode) {
     case HEIZUNGSMODE::TEMP:
-      strncpy(zustandsstrings[1], "TEMP", 21);
-      zustandsstrings[0][20] = '\0';
+      strncpy(stringsOfStates[1], "TEMP", 21);
+      stringsOfStates[0][20] = '\0';
       break;
     case HEIZUNGSMODE::POWER:
-      strncpy(zustandsstrings[1], "POWER", 21);
-      zustandsstrings[0][20] = '\0';
+      strncpy(stringsOfStates[1], "POWER", 21);
+      stringsOfStates[0][20] = '\0';
       break;
   }
 }
 //Update_Wrapper Funktion
-void display_update_wrapper(unsigned long now) {
-  ZustaendetoString();
-  display_create_content();
+void lcdDisplay(unsigned long now) {
+  statesToStrings();
+  createDisplayContent();
   display_update(now, content);
 }

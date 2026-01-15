@@ -4,9 +4,9 @@
 #include <Arduino.h>
 #include <Encoder.h>
 
-bool requestrelais(unsigned long now, RELAISZUSTAND zielzustand, ART_DES_SCHALTENS quelle = ART_DES_SCHALTENS::Schalter);
+bool requestrelais(unsigned long now, RELAISZUSTAND zielzustand, ART_DES_SCHALTENS quelle);
 void interpretencoder(); 
-void debugprint(unsigned long now);
+void debugPrint(unsigned long now);
 void temperaturmessung(unsigned long now);
 void temperaturschaltung(unsigned long now);
 void checktemperatursperre(unsigned long now);

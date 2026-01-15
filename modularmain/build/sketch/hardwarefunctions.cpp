@@ -63,7 +63,7 @@ void anaus_Schalter(unsigned long now) {
   }
 }
 
-void mode_Schalter(unsigned long now) {
+void modeSwitch(unsigned long now) {
   static bool initialized = false;
   bool switchmodeVal = digitalRead(switchmodePin);
   static bool lastswitchmodeVal;
@@ -81,7 +81,7 @@ void mode_Schalter(unsigned long now) {
     if (debugmode == DEBUGMODE::debug) Serial.println("Schalter Mode gedrückt");
   }
 }
-void display_switch(unsigned long now) {
+void displayModeSwitch(unsigned long now) {
   bool current = digitalRead(encoderswPin);
   static bool last = HIGH;
   static unsigned long lastdebounce = 0;

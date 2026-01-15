@@ -10,6 +10,7 @@
 #include <DallasTemperature.h>
 
 
+
 void setup() {
   pinMode(switchanausPin, INPUT_PULLUP);
   pinMode(switchmodePin, INPUT_PULLUP);
@@ -39,14 +40,14 @@ void setup() {
 void loop() {
   unsigned long now = millis();
   anaus_Schalter(now);
-  mode_Schalter(now);
+  modeSwitch(now);
   display_switch(now);
   interpretencoder();
   relaischeck_loesen(now);
   checktemperatursperre(now);
   temperaturmessung(now);
   temperaturschaltung(now);
-  debugprint(now);
-  display_update_wrapper(now);
+  debugPrint(now);
+  lcdDisplay(now);
 
 }

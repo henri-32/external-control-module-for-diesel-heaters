@@ -5,7 +5,7 @@
 #include <LiquidCrystal_I2C.h>
 
 void display_init();
-void display_update_wrapper(unsigned long now);
+void lcdDisplay(unsigned long now);
 enum class DISPLAYSTATUS { standard,
                            passive };
 extern DISPLAYSTATUS displaystatus;
