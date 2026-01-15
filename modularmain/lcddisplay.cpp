@@ -5,11 +5,11 @@
 // Display Status Variable wird auf passive gesetzt damit das Display im Startmodus ausgeschaltet ist
 DISPLAYSTATUS displaystatus = DISPLAYSTATUS::passive;
 
-// In dieser Datei globale Variablen für den Displayinhalt (content) definiert
+// In dieser Datei globale Arrays für den Displayinhalt (content) definiert
 char content[4][21];
 char stringsOfStates[2][21];
 
-// LCD Adresse und Größe anpassen Objekt erstellen
+// LCD Adresse und Größe anpassen, Objekt erstellen
 static LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 // Hilfsfunktion: Zeile löschen
@@ -30,10 +30,8 @@ void display_init() {
 
 
 // Update-Funktion für display_update_wrapper(), die Displayinhalt physisch aktualisiert
-void display_update(unsigned long now,
-                    char content[4][21]) {
-
-  static char lastLine[4][21] = { "", "", "", "" };
+void display_update(unsigned long now, char content[4][21]) {
+  static char lastLine[4][21] = { "", "", "", "" }; //nötige für Vergleich
 
   for (uint8_t i = 0; i < 4; i++) {
     if (strcmp(content[i], lastLine[i]) != 0) {  // Nur schreiben, wenn sich etwas geändert hat
@@ -45,7 +43,7 @@ void display_update(unsigned long now,
   }
 }
 
-//Zustände werden in Strings umgewandelt um sie auf dem Display anzuzeigen zu können (Hilfsfunktion)
+// Hilfsfunktion: Zustände werden in Strings umgewandelt um sie auf dem Display anzuzeigen zu können
 void statesToStrings() {
   switch (Heizungszustand) {
     case HEIZUNGSZUSTAND::AN:
@@ -68,7 +66,7 @@ void statesToStrings() {
       break;
   }
 }
-//Inhaltsfunktion die entscheidet was angezeigt wird (content)
+//Inhaltsfunktion die berechnet, was angezeigt wird (content)
 void createDisplayContent() {
   statesToStrings(); // Es werden die aktuellen globalen Zustände eingelesen und in Strings umgewandelt
   switch (displaystatus) {
@@ -98,7 +96,7 @@ void createDisplayContent() {
 }
 
 
-//Update_Wrapper Funktion für main.cpp loop()
+//Wrapper Funktion für main.cpp loop()
 void lcdDisplay(unsigned long now) {
   createDisplayContent();
   display_update(now, content);

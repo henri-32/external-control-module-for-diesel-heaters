@@ -1,8 +1,7 @@
 //modularmain.ino.ino
 #pragma once
 #include "variables.h"
-#include "hardwarefunctions.h"
-#include "logicfunctions.h"
+#include "functions.h"
 #include "lcddisplay.h"
 
 #include <Arduino.h>
@@ -41,7 +40,7 @@ void loop() {
   unsigned long now = millis();
   anaus_Schalter(now);
   modeSwitch(now);
-  display_switch(now);
+  displayModeSwitch(now);
   interpretencoder();
   relaischeck_loesen(now);
   checktemperatursperre(now);
