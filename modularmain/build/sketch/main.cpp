@@ -40,14 +40,14 @@ void setup() {
 void loop() {
   unsigned long now = millis();
   anaus_Schalter(now);
-  mode_Schalter(now);
-  display_switch(now);
+  modeSwitch(now);
+  displayModeSwitch(now);
   interpretencoder();
   relaischeck_loesen(now);
   checktemperatursperre(now);
   temperaturmessung(now);
   temperaturschaltung(now);
-  debugprint(now);
-  display_update_wrapper(now);
+  debugPrint(now);
+  lcdDisplay(now);
 
 }

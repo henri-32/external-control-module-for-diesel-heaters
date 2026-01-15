@@ -1,6 +1,7 @@
 //hardwarefunctions.cpp
 #include "hardwarefunctions.h"
 #include "lcddisplay.h"
+#include "logicfunctions.h"
 
 //Bibliotheken verknüpfen
 OneWire oneWire(ds18b20Pin);
@@ -62,7 +63,7 @@ void anaus_Schalter(unsigned long now) {
   }
 }
 
-void mode_Schalter(unsigned long now) {
+void modeSwitch(unsigned long now) {
   static bool initialized = false;
   bool switchmodeVal = digitalRead(switchmodePin);
   static bool lastswitchmodeVal;
@@ -75,12 +76,12 @@ void mode_Schalter(unsigned long now) {
 
   else {
     if (switchmodeVal == lastswitchmodeVal) return;
-    requestrelais(now, RELAISZUSTAND::AN500);
+    requestrelais(now, RELAISZUSTAND::AN500, ART_DES_SCHALTENS::Schalter);
     lastswitchmodeVal = switchmodeVal;
     if (debugmode == DEBUGMODE::debug) Serial.println("Schalter Mode gedrückt");
   }
 }
-void display_switch(unsigned long now) {
+void displayModeSwitch(unsigned long now) {
   bool current = digitalRead(encoderswPin);
   static bool last = HIGH;
   static unsigned long lastdebounce = 0;

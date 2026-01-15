@@ -3,7 +3,7 @@
 #include "hardwarefunctions.h"
 
 // ---------------- KOMMANDOZENTRALE ----------------
-bool requestrelais(unsigned long now, RELAISZUSTAND zielzustand, ART_DES_SCHALTENS quelle = ART_DES_SCHALTENS::Schalter) {
+bool requestrelais(unsigned long now, RELAISZUSTAND zielzustand, ART_DES_SCHALTENS quelle) {
   uint8_t keysteuerung = (static_cast<uint8_t>(zielzustand) << 2) | static_cast<uint8_t>(quelle);
   switch (keysteuerung) {
     case 0b1010:  // AN2000 + Temperatur
@@ -55,7 +55,7 @@ void interpretencoder() {
 }
 
 
-void debugprint(unsigned long now) {
+void debugPrint(unsigned long now) {
   if (debugmode != DEBUGMODE::debug) return;
   if (now - lastdebugprint < debugprintintervall) return;
 

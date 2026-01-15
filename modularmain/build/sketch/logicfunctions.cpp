@@ -55,7 +55,7 @@ void interpretencoder() {
 }
 
 
-void debugprint(unsigned long now) {
+void debugPrint(unsigned long now) {
   if (debugmode != DEBUGMODE::debug) return;
   if (now - lastdebugprint < debugprintintervall) return;
 
