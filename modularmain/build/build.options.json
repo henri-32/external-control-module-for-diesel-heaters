@@ -1,0 +1,9 @@
+{
+  "additionalFiles": "../../..,../..,../..,../..,../..,../..,../..,../..,../..,../..,../..",
+  "compiler.optimization_flags": "",
+  "customBuildProperties": "",
+  "fqbn": "arduino:avr:uno",
+  "hardwareFolders": "/home/henri-32/snap/arduino-cli/62/.arduino15/packages",
+  "otherLibrariesFolders": "/home/henri-32/snap/arduino-cli/62/Arduino/libraries",
+  "sketchLocation": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git/modularmain"
+}
