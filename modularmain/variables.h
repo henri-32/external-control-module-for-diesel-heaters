@@ -12,13 +12,9 @@ enum class RELAISZUSTAND : uint8_t { AUS, AN500, AN2000 };
 
 enum class HEIZUNG_STARTBEREIT : uint8_t { nichtbereit, bereit };
 
-enum class RAUMTEMPERATUR : uint8_t { richtig, kalt, warm, Fehler };
-
-enum class ART_DES_SCHALTENS : uint8_t { nichtgesetzt, Schalter, Temperatur };
-
-enum class TEMPERATURSPERRE : uint8_t { nichtaktiv, aktiv, abgelaufen };
-
 enum class DEBUGMODE : uint8_t { running, debug, oledprint };
+
+enum class RAUMTEMPERATUR : uint8_t { richtig, kalt, warm, Fehler };
 
 extern OneWire oneWire;
 extern DallasTemperature sensors;
@@ -26,10 +22,8 @@ extern DallasTemperature sensors;
 extern HEIZUNGSZUSTAND Heizungszustand;
 extern HEIZUNGSMODE Heizungsmode;
 extern RELAISZUSTAND Relaiszustand;
-extern RAUMTEMPERATUR Raumtemperatur;
-extern ART_DES_SCHALTENS Art_des_Schaltens;
-extern TEMPERATURSPERRE Temperatursperre;
 extern DEBUGMODE debugmode;
+extern RAUMTEMPERATUR Raumtemperatur;
 
 // Pin Definitionen
 extern const int OnOffSwitchPin;

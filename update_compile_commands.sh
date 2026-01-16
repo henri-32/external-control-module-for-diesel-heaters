@@ -7,6 +7,7 @@ TARGET="$PROJECT_ROOT/compile_commands.json"
 # mögliche Cache-Pfade
 CANDIDATES=(
   "$HOME/.cache/arduino/sketches"
+  "$HOME/.arduino15"
   "$HOME/snap/arduino-cli/current/.cache/arduino/sketches"
   "$HOME/snap/arduino-cli/62/.cache/arduino/sketches"
 )

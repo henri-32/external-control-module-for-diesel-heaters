@@ -24,17 +24,10 @@ Encoder encoder(TRAPin, TRBPin);
 unsigned long lastDebounceTimeanaus = 0;
 unsigned long lastDebounceTimemode = 0;
 const unsigned long debounceDelay = 50;
-
-unsigned long lastdebugprint = 0;
-const unsigned long debugprintintervall = 1500;
-
 unsigned long lastrelais2000time = 0;
 unsigned long lastrelais500time = 0;
 const unsigned long relais2000delay = 2000;
 const unsigned long relais500delay = 500;
-
-unsigned long beginnsperretimer = 0;
-const unsigned long dauersperre = 360000;
 
 unsigned long lastTempRequest = 0;
 const unsigned long tempMeasurementDelay = 750; // für 12-Bit DS18B20
@@ -44,8 +37,5 @@ const unsigned long tempMeasurementDelay = 750; // für 12-Bit DS18B20
 HEIZUNGSZUSTAND Heizungszustand = HEIZUNGSZUSTAND::AUS;
 HEIZUNGSMODE Heizungsmode = HEIZUNGSMODE::TEMP;
 RELAISZUSTAND Relaiszustand = RELAISZUSTAND::AUS;
-HEIZUNG_STARTBEREIT Heizung_startbereit = HEIZUNG_STARTBEREIT::nichtbereit;
-RAUMTEMPERATUR Raumtemperatur = RAUMTEMPERATUR::richtig;
-ART_DES_SCHALTENS Art_des_Schaltens = ART_DES_SCHALTENS::nichtgesetzt;
-TEMPERATURSPERRE Temperatursperre = TEMPERATURSPERRE::nichtaktiv;
 DEBUGMODE debugmode = DEBUGMODE::debug;
+RAUMTEMPERATUR Raumtemperatur = RAUMTEMPERATUR::richtig;

@@ -6,5 +6,11 @@
   },
   "[cpp]": {
     "editor.formatOnSave": true
-  }
+  },
+
+  "clangd.arguments": [
+    "--background-index",
+    "--compile-commands-dir=."
+  ]
+
 }
