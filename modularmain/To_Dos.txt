@@ -1,14 +1,1 @@
-Alles was mit der Temperatursperre zusammenhängt löschen. Dazu gehört vor allem auch die Quelle des Schaltens. Dann ist die Bitverschiebung nicht mehr nötig.
-Temperatursperre komplett entfernen. 
-
-Zustand Heizungsstartbereit entfernen.
-In der Logik von Raumzustand auf TempC ändern. Dann Logik iwann auch OOP. 
-
-
-OOP 
-    OOP für Relais als Klasse mit entsprechenden Methoden 
-    OOP für alle Temperatur Funktionen ? 
-    OOP Für Schalter 
-    OOP für Logik ?? 
-    OOP Für alles 
-
+Debouncing in Switch class hinzufügen
