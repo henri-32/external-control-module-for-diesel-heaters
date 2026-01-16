@@ -6,19 +6,17 @@
 #include <DallasTemperature.h>
 #include <OneWire.h>
 
+bool initComplete;
+
 void setup() {
   pinSettings();
-  initSystems();
+  initComplete = initSystems();
 }
 
 void loop() {
   unsigned long now = millis();
-  readOnOfSwitch(now);
-  readModeSwitch(now);
-  readDisplayModeSwitch(now);
-  readAndInterpretEncoder();
+  readAllSwitches(now, initComplete);
   relaischeck_loesen(now);
-  checktemperatursperre(now);
   temperaturmessung(now);
   temperaturschaltung(now);
   lcdDisplay(now);

@@ -1,5 +1,6 @@
 #include "functions.h"
 #include "lcddisplay.h"
+#include "variables.h"
 #include <Arduino.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
@@ -19,7 +20,7 @@ void pinSettings() {
   digitalWrite(outputRelaisPin, LOW);
 }
 
-void relaisstarten(RELAISZUSTAND zielzustand, unsigned long now) {
+void startRelais(RELAISZUSTAND zielzustand, unsigned long now) {
   if (zielzustand == RELAISZUSTAND::AN2000) {
     if (now - lastDebounceTimeanaus < debounceDelay)
       return;
@@ -67,31 +68,30 @@ void relaischeck_loesen(unsigned long now) {
 
 // Beginn aller Schalterfunktionen
 //
-void readOnOfSwitch(unsigned long now) {
-  static bool lastswitchanausVal;
+void readOnOfSwitch(unsigned long now, bool initComplete) {
   bool switchanausVal = digitalRead(OnOffSwitchPin);
-  {
-    if (lastswitchanausVal == switchanausVal)
-      return;
-    requestrelais(now, RELAISZUSTAND::AN2000, ART_DES_SCHALTENS::Schalter);
-    lastswitchanausVal = switchanausVal;
+  static bool lastswitchanausVal = switchanausVal;
+  if (!initComplete)
+    return;
 
-    if (Heizungszustand == HEIZUNGSZUSTAND::AN)
-      temperatursperre(now);
-    else if (Heizungszustand == HEIZUNGSZUSTAND::AUS)
-      temperatursperre_reset();
-    if (debugmode == DEBUGMODE::debug)
-      Serial.println("Schalter AN/AUS gedrückt");
-  }
+  if (lastswitchanausVal == switchanausVal)
+    return;
+  startRelais(RELAISZUSTAND::AN2000, now);
+  lastswitchanausVal = switchanausVal;
+
+  if (debugmode == DEBUGMODE::debug)
+    Serial.println("Schalter AN/AUS gedrückt");
 }
 
-void readModeSwitch(unsigned long now) {
+void readModeSwitch(unsigned long now, bool initComplete) {
   bool switchmodeVal = digitalRead(modeSwitchPin);
-  static bool lastswitchmodeVal;
+  static bool lastswitchmodeVal = switchmodeVal;
+  if (!initComplete)
+    return;
 
   if (switchmodeVal == lastswitchmodeVal)
     return;
-  requestrelais(now, RELAISZUSTAND::AN500, ART_DES_SCHALTENS::Schalter);
+  startRelais(RELAISZUSTAND::AN500, now);
   lastswitchmodeVal = switchmodeVal;
   if (debugmode == DEBUGMODE::debug)
     Serial.println("Schalter Mode gedrückt");
@@ -99,9 +99,12 @@ void readModeSwitch(unsigned long now) {
 
 /* Bis jetzt nur einfacher Knopf für Displaymodus / in
    Zukunft vllt gedrückt halten für Laufzeitdaten */
-void readDisplayModeSwitch(unsigned long now) {
+void readDisplayModeSwitch(unsigned long now, bool initComplete) {
   bool current = digitalRead(encoderswPin);
-  static bool last = HIGH;
+  static bool last = current;
+  if (!initComplete)
+    return;
+
   static unsigned long lastdebounce = 0;
 
   if (current != last) {
@@ -163,12 +166,12 @@ void readAndInterpretEncoder() {
 }
 
 // Wrapperfunktion um alle Schalter auf einmal zu lesen
-void readAllSwitches(unsigned long now) {
-  readOnOfSwitch(now);
-  readModeSwitch(now);
-  readDisplayModeSwitch(now);
-  readAndInterpretEncoder(); // braucht keinen Zeitstempel weil das Debouncing
-                             // in der Bibliothek passiert
+void readAllSwitches(unsigned long now, bool initComplete) {
+  readOnOfSwitch(now, initComplete);
+  readModeSwitch(now, initComplete);
+  readDisplayModeSwitch(now, initComplete);
+  readAndInterpretEncoder(); // braucht keinen Zeitstempel und init weil das
+                             // Debouncing und init in der Bibliothek passiert
 }
 
 //
@@ -193,34 +196,6 @@ void readTemperature(unsigned long now) {
   tempRequestPending = false;         // Kein Ergebnis mehr ausstehend
 }
 
-// ---------------- KOMMANDOZENTRALE ----------------
-bool requestrelais(unsigned long now, RELAISZUSTAND zielzustand,
-                   ART_DES_SCHALTENS quelle) {
-  uint8_t keysteuerung =
-      (static_cast<uint8_t>(zielzustand) << 2) | static_cast<uint8_t>(quelle);
-  switch (keysteuerung) {
-  case 0b1010: // AN2000 + Temperatur
-  
-    if (Relaiszustand != RELAISZUSTAND::AUS)
-      return false;
-    if (Temperatursperre == TEMPERATURSPERRE::aktiv)
-      return false;
-    relaisstarten(RELAISZUSTAND::AN2000, now);
-    return true;
-  case 0b1001: // AN2000 + Schalter
-    if (Relaiszustand != RELAISZUSTAND::AUS)
-      return false;
-    relaisstarten(RELAISZUSTAND::AN2000, now);
-    return true;
-  case 0b0101: // AN500 + Schalter
-    if (now - lastDebounceTimemode < debounceDelay)
-      return false;
-    relaisstarten(RELAISZUSTAND::AN500, now);
-    return true;
-  }
-  return false;
-}
-
 void temperaturmessung(unsigned long now) {
   if (!tempRequestPending)
     startTemperatureRequest(now); // Wenn keine Messung gestartet, dann starten
@@ -243,47 +218,30 @@ void temperaturschaltung(unsigned long now) {
   static RAUMTEMPERATUR lastHandledRaumtemperatur = RAUMTEMPERATUR::richtig;
   if (Raumtemperatur == lastHandledRaumtemperatur)
     return;
-  if (Temperatursperre == TEMPERATURSPERRE::aktiv)
-    return;
   if (Heizungsmode != HEIZUNGSMODE::TEMP)
     return;
 
   if (Raumtemperatur == RAUMTEMPERATUR::kalt &&
       Heizungszustand == HEIZUNGSZUSTAND::AUS) {
-    requestrelais(now, RELAISZUSTAND::AN2000, ART_DES_SCHALTENS::Temperatur);
+    startRelais(RELAISZUSTAND::AN2000, now);
     // if (debugmode == DEBUGMODE::debug) Serial.println("Relais kalt
     // Schalten");
   } else if (Raumtemperatur == RAUMTEMPERATUR::warm &&
              Heizungszustand == HEIZUNGSZUSTAND::AN) {
-    requestrelais(now, RELAISZUSTAND::AN2000, ART_DES_SCHALTENS::Temperatur);
+    startRelais(RELAISZUSTAND::AN2000, now);
     if (debugmode == DEBUGMODE::debug)
       Serial.println("Relais warm Schalten");
   }
   lastHandledRaumtemperatur = Raumtemperatur;
 }
 
-void checktemperatursperre(unsigned long now) {
-  if (Temperatursperre == TEMPERATURSPERRE::aktiv &&
-      now - beginnsperretimer > dauersperre) {
-    temperatursperre_reset();
-  }
-}
-void temperatursperre(unsigned long now) {
-  Temperatursperre = TEMPERATURSPERRE::aktiv;
-  beginnsperretimer = now;
-}
-
-void temperatursperre_reset() {
-  Temperatursperre = TEMPERATURSPERRE::nichtaktiv;
-  beginnsperretimer = 0;
-}
-
-void initSystems() {
-   Serial.begin(9600);
+bool initSystems() {
+  bool initComplete = false;
+  Serial.begin(9600);
   // Initialer Zustand der Schalter einlesen hier
   // millis() weil zeitwertparameter erwartet wird, now
   // ist aber der loop zeitstempel
-  readAllSwitches(millis());
+  readAllSwitches(millis(), initComplete);
   sensors.begin();
   sensors.requestTemperatures();
   tempC = sensors.getTempCByIndex(0);
@@ -295,5 +253,7 @@ void initSystems() {
   }
 
   display_init();
-}
 
+  initComplete = true;
+  return initComplete;
+}
