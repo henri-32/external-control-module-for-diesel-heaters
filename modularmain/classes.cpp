@@ -1,14 +1,16 @@
 #include "classes.h"
 #include "Arduino.h"
+#include "variables.h"
 #include <DallasTemperature.h>
 #include <Encoder.h>
 #include <OneWire.h>
+#include <cstdint>
 
 // Klasseninstanzen
 
-class ToggleSwitches {
+class ToggleSwitchesCLASS {
 public:
-  explicit ToggleSwitches(uint8_t pin) : pin(pin){};
+  explicit ToggleSwitchesCLASS(uint8_t pin) : pin(pin){};
 
   void init() {
     pinMode(pin, INPUT_PULLUP);
@@ -20,7 +22,10 @@ public:
     switchVal = digitalRead(pin);
     if (switchVal == lastSwitchVal)
       return false;
+    if (millis() - lastDebounce < debounceDelay)
+      return false;
     lastSwitchVal = switchVal;
+    lastDebounce = millis();
     return true;
   };
 
@@ -28,11 +33,13 @@ private:
   const uint8_t pin;
   bool switchVal;
   bool lastSwitchVal;
+  long lastDebounce = 0;
+  const long debounceDelay = 50;
 };
 
-class PushButton {
+class PushButtonCLASS {
 public:
-  explicit PushButton(uint8_t pin) : pin(pin) {}
+  explicit PushButtonCLASS(uint8_t pin) : pin(pin) {}
   void init() {
     pinMode(pin, INPUT_PULLUP);
     buttonVal = digitalRead(pin);
@@ -42,6 +49,8 @@ public:
   bool isPressed() {
     buttonVal = digitalRead(pin);
     if (buttonVal == lastButtonVal)
+      return false;
+    if (millis() - lastDebounce < debounceDelay)
       return false;
     if (buttonVal == HIGH)
       return false; // Hier wird im Gegensatz zum ToggleSwitch nur auf das
@@ -53,11 +62,13 @@ private:
   const uint8_t pin;
   bool buttonVal;
   bool lastButtonVal;
+  bool lastDebounce = 0;
+  const bool debounceDelay = 50;
 };
 
-class MyEncoders { // Name gewählt, da Bibliothek Encoder heißt.
+class MyEncodersCLASS { // Name gewählt, da Bibliothek Encoder heißt.
 public:
-  explicit MyEncoders(uint8_t pin1, uint8_t pin2) : encoder(pin1, pin2){};
+  explicit MyEncodersCLASS(uint8_t pin1, uint8_t pin2) : encoder(pin1, pin2){};
 
 private:
   void poll() {
@@ -96,9 +107,10 @@ private:
   long lastAction = 0;
 };
 
-class TemperatureSensors {
+class TemperatureSensorsCLASS {
 public:
-  explicit TemperatureSensors(uint8_t pin) : oneWire(pin), sensors(&oneWire) {}
+  explicit TemperatureSensorsCLASS(uint8_t pin)
+      : oneWire(pin), sensors(&oneWire) {}
 
   void init() {
     sensors.begin();
@@ -145,10 +157,17 @@ private:
   static constexpr unsigned long CONVERSION_TIME_MS = 750;
 };
 
-class Inputs {
+struct InputDataSTRUCT {
+  bool onOffSwitchHasChanged;
+  bool modeSwitchHasChanged;
+  bool displayButtonHasChanged;
+  int8_t myEncoderHasChanged;
+  int8_t DS18B20actual;
+};
 
+class HardwareInputCLASS {
 public:
-  Inputs()
+  HardwareInputCLASS()
       : onOffSwitch(2), modeSwitch(3), displayButton(8), myEncoder(6, 7),
         DS18B20(5){};
 
@@ -159,7 +178,7 @@ public:
     DS18B20.init();
   }
 
-  void poll() {
+  void polling() {
     onOffSwitch.hasChanged();
     modeSwitch.hasChanged();
     displayButton.isPressed();
@@ -168,13 +187,37 @@ public:
   }
 
 private:
-  ToggleSwitches onOffSwitch;
-  ToggleSwitches modeSwitch;
-  PushButton displayButton;
-  MyEncoders myEncoder;
-  TemperatureSensors DS18B20;
+  ToggleSwitchesCLASS onOffSwitch;
+  ToggleSwitchesCLASS modeSwitch;
+  PushButtonCLASS displayButton;
+  MyEncodersCLASS myEncoder;
+  TemperatureSensorsCLASS DS18B20;
 };
-Inputs inputs;
 
-void testsetup() { inputs.init(); };
-void testloop() { inputs.poll(); };
+struct HeaterStatesSTRUCT {
+  enum class HEIZUNGSZUSTAND { ON, OFF };
+  HEIZUNGSZUSTAND Heizungszustand = HEIZUNGSZUSTAND::OFF;
+
+  enum class HEIZUNGSMODE { TEMP, POWER };
+  HEIZUNGSMODE Heizungsmode = HEIZUNGSMODE::TEMP;
+
+  enum class RAUMTEMPERATUR { neutral, kalt, warm };
+  RAUMTEMPERATUR Raumtemperatur = RAUMTEMPERATUR::neutral;
+};
+
+class ControllerCLASS {
+public:
+  explicit ControllerCLASS() : inputdata(), heaterstates(){};
+  InputDataSTRUCT inputdata;
+  HeaterStatesSTRUCT heaterstates;
+
+private:
+  void getInputData() {
+    HardwareInputCLASS inputs;
+
+  };
+
+private:
+};
+
+HardwareInputCLASS inputs(); // Muss in Master instanziert werden

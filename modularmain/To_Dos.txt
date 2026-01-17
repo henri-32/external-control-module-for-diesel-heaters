@@ -1,1 +1,1 @@
-Debouncing in Switch class hinzufügen
+INPUTS muss in Master aufgerufen werden
