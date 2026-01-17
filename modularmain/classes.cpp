@@ -1,39 +1,114 @@
 #include "classes.h"
 #include "Arduino.h"
-#include "variables.h"
+#include <Encoder.h>
 
-// Zu Testzwecken hier definiert
-const int OnOffSwitchPin = 2;
-int test;
 // Klasseninstanzen
 
-class Switches {
+class ToggleSwitches {
 public:
-  explicit Switches(uint8_t pin)
-      : pin(pin), switchValue(false), lastSwitchValue(false) {}
+  explicit ToggleSwitches(uint8_t pin) : pin(pin){};
+
   void init() {
     pinMode(pin, INPUT_PULLUP);
-    switchValue = digitalRead(pin);
-    lastSwitchValue = switchValue;
+    switchVal = digitalRead(pin);
+    lastSwitchVal = switchVal;
+  };
+
+  bool hasChanged() {
+    switchVal = digitalRead(pin);
+    if (switchVal == lastSwitchVal)
+      return false;
+    lastSwitchVal = switchVal;
+    return true;
+  };
+
+private:
+  const uint8_t pin;
+  bool switchVal;
+  bool lastSwitchVal;
+};
+
+class PushButton {
+public:
+  explicit PushButton(uint8_t pin) : pin(pin) {}
+  void init() {
+    pinMode(pin, INPUT_PULLUP);
+    buttonVal = digitalRead(pin);
+    lastButtonVal = buttonVal;
   }
 
-  bool hasSwitched() {
-    switchValue = digitalRead(pin);
-    if (switchValue == lastSwitchValue)
+  bool isPressed() {
+    buttonVal = digitalRead(pin);
+    if (buttonVal == lastButtonVal)
       return false;
-    lastSwitchValue = switchValue;
+    if (buttonVal == HIGH)
+      return false; // Hier wird im Gegensatz zum ToggleSwitch nur auf das
+                    // Drücken reagiert, nicht aufs Loslassen
     return true;
   }
 
 private:
-  uint8_t pin;
-  bool switchValue;
-  bool lastSwitchValue;
+  const uint8_t pin;
+  bool buttonVal;
+  bool lastButtonVal;
 };
 
-Switches onOffSwitch{OnOffSwitchPin};
+class MyEncoders { // Name gewählt, da Bibliothek Encoder heißt.
+public:
+  explicit MyEncoders(uint8_t pin1, uint8_t pin2) : encoder(pin1, pin2){};
 
-void testfunction() {
-  if (onOffSwitch.hasSwitched() == true)
-    test = 1;
-}
+  void poll() {
+    value = encoder.read();
+    if (value == lastValue)
+      return;
+    delta += diff;
+    lastAction = millis();
+    lastValue = value;
+  }
+
+  int translateStepsToInput() {
+    if (millis() - lastAction < 100)
+      return 0;
+    int steps = delta / 4; // Wird auf ganze Schritte runtergebrochen und rest
+                           // vernichtet bei Ganzzahldivision
+    delta -= steps * 4;    // Das Delta wird um die Schritte die ganz gemacht
+                        // wurden wieder reduziert (in Rohwerten) so bleibt der
+                        // Rest für den nächsten aufruf erhalten
+    return steps;
+  };
+
+private:
+  Encoder encoder;
+  long value;
+  long lastValue = 0;
+  int diff = value - lastValue;
+  int delta;
+  long lastAction = 0;
+};
+
+class Inputs {
+
+public:
+  Inputs() : onOffSwitch(2), modeSwitch(3), displaySwitch(8){};
+
+  void init() {
+    onOffSwitch.init();
+    modeSwitch.init();
+    displaySwitch.init();
+  }
+
+  void poll() {
+    onOffSwitch.hasChanged();
+    modeSwitch.hasChanged();
+    displaySwitch.isPressed();
+  }
+
+private:
+  ToggleSwitches onOffSwitch;
+  ToggleSwitches modeSwitch;
+  PushButton displaySwitch;
+};
+Inputs inputs;
+
+void testsetup() { inputs.init(); };
+void testloop() { inputs.poll(); };
