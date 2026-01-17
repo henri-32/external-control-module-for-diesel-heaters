@@ -148,12 +148,15 @@ private:
 class Inputs {
 
 public:
-  Inputs() : onOffSwitch(2), modeSwitch(3), displayButton(8), myEncoder(6, 7){};
+  Inputs()
+      : onOffSwitch(2), modeSwitch(3), displayButton(8), myEncoder(6, 7),
+        DS18B20(5){};
 
   void init() {
     onOffSwitch.init();
     modeSwitch.init();
     displayButton.init();
+    DS18B20.init();
   }
 
   void poll() {
@@ -161,6 +164,7 @@ public:
     modeSwitch.hasChanged();
     displayButton.isPressed();
     myEncoder.update();
+    DS18B20.update();
   }
 
 private:
@@ -168,6 +172,7 @@ private:
   ToggleSwitches modeSwitch;
   PushButton displayButton;
   MyEncoders myEncoder;
+  TemperatureSensors DS18B20;
 };
 Inputs inputs;
 
