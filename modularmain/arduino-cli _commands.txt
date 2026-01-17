@@ -1,5 +1,5 @@
 arduino-cli upload   -p /dev/ttyUSB0   --fqbn arduino:avr:uno   --verify   modularmain // Zum Hochladen des Sketches
 
 Erste einmal ab dann zweite nach JEDEM Compile
-chmod +x update_compile_commands.sh`
-update_compile_commands.sh
+chmod +x update_compile_commands.sh
+./update_compile_commands.sh
