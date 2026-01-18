@@ -1,93 +1,101 @@
 #include "classes.h"
 #include "Arduino.h"
-#include "variables.h"
 #include <DallasTemperature.h>
 #include <Encoder.h>
 #include <OneWire.h>
 #include <cstdint>
 
-// Klasseninstanzen
+// Forward declarations
+struct InputDataSTRUCT {
+  bool onOffSwitchHasChanged;
+  bool modeSwitchHasChanged;
+  bool displayButtonHasChanged;
+  int8_t myEncoderHasChanged;
+  int8_t DS18B20_tempC;
+};
 
-class ToggleSwitchesCLASS {
+// Klasseninstanzen Unterklassen von HardwareInputs
+
+class ToggleSwitches {
 public:
-  explicit ToggleSwitchesCLASS(uint8_t pin) : pin(pin){};
+  explicit ToggleSwitches(uint8_t pin) : m_pin(pin){};
 
   void init() {
-    pinMode(pin, INPUT_PULLUP);
-    switchVal = digitalRead(pin);
-    lastSwitchVal = switchVal;
+    pinMode(m_pin, INPUT_PULLUP);
+    m_switchVal = digitalRead(m_pin);
+    m_lastSwitchVal = m_switchVal;
   };
 
   bool hasChanged() {
-    switchVal = digitalRead(pin);
-    if (switchVal == lastSwitchVal)
+    m_switchVal = digitalRead(m_pin);
+    if (m_switchVal == m_lastSwitchVal)
       return false;
-    if (millis() - lastDebounce < debounceDelay)
+    if (millis() - m_lastDebounce < m_debounceDelay)
       return false;
-    lastSwitchVal = switchVal;
-    lastDebounce = millis();
+    m_lastSwitchVal = m_switchVal;
+    m_lastDebounce = millis();
     return true;
   };
 
 private:
-  const uint8_t pin;
-  bool switchVal;
-  bool lastSwitchVal;
-  long lastDebounce = 0;
-  const long debounceDelay = 50;
+  const uint8_t m_pin;
+  bool m_switchVal;
+  bool m_lastSwitchVal;
+  long m_lastDebounce = 0;
+  const long m_debounceDelay = 50;
 };
 
-class PushButtonCLASS {
+class PushButtons {
 public:
-  explicit PushButtonCLASS(uint8_t pin) : pin(pin) {}
+  explicit PushButtons(uint8_t pin) : m_pin(pin) {}
   void init() {
-    pinMode(pin, INPUT_PULLUP);
-    buttonVal = digitalRead(pin);
-    lastButtonVal = buttonVal;
+    pinMode(m_pin, INPUT_PULLUP);
+    m_buttonVal = digitalRead(m_pin);
+    m_lastButtonVal = m_buttonVal;
   }
 
   bool isPressed() {
-    buttonVal = digitalRead(pin);
-    if (buttonVal == lastButtonVal)
+    m_buttonVal = digitalRead(m_pin);
+    if (m_buttonVal == m_lastButtonVal)
       return false;
-    if (millis() - lastDebounce < debounceDelay)
+    if (millis() - m_lastDebounce < m_debounceDelay)
       return false;
-    if (buttonVal == HIGH)
+    if (m_buttonVal == HIGH)
       return false; // Hier wird im Gegensatz zum ToggleSwitch nur auf das
                     // Drücken reagiert, nicht aufs Loslassen
     return true;
   }
 
 private:
-  const uint8_t pin;
-  bool buttonVal;
-  bool lastButtonVal;
-  bool lastDebounce = 0;
-  const bool debounceDelay = 50;
+  const uint8_t m_pin;
+  bool m_buttonVal;
+  bool m_lastButtonVal;
+  bool m_lastDebounce = 0;
+  const bool m_debounceDelay = 50;
 };
 
-class MyEncodersCLASS { // Name gewählt, da Bibliothek Encoder heißt.
+class MyEncoders { // Name gewählt, da Bibliothek Encoder heißt.
 public:
-  explicit MyEncodersCLASS(uint8_t pin1, uint8_t pin2) : encoder(pin1, pin2){};
+  explicit MyEncoders(uint8_t pin1, uint8_t pin2) : m_encoder(pin1, pin2){};
 
 private:
   void poll() {
-    value = encoder.read();
-    if (value == lastValue)
+    m_value = m_encoder.read();
+    if (m_value == m_lastValue)
       return;
-    delta += diff;
-    lastAction = millis();
-    lastValue = value;
+    m_delta += m_diff;
+    m_lastAction = millis();
+    m_lastValue = m_value;
   }
 
   int translateStepsToInput() {
-    if (millis() - lastAction < 100)
+    if (millis() - m_lastAction < 100)
       return 0;
-    int steps = delta / 4; // Wird auf ganze Schritte runtergebrochen und rest
-                           // vernichtet bei Ganzzahldivision
-    delta -= steps * 4;    // Das Delta wird um die Schritte die ganz gemacht
-                        // wurden wieder reduziert (in Rohwerten) so bleibt der
-                        // Rest für den nächsten aufruf erhalten
+    int steps = m_delta / 4; // Wird auf ganze Schritte runtergebrochen und rest
+                             // vernichtet bei Ganzzahldivision
+    m_delta -= steps * 4;    // Das Delta wird um die Schritte die ganz gemacht
+                             // wurden wieder reduziert (in Rohwerten) so bleibt
+                             // der Rest für den nächsten aufruf erhalten
     return steps;
   };
 
@@ -99,99 +107,91 @@ public:
   }
 
 private:
-  Encoder encoder;
-  long value;
-  long lastValue = 0;
-  int diff = value - lastValue;
-  int delta;
-  long lastAction = 0;
+  Encoder m_encoder; // Encoder library genutzt
+  long m_value;
+  long m_lastValue = 0;
+  int m_diff = m_value - m_lastValue;
+  int m_delta;
+  long m_lastAction = 0;
 };
 
-class TemperatureSensorsCLASS {
+class TenperatureSensors {
 public:
-  explicit TemperatureSensorsCLASS(uint8_t pin)
-      : oneWire(pin), sensors(&oneWire) {}
+  explicit TenperatureSensors(uint8_t pin)
+      : m_oneWire(pin), m_sensors(&m_oneWire) {}
 
   void init() {
-    sensors.begin();
-    sensors.requestTemperatures();
-    tempC = sensors.getTempCByIndex(0);
+    m_sensors.begin();
+    m_sensors.requestTemperatures();
+    m_tempC = m_sensors.getTempCByIndex(0);
   }
 
 private:
   void startTemperatureRequest() {
-    if (millis() - lastTempRequest < REQUEST_INTERVAL_MS)
+    if (millis() - m_lastTempRequest < m_REQUEST_INTERVAL_MS)
       return;
-    if (tempRequestPending)
+    if (m_tempRequestPending)
       return;
-    sensors.requestTemperatures();
-    lastTempRequest = millis();
-    tempRequestPending = true;
+    m_sensors.requestTemperatures();
+    m_lastTempRequest = millis();
+    m_tempRequestPending = true;
   }
 
   void measureTemperature() {
-    if (!tempRequestPending)
+    if (!m_tempRequestPending)
       return;
-    if (millis() - lastTempRequest < CONVERSION_TIME_MS)
+    if (millis() - m_lastTempRequest < m_CONVERSION_TIME_MS)
       return;
     // Zeit die Messung DS18B20 braucht
-    tempC = sensors.getTempCByIndex(0);
-    tempRequestPending = false;
+    m_tempC = m_sensors.getTempCByIndex(0);
+    m_tempRequestPending = false;
   };
 
 public:
   float update() {
     startTemperatureRequest();
     measureTemperature();
-    return tempC;
+    return m_tempC;
   }
 
 private:
-  OneWire oneWire;
-  DallasTemperature sensors;
-  float tempC;
-  unsigned long lastTempRequest = 0;
-  bool tempRequestPending = false;
-  static constexpr unsigned long REQUEST_INTERVAL_MS = 2000;
+  OneWire m_oneWire;
+  DallasTemperature m_sensors;
+  float m_tempC;
+  unsigned long m_lastTempRequest = 0;
+  bool m_tempRequestPending = false;
+  static constexpr unsigned long m_REQUEST_INTERVAL_MS = 2000;
   // Static heißt hier alle Objekte nutzen gleiche Variable
-  static constexpr unsigned long CONVERSION_TIME_MS = 750;
+  static constexpr unsigned long m_CONVERSION_TIME_MS = 750;
 };
 
-struct InputDataSTRUCT {
-  bool onOffSwitchHasChanged;
-  bool modeSwitchHasChanged;
-  bool displayButtonHasChanged;
-  int8_t myEncoderHasChanged;
-  int8_t DS18B20actual;
-};
-
-class HardwareInputCLASS {
+class AllInputDevices {
 public:
-  HardwareInputCLASS()
-      : onOffSwitch(2), modeSwitch(3), displayButton(8), myEncoder(6, 7),
-        DS18B20(5){};
+  AllInputDevices()
+      : m_onOffSwitch(2), m_modeSwitch(3), m_displayButton(8),
+        m_myEncoder(6, 7), m_DS18B20(5){};
 
   void init() {
-    onOffSwitch.init();
-    modeSwitch.init();
-    displayButton.init();
-    DS18B20.init();
+    m_onOffSwitch.init();
+    m_modeSwitch.init();
+    m_displayButton.init();
+    m_DS18B20.init();
   }
 
-  void polling() {
-    onOffSwitch.hasChanged();
-    modeSwitch.hasChanged();
-    displayButton.isPressed();
-    myEncoder.update();
-    DS18B20.update();
+  void pollingAndUpdate(InputDataSTRUCT &output) {
+    output.onOffSwitchHasChanged = m_onOffSwitch.hasChanged();
+    output.modeSwitchHasChanged = m_modeSwitch.hasChanged();
+    output.displayButtonHasChanged = m_displayButton.isPressed();
+    output.myEncoderHasChanged = m_myEncoder.update();
+    output.DS18B20_tempC = m_DS18B20.update();
   }
 
 private:
-  ToggleSwitchesCLASS onOffSwitch;
-  ToggleSwitchesCLASS modeSwitch;
-  PushButtonCLASS displayButton;
-  MyEncodersCLASS myEncoder;
-  TemperatureSensorsCLASS DS18B20;
+  ToggleSwitches m_onOffSwitch;
+  ToggleSwitches m_modeSwitch;
+  PushButtons m_displayButton;
+  MyEncoders m_myEncoder;
+  TenperatureSensors m_DS18B20;
 };
 
 struct HeaterStatesSTRUCT {
@@ -205,19 +205,80 @@ struct HeaterStatesSTRUCT {
   RAUMTEMPERATUR Raumtemperatur = RAUMTEMPERATUR::neutral;
 };
 
-class ControllerCLASS {
+class Relais {
 public:
-  explicit ControllerCLASS() : inputdata(), heaterstates(){};
-  InputDataSTRUCT inputdata;
-  HeaterStatesSTRUCT heaterstates;
+  explicit Relais(const uint8_t pin) : m_pin(pin) {}
+
+  void init() {
+    pinMode(m_pin, OUTPUT);
+    digitalWrite(m_pin, LOW);
+  }
+
+  void request(uint16_t duration) {
+    if (m_relaisState == RelaisState::ON)
+      return;
+    m_duration = duration;
+    activate();
+  }
+
+  void update() {
+    if (m_relaisState == RelaisState::OFF)
+      return;
+
+    if (millis() - m_lastRelaisActivation < m_duration)
+      return;
+    deactivate();
+  }
 
 private:
-  void getInputData() {
-    HardwareInputCLASS inputs;
+  void activate() {
+    digitalWrite(m_pin, HIGH);
+    m_lastRelaisActivation = millis();
+    m_relaisState = RelaisState::ON;
+  }
 
-  };
+  void deactivate() {
+    digitalWrite(m_pin, LOW);
+    m_relaisState = RelaisState::OFF;
+  }
 
-private:
+  const uint8_t m_pin;
+  unsigned long m_lastRelaisActivation = 0;
+  enum class RelaisState { ON, OFF };
+  RelaisState m_relaisState = RelaisState::OFF;
+  uint16_t m_duration = 0;
 };
 
-HardwareInputCLASS inputs(); // Muss in Master instanziert werden
+AllInputDevices hardwareinputs;
+Relais relais(4); // Frage an ChatGPT Darf das in main.ino instanziert werden,
+                  // wenn main.ino diese Datei inkludiert? Bzw. konkreter,
+                  // wenn Dateien inkludiert werden, wie ist die
+                  // Aufrufreihenfolge?
+
+                  
+class ControllerCLASS {
+public:
+  explicit ControllerCLASS() : inputData(), heaterStates() {}
+
+  void initAllHardware() {
+    hardwareinputs.init();
+    relais.init();
+  }
+
+  void Runtime() {
+    hardwareinputs.pollingAndUpdate(inputData);
+    relais.update();
+  }
+
+private:
+  InputDataSTRUCT inputData;
+  HeaterStatesSTRUCT heaterStates;
+};
+
+// Dann in main.ino
+
+ControllerCLASS Controller;
+
+void setup() { Controller.initAllHardware(); };
+
+void loop() { Controller.Runtime(); }
