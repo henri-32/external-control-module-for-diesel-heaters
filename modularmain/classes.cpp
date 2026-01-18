@@ -6,7 +6,7 @@
 #include <cstdint>
 
 // Forward declarations
-struct InputDataSTRUCT {
+struct InputData {
   bool onOffSwitchHasChanged;
   bool modeSwitchHasChanged;
   bool displayButtonHasChanged;
@@ -165,9 +165,9 @@ private:
   static constexpr unsigned long m_CONVERSION_TIME_MS = 750;
 };
 
-class AllInputDevices {
+class InputDevices {
 public:
-  AllInputDevices()
+  InputDevices()
       : m_onOffSwitch(2), m_modeSwitch(3), m_displayButton(8),
         m_myEncoder(6, 7), m_DS18B20(5){};
 
@@ -178,7 +178,7 @@ public:
     m_DS18B20.init();
   }
 
-  void pollingAndUpdate(InputDataSTRUCT &output) {
+  void pollingDevicesAndUpdateDataForController(InputData &output) {
     output.onOffSwitchHasChanged = m_onOffSwitch.hasChanged();
     output.modeSwitchHasChanged = m_modeSwitch.hasChanged();
     output.displayButtonHasChanged = m_displayButton.isPressed();
@@ -194,7 +194,7 @@ private:
   TenperatureSensors m_DS18B20;
 };
 
-struct HeaterStatesSTRUCT {
+struct HeaterStates {
   enum class HEIZUNGSZUSTAND { ON, OFF };
   HEIZUNGSZUSTAND Heizungszustand = HEIZUNGSZUSTAND::OFF;
 
@@ -249,36 +249,37 @@ private:
   uint16_t m_duration = 0;
 };
 
-AllInputDevices hardwareinputs;
-Relais relais(4); // Frage an ChatGPT Darf das in main.ino instanziert werden,
+InputDevices inputdevices;
+// Frage an ChatGPT Darf das in main.ino instanziert werden,
                   // wenn main.ino diese Datei inkludiert? Bzw. konkreter,
                   // wenn Dateien inkludiert werden, wie ist die
                   // Aufrufreihenfolge?
 
-                  
 class ControllerCLASS {
 public:
-  explicit ControllerCLASS() : inputData(), heaterStates() {}
+  explicit ControllerCLASS() : heaterStates(), inputdata(), relais(4) {}
 
-  void initAllHardware() {
-    hardwareinputs.init();
+  void init() {
+    inputdevices.init();
     relais.init();
   }
 
   void Runtime() {
-    hardwareinputs.pollingAndUpdate(inputData);
+    inputdevices.pollingDevicesAndUpdateDataForController(inputdata);
     relais.update();
   }
 
 private:
-  InputDataSTRUCT inputData;
-  HeaterStatesSTRUCT heaterStates;
-};
+  HeaterStates heaterStates;
+  InputData inputdata;
+  Relais relais;
+}
+;
 
 // Dann in main.ino
 
 ControllerCLASS Controller;
 
-void setup() { Controller.initAllHardware(); };
+void setup() { Controller.init(); };
 
 void loop() { Controller.Runtime(); }
