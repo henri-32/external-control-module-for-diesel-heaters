@@ -5,16 +5,24 @@
 #include <OneWire.h>
 #include <cstdint>
 
-// Forward declarations
+// Werttypen
 struct InputData {
   bool onOffSwitchHasChanged;
   bool modeSwitchHasChanged;
   bool displayButtonHasChanged;
-  int8_t myEncoderHasChanged;
-  int8_t DS18B20_tempC;
+  int8_t encoderVal;
+  float DS18B20_tempC;
 };
 
-// Klasseninstanzen Unterklassen von HardwareInputs
+struct HeaterStatus {
+  enum class HeatingState { ON, OFF };
+  HeatingState heatingstate = HeatingState::OFF;
+
+  enum class Mode { TEMP, POWER };
+  Mode mode = Mode::TEMP;
+};
+
+// Hardwareadapter
 
 class ToggleSwitches {
 public:
@@ -161,48 +169,8 @@ private:
   unsigned long m_lastTempRequest = 0;
   bool m_tempRequestPending = false;
   static constexpr unsigned long m_REQUEST_INTERVAL_MS = 2000;
-  // Static heißt hier alle Objekte nutzen gleiche Variable
+  // Static heißt hier alle Objekte nutzen die gleiche Variable
   static constexpr unsigned long m_CONVERSION_TIME_MS = 750;
-};
-
-class InputDevices {
-public:
-  InputDevices()
-      : m_onOffSwitch(2), m_modeSwitch(3), m_displayButton(8),
-        m_myEncoder(6, 7), m_DS18B20(5){};
-
-  void init() {
-    m_onOffSwitch.init();
-    m_modeSwitch.init();
-    m_displayButton.init();
-    m_DS18B20.init();
-  }
-
-  void pollingDevicesAndUpdateDataForController(InputData &output) {
-    output.onOffSwitchHasChanged = m_onOffSwitch.hasChanged();
-    output.modeSwitchHasChanged = m_modeSwitch.hasChanged();
-    output.displayButtonHasChanged = m_displayButton.isPressed();
-    output.myEncoderHasChanged = m_myEncoder.update();
-    output.DS18B20_tempC = m_DS18B20.update();
-  }
-
-private:
-  ToggleSwitches m_onOffSwitch;
-  ToggleSwitches m_modeSwitch;
-  PushButtons m_displayButton;
-  MyEncoders m_myEncoder;
-  TenperatureSensors m_DS18B20;
-};
-
-struct HeaterStates {
-  enum class HEIZUNGSZUSTAND { ON, OFF };
-  HEIZUNGSZUSTAND Heizungszustand = HEIZUNGSZUSTAND::OFF;
-
-  enum class HEIZUNGSMODE { TEMP, POWER };
-  HEIZUNGSMODE Heizungsmode = HEIZUNGSMODE::TEMP;
-
-  enum class RAUMTEMPERATUR { neutral, kalt, warm };
-  RAUMTEMPERATUR Raumtemperatur = RAUMTEMPERATUR::neutral;
 };
 
 class Relais {
@@ -214,7 +182,7 @@ public:
     digitalWrite(m_pin, LOW);
   }
 
-  void request(uint16_t duration) {
+  void request(uint8_t duration) {
     if (m_relaisState == RelaisState::ON)
       return;
     m_duration = duration;
@@ -249,37 +217,143 @@ private:
   uint16_t m_duration = 0;
 };
 
-InputDevices inputdevices;
-// Frage an ChatGPT Darf das in main.ino instanziert werden,
-                  // wenn main.ino diese Datei inkludiert? Bzw. konkreter,
-                  // wenn Dateien inkludiert werden, wie ist die
-                  // Aufrufreihenfolge?
-
-class ControllerCLASS {
-public:
-  explicit ControllerCLASS() : heaterStates(), inputdata(), relais(4) {}
+class InputDevices {
+private:
+  friend class SystemController;
+  InputDevices()
+      : m_onOffSwitch(2), m_modeSwitch(3), m_displayButton(8),
+        m_myEncoder(6, 7), m_DS18B20(5){};
 
   void init() {
-    inputdevices.init();
-    relais.init();
+    m_onOffSwitch.init();
+    m_modeSwitch.init();
+    m_displayButton.init();
+    m_DS18B20.init();
   }
 
-  void Runtime() {
-    inputdevices.pollingDevicesAndUpdateDataForController(inputdata);
-    relais.update();
+  void pollingDevicesAndUpdateData(InputData &output) {
+    output.onOffSwitchHasChanged = m_onOffSwitch.hasChanged();
+    output.modeSwitchHasChanged = m_modeSwitch.hasChanged();
+    output.displayButtonHasChanged = m_displayButton.isPressed();
+    output.encoderVal = m_myEncoder.update();
+    output.DS18B20_tempC = m_DS18B20.update();
   }
 
 private:
-  HeaterStates heaterStates;
-  InputData inputdata;
+  ToggleSwitches m_onOffSwitch;
+  ToggleSwitches m_modeSwitch;
+  PushButtons m_displayButton;
+  MyEncoders m_myEncoder;
+  TenperatureSensors m_DS18B20;
+};
+
+class OutputDevices {
+private:
+  friend class SystemController;
+  OutputDevices() : relais(4) {}
+
+  void init() { relais.init(); }
+
+  void update() { relais.update(); }
   Relais relais;
-}
-;
+};
 
-// Dann in main.ino
+class SystemController {
+public:
+  explicit SystemController(uint8_t pin) : heaterStatus(), inputdata() {}
 
-ControllerCLASS Controller;
+  void init() {
+    delay(500); // Damit sich Hardware kurz einpendeln kann
+    inputdevices.init();
+    outputdevices.init();
+  }
 
-void setup() { Controller.init(); };
+  void Runtime() {
+    inputdevices.pollingDevicesAndUpdateData(inputdata);
+    applyInputdata();
+    applyHeatingLogic();
+    outputdevices.update();
+  }
 
-void loop() { Controller.Runtime(); }
+private:
+  void applyInputdata() {
+    /* Der Heizungsmodus wird beim OnOff Schalter immer auf POWER gewechselt, um
+    die Temperaturlogik daran zu hindern, direkt zurückzuschalten. Das ersetzt
+    meine alte Temperatursperre. Das ist unproblematisch weil der Modus
+    unabhängig vom Zustand per modeSwitch gewechselt werden kann. Und es ist
+    nötig, damit ich beim Verlassen des Bootes, die Heizung aus machen kann und
+    sie korrekt herunterfährt, bevor ich den Strom wegnehme*/
+    constexpr float TempStep = 0.5;
+    constexpr float TempMin = 5.0;
+    constexpr float TempMax = 30.0;
+
+    if (inputdata.onOffSwitchHasChanged) {
+      if (heaterStatus.heatingstate == HeaterStatus::HeatingState::ON) {
+        outputdevices.relais.request(2000);
+        heaterStatus.heatingstate = HeaterStatus::HeatingState::OFF;
+        heaterStatus.mode = HeaterStatus::Mode::POWER;
+
+      } else
+        outputdevices.relais.request(2000);
+      heaterStatus.heatingstate = HeaterStatus::HeatingState::ON;
+      heaterStatus.mode = HeaterStatus::Mode::POWER;
+    }
+
+    if (inputdata.modeSwitchHasChanged) {
+      if (heaterStatus.mode == HeaterStatus::Mode::POWER) {
+        outputdevices.relais.request(500);
+        heaterStatus.mode = HeaterStatus::Mode::TEMP;
+      } else
+        outputdevices.relais.request(500);
+      heaterStatus.mode = HeaterStatus::Mode::POWER;
+    }
+
+    // Hier wird der Modus geprüft, weil der Drehregler mit Knopf vllt mal die
+    // Ansicht auf Laufzeitdaten wechseln soll.
+    if (inputdata.encoderVal != 0) {
+      if (heaterStatus.mode == HeaterStatus::Mode::TEMP) {
+        Solltemperatur +=
+            inputdata.encoderVal * TempStep; // encoderVal hat ist signed
+        if (Solltemperatur > TempMax)
+          Solltemperatur = TempMax;
+        else if (Solltemperatur < TempMin)
+          Solltemperatur = TempMin;
+      }
+    }
+  }
+
+  void applyHeatingLogic() {
+    constexpr float Solltoleranz = 1.5;
+
+    if (heaterStatus.mode == HeaterStatus::Mode::TEMP) {
+      if (inputdata.DS18B20_tempC < Solltemperatur - Solltoleranz &&
+          heaterStatus.heatingstate == HeaterStatus::HeatingState::OFF) {
+        outputdevices.relais.request(2000);
+        heaterStatus.heatingstate = HeaterStatus::HeatingState::ON;
+      } else if (inputdata.DS18B20_tempC > Solltemperatur + Solltoleranz &&
+                 heaterStatus.heatingstate == HeaterStatus::HeatingState::ON) {
+        outputdevices.relais.request(2000);
+        heaterStatus.heatingstate == HeaterStatus::HeatingState::OFF;
+      }
+
+    } else
+      return;
+  }
+
+  HeaterStatus heaterStatus;
+  InputData inputdata;
+  uint8_t Solltemperatur = 20;
+  uint8_t pin;
+  InputDevices inputdevices;
+  OutputDevices outputdevices;
+};
+
+// Dann in main.ino bzw main.cpp
+
+SystemController controller(4);
+
+void setup() { controller.init(); };
+
+void loop() { controller.Runtime(); }
+
+void test() {}
