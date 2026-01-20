@@ -7,7 +7,7 @@
 
 // Werttypen
 struct InputData {
-  bool onOffSwitchHasChanged;
+  bool powerSwitchHasChanged;
   bool modeSwitchHasChanged;
   bool displayButtonHasChanged;
   int8_t encoderVal;
@@ -24,9 +24,9 @@ struct HeaterStatus {
 
 // Hardwareadapter
 
-class ToggleSwitches {
+class ToggleSwitchDriver {
 public:
-  explicit ToggleSwitches(uint8_t pin) : m_pin(pin){};
+  explicit ToggleSwitchDriver(uint8_t pin) : m_pin(pin){};
 
   void init() {
     pinMode(m_pin, INPUT_PULLUP);
@@ -49,13 +49,13 @@ private:
   const uint8_t m_pin;
   bool m_switchVal;
   bool m_lastSwitchVal;
-  long m_lastDebounce = 0;
-  const long m_debounceDelay = 50;
+  unsigned long m_lastDebounce = 0;
+  const unsigned long m_debounceDelay = 50;
 };
 
-class PushButtons {
+class PushButtonDriver {
 public:
-  explicit PushButtons(uint8_t pin) : m_pin(pin) {}
+  explicit PushButtonDriver(uint8_t pin) : m_pin(pin) {}
   void init() {
     pinMode(m_pin, INPUT_PULLUP);
     m_buttonVal = digitalRead(m_pin);
@@ -82,9 +82,10 @@ private:
   const bool m_debounceDelay = 50;
 };
 
-class MyEncoders { // Name gewählt, da Bibliothek Encoder heißt.
+class MyEncoderDriver { // Name gewählt, da Bibliothek Encoder heißt.
 public:
-  explicit MyEncoders(uint8_t pin1, uint8_t pin2) : m_encoder(pin1, pin2){};
+  explicit MyEncoderDriver(uint8_t pin1, uint8_t pin2)
+      : m_encoder(pin1, pin2){};
 
 private:
   void poll() {
@@ -108,8 +109,8 @@ private:
   };
 
 public:
-  int update() { // So kann nur ein Aufruf erfolgen, allerdings bleibt die
-                 // Refreshrate der beiden Funktionen unterschiedlich
+  int updateVal() { // So kann nur ein Aufruf erfolgen, allerdings bleibt die
+                    // Refreshrate der beiden Funktionen unterschiedlich
     poll();
     return translateStepsToInput();
   }
@@ -123,15 +124,21 @@ private:
   long m_lastAction = 0;
 };
 
-class TenperatureSensors {
+class TemperatureSensorDriver {
 public:
-  explicit TenperatureSensors(uint8_t pin)
+  explicit TemperatureSensorDriver(uint8_t pin)
       : m_oneWire(pin), m_sensors(&m_oneWire) {}
 
   void init() {
     m_sensors.begin();
     m_sensors.requestTemperatures();
     m_tempC = m_sensors.getTempCByIndex(0);
+  }
+
+  float updateTemp() {
+    startTemperatureRequest();
+    measureTemperature();
+    return m_tempC;
   }
 
 private:
@@ -155,13 +162,6 @@ private:
     m_tempRequestPending = false;
   };
 
-public:
-  float update() {
-    startTemperatureRequest();
-    measureTemperature();
-    return m_tempC;
-  }
-
 private:
   OneWire m_oneWire;
   DallasTemperature m_sensors;
@@ -173,32 +173,43 @@ private:
   static constexpr unsigned long m_CONVERSION_TIME_MS = 750;
 };
 
-class Relais {
+class RelaisDriver {
 public:
-  explicit Relais(const uint8_t pin) : m_pin(pin) {}
+  explicit RelaisDriver(const uint8_t pin) : m_pin(pin) {}
+  enum class RelaisDuration { long_, short_ };
+  RelaisDuration m_relais_duration;
+  uint16_t m_relais_duration_int = 0;
 
+public:
   void init() {
     pinMode(m_pin, OUTPUT);
     digitalWrite(m_pin, LOW);
   }
 
-  void request(uint8_t duration) {
+  void request(RelaisDriver::RelaisDuration relais_duration) {
     if (m_relaisState == RelaisState::ON)
       return;
-    m_duration = duration;
+    m_relais_duration = relais_duration;
     activate();
   }
 
   void update() {
+    convertRelaisDurationToInt();
     if (m_relaisState == RelaisState::OFF)
       return;
 
-    if (millis() - m_lastRelaisActivation < m_duration)
+    if (millis() - m_lastRelaisActivation < m_relais_duration_int)
       return;
     deactivate();
   }
 
 private:
+  void convertRelaisDurationToInt() {
+    if (m_relais_duration == RelaisDuration::long_)
+      m_relais_duration_int = 2000;
+    else if (m_relais_duration == RelaisDuration::short_)
+      m_relais_duration_int = 500;
+  }
   void activate() {
     digitalWrite(m_pin, HIGH);
     m_lastRelaisActivation = millis();
@@ -214,37 +225,36 @@ private:
   unsigned long m_lastRelaisActivation = 0;
   enum class RelaisState { ON, OFF };
   RelaisState m_relaisState = RelaisState::OFF;
-  uint16_t m_duration = 0;
 };
 
 class InputDevices {
 private:
   friend class SystemController;
   InputDevices()
-      : m_onOffSwitch(2), m_modeSwitch(3), m_displayButton(8),
+      : m_powerSwitch(2), m_modeSwitch(3), m_displayButton(8),
         m_myEncoder(6, 7), m_DS18B20(5){};
 
   void init() {
-    m_onOffSwitch.init();
+    m_powerSwitch.init();
     m_modeSwitch.init();
     m_displayButton.init();
     m_DS18B20.init();
   }
 
   void pollingDevicesAndUpdateData(InputData &output) {
-    output.onOffSwitchHasChanged = m_onOffSwitch.hasChanged();
+    output.powerSwitchHasChanged = m_powerSwitch.hasChanged();
     output.modeSwitchHasChanged = m_modeSwitch.hasChanged();
     output.displayButtonHasChanged = m_displayButton.isPressed();
-    output.encoderVal = m_myEncoder.update();
-    output.DS18B20_tempC = m_DS18B20.update();
+    output.encoderVal = m_myEncoder.updateVal();
+    output.DS18B20_tempC = m_DS18B20.updateTemp();
   }
 
 private:
-  ToggleSwitches m_onOffSwitch;
-  ToggleSwitches m_modeSwitch;
-  PushButtons m_displayButton;
-  MyEncoders m_myEncoder;
-  TenperatureSensors m_DS18B20;
+  ToggleSwitchDriver m_powerSwitch;
+  ToggleSwitchDriver m_modeSwitch;
+  PushButtonDriver m_displayButton;
+  MyEncoderDriver m_myEncoder;
+  TemperatureSensorDriver m_DS18B20;
 };
 
 class OutputDevices {
@@ -255,24 +265,24 @@ private:
   void init() { relais.init(); }
 
   void update() { relais.update(); }
-  Relais relais;
+  RelaisDriver relais;
 };
 
 class SystemController {
 public:
-  explicit SystemController(uint8_t pin) : heaterStatus(), inputdata() {}
+  explicit SystemController() : heaterStatus(), inputdata() {}
+
+  void operator()() {
+    inputdevices.pollingDevicesAndUpdateData(inputdata);
+    applyInputdata();
+    applyHeatingLogic();
+    outputdevices.update();
+  }
 
   void init() {
     delay(500); // Damit sich Hardware kurz einpendeln kann
     inputdevices.init();
     outputdevices.init();
-  }
-
-  void Runtime() {
-    inputdevices.pollingDevicesAndUpdateData(inputdata);
-    applyInputdata();
-    applyHeatingLogic();
-    outputdevices.update();
   }
 
 private:
@@ -287,24 +297,24 @@ private:
     constexpr float TempMin = 5.0;
     constexpr float TempMax = 30.0;
 
-    if (inputdata.onOffSwitchHasChanged) {
+    if (inputdata.powerSwitchHasChanged) {
       if (heaterStatus.heatingstate == HeaterStatus::HeatingState::ON) {
-        outputdevices.relais.request(2000);
+        outputdevices.relais.request(RelaisDriver::RelaisDuration::long_);
         heaterStatus.heatingstate = HeaterStatus::HeatingState::OFF;
         heaterStatus.mode = HeaterStatus::Mode::POWER;
 
       } else
-        outputdevices.relais.request(2000);
+        outputdevices.relais.request(RelaisDriver::RelaisDuration::long_);
       heaterStatus.heatingstate = HeaterStatus::HeatingState::ON;
       heaterStatus.mode = HeaterStatus::Mode::POWER;
     }
 
     if (inputdata.modeSwitchHasChanged) {
       if (heaterStatus.mode == HeaterStatus::Mode::POWER) {
-        outputdevices.relais.request(500);
+        outputdevices.relais.request(RelaisDriver::RelaisDuration::short_);
         heaterStatus.mode = HeaterStatus::Mode::TEMP;
       } else
-        outputdevices.relais.request(500);
+        outputdevices.relais.request(RelaisDriver::RelaisDuration::short_);
       heaterStatus.mode = HeaterStatus::Mode::POWER;
     }
 
@@ -328,14 +338,13 @@ private:
     if (heaterStatus.mode == HeaterStatus::Mode::TEMP) {
       if (inputdata.DS18B20_tempC < Solltemperatur - Solltoleranz &&
           heaterStatus.heatingstate == HeaterStatus::HeatingState::OFF) {
-        outputdevices.relais.request(2000);
+        outputdevices.relais.request(RelaisDriver::RelaisDuration::long_);
         heaterStatus.heatingstate = HeaterStatus::HeatingState::ON;
       } else if (inputdata.DS18B20_tempC > Solltemperatur + Solltoleranz &&
                  heaterStatus.heatingstate == HeaterStatus::HeatingState::ON) {
-        outputdevices.relais.request(2000);
+        outputdevices.relais.request(RelaisDriver::RelaisDuration::long_);
         heaterStatus.heatingstate == HeaterStatus::HeatingState::OFF;
       }
-
     } else
       return;
   }
@@ -350,10 +359,10 @@ private:
 
 // Dann in main.ino bzw main.cpp
 
-SystemController controller(4);
+SystemController controller;
 
 void setup() { controller.init(); };
 
-void loop() { controller.Runtime(); }
+void loop() { controller(); }
 
 void test() {}
