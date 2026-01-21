@@ -3,6 +3,7 @@
 #include <DallasTemperature.h>
 #include <Encoder.h>
 #include <OneWire.h>
+#include <LiquidCrystal_I2C.h>
 #include <cstdint>
 
 // Werttypen
@@ -71,6 +72,8 @@ public:
     if (m_buttonVal == HIGH)
       return false; // Hier wird im Gegensatz zum ToggleSwitch nur auf das
                     // Drücken reagiert, nicht aufs Loslassen
+    m_lastButtonVal = m_buttonVal;
+    m_lastDebounce = millis();
     return true;
   }
 
@@ -89,12 +92,13 @@ public:
 
 private:
   void poll() {
-    m_value = m_encoder.read();
-    if (m_value == m_lastValue)
+    long value = m_encoder.read();
+    long diff = value - m_lastValue;
+    if (diff == 0)
       return;
-    m_delta += m_diff;
+    m_delta += diff;
     m_lastAction = millis();
-    m_lastValue = m_value;
+    m_lastValue = value;
   }
 
   int translateStepsToInput() {
@@ -115,13 +119,15 @@ public:
     return translateStepsToInput();
   }
 
+  void init(){
+    poll();
+  }
+
 private:
   Encoder m_encoder; // Encoder library genutzt
-  long m_value;
   long m_lastValue = 0;
-  int m_diff = m_value - m_lastValue;
-  int m_delta;
-  long m_lastAction = 0;
+  long m_delta = 0;
+  unsigned long m_lastAction = 0;
 };
 
 class TemperatureSensorDriver {
@@ -176,13 +182,14 @@ private:
 class RelaisDriver {
 public:
   explicit RelaisDriver(const uint8_t pin) : m_pin(pin) {}
-  enum class RelaisDuration { long_, short_ };
+  enum class RelaisDuration { long_, short_, init };
   RelaisDuration m_relais_duration;
   uint16_t m_relais_duration_int = 0;
 
 public:
   void init() {
     pinMode(m_pin, OUTPUT);
+    m_relais_duration = RelaisDuration::init;
     digitalWrite(m_pin, LOW);
   }
 
@@ -209,6 +216,8 @@ private:
       m_relais_duration_int = 2000;
     else if (m_relais_duration == RelaisDuration::short_)
       m_relais_duration_int = 500;
+    else if (m_relais_duration == RelaisDuration::init)
+      m_relais_duration_int = 0;
   }
   void activate() {
     digitalWrite(m_pin, HIGH);
@@ -227,6 +236,32 @@ private:
   RelaisState m_relaisState = RelaisState::OFF;
 };
 
+class LCDDisplay  {
+private:
+friend class SystemController;
+  LCDDisplay() : content[][] (), stringOfStates[][]() {}
+  LiquidCrystal_I2C lcd (0x27, 20, 4);
+
+    static void clearLine(uint8_t line){
+      lcd.setCursor(0, line);
+      lcd.print("                    ");
+      lcd.setCursor(0,line);
+    }
+
+    void init(){
+      Wire.begin();
+      lcd.init();
+      lcd.backlight();
+      lcd.clear();
+    }
+
+    char content[4][21]; 
+    char stringOfStates[4][21];
+  
+
+
+};
+
 class InputDevices {
 private:
   friend class SystemController;
@@ -238,6 +273,7 @@ private:
     m_powerSwitch.init();
     m_modeSwitch.init();
     m_displayButton.init();
+    m_myEncoder.init();
     m_DS18B20.init();
   }
 
@@ -351,7 +387,7 @@ private:
 
   HeaterStatus heaterStatus;
   InputData inputdata;
-  uint8_t Solltemperatur = 20;
+  float Solltemperatur = 20;
   uint8_t pin;
   InputDevices inputdevices;
   OutputDevices outputdevices;
@@ -365,4 +401,3 @@ void setup() { controller.init(); };
 
 void loop() { controller(); }
 
-void test() {}
