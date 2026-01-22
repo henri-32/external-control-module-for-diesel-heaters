@@ -1,11 +1,12 @@
 #include "classes.h"
 #include "Arduino.h"
+#include "variables.h"
 #include <DallasTemperature.h>
 #include <Encoder.h>
-#include <OneWire.h>
 #include <LiquidCrystal_I2C.h>
-#include <cstdint>
+#include <OneWire.h>
 
+ 
 // Werttypen
 struct InputData {
   bool powerSwitchHasChanged;
@@ -17,12 +18,12 @@ struct InputData {
 
 struct HeaterStatus {
   enum class HeatingState { ON, OFF };
-  HeatingState heatingstate = HeatingState::OFF;
+  HeatingState heatingstate;
 
   enum class Mode { TEMP, POWER };
-  Mode mode = Mode::TEMP;
+  Mode mode;
 };
-
+ 
 // Hardwareadapter
 
 class ToggleSwitchDriver {
@@ -119,9 +120,7 @@ public:
     return translateStepsToInput();
   }
 
-  void init(){
-    poll();
-  }
+  void init() { poll(); }
 
 private:
   Encoder m_encoder; // Encoder library genutzt
@@ -236,38 +235,67 @@ private:
   RelaisState m_relaisState = RelaisState::OFF;
 };
 
-class LCDDisplay  {
+class DisplayDriver {
 private:
-friend class SystemController;
-  LCDDisplay() : content[][] (), stringOfStates[][]() {}
-  LiquidCrystal_I2C lcd (0x27, 20, 4);
+  friend class SystemController;
+  static constexpr uint8_t Rows = 4;
+  static constexpr uint8_t Cols = 20;
+  char content[Rows][Cols] = {};
+  char stringOfStates[Rows][Cols] = {};
 
-    static void clearLine(uint8_t line){
-      lcd.setCursor(0, line);
-      lcd.print("                    ");
-      lcd.setCursor(0,line);
-    }
+  LiquidCrystal_I2C lcd{0x27, 20, 4};
+  DisplayDriver() = default;
 
-    void init(){
-      Wire.begin();
-      lcd.init();
-      lcd.backlight();
-      lcd.clear();
-    }
+  void clearLine(uint8_t line) {
+    lcd.setCursor(0, line);
+    lcd.print("                    ");
+    lcd.setCursor(0, line);
+  }
 
-    char content[4][21]; 
-    char stringOfStates[4][21];
-  
+  // Hilfsfunktion: Zustände werden in Strings umgewandelt um sie auf dem Display anzuzeigen zu können
+void statesToStrings(HeaterStatus::HeatingState Heizungszustand, HeaterStatus::Mode Mode) {
+  switch (Heizungszustand) {
+    case HeaterStatus::HeatingState::ON:
+      strncpy(stringOfStates[0], "ON", 21);
+      stringOfStates[0][20] = '\0';
+      break;
+    case HeaterStatus::HeatingState::OFF:
+      strncpy(stringOfStates[0], "OFF", 21);
+      stringOfStates[0][20] = '\0';
+      break;
+  }
+  switch (Mode) {
+    case HeaterStatus::Mode::TEMP:
+      strncpy(stringOfStates[1], "TEMP", 21);
+      stringOfStates[0][20] = '\0';
+      break;
+    case HeaterStatus::Mode::POWER:
+      strncpy(stringOfStates[1], "POWER", 21);
+      stringOfStates[0][20] = '\0';
+      break;
+  }
+}
 
 
+
+  void init() {
+    Wire.begin();
+    lcd.init();
+    lcd.backlight();
+    lcd.clear();
+  }
 };
 
 class InputDevices {
 private:
   friend class SystemController;
-  InputDevices()
-      : m_powerSwitch(2), m_modeSwitch(3), m_displayButton(8),
-        m_myEncoder(6, 7), m_DS18B20(5){};
+  ToggleSwitchDriver m_powerSwitch{2};
+  ToggleSwitchDriver m_modeSwitch{3};
+  PushButtonDriver m_displayButton{8};
+  MyEncoderDriver m_myEncoder{6, 7};
+  TemperatureSensorDriver m_DS18B20{5};
+
+  InputDevices() = default;
 
   void init() {
     m_powerSwitch.init();
@@ -284,29 +312,28 @@ private:
     output.encoderVal = m_myEncoder.updateVal();
     output.DS18B20_tempC = m_DS18B20.updateTemp();
   }
-
-private:
-  ToggleSwitchDriver m_powerSwitch;
-  ToggleSwitchDriver m_modeSwitch;
-  PushButtonDriver m_displayButton;
-  MyEncoderDriver m_myEncoder;
-  TemperatureSensorDriver m_DS18B20;
 };
 
 class OutputDevices {
 private:
   friend class SystemController;
-  OutputDevices() : relais(4) {}
+  RelaisDriver relais{4};
+  OutputDevices() = default;
 
   void init() { relais.init(); }
 
   void update() { relais.update(); }
-  RelaisDriver relais;
 };
 
 class SystemController {
 public:
-  explicit SystemController() : heaterStatus(), inputdata() {}
+  InputDevices inputdevices;
+  InputData inputdata;
+  HeaterStatus heaterStatus;
+  float Solltemperatur = 20;
+  OutputDevices outputdevices;
+
+  SystemController() = default;
 
   void operator()() {
     inputdevices.pollingDevicesAndUpdateData(inputdata);
@@ -316,6 +343,8 @@ public:
   }
 
   void init() {
+    heaterStatus.heatingstate = HeaterStatus::HeatingState::OFF;
+    heaterStatus.mode = HeaterStatus::Mode::TEMP;
     delay(500); // Damit sich Hardware kurz einpendeln kann
     inputdevices.init();
     outputdevices.init();
@@ -333,6 +362,7 @@ private:
     constexpr float TempMin = 5.0;
     constexpr float TempMax = 30.0;
 
+    // Power Switch Logik
     if (inputdata.powerSwitchHasChanged) {
       if (heaterStatus.heatingstate == HeaterStatus::HeatingState::ON) {
         outputdevices.relais.request(RelaisDriver::RelaisDuration::long_);
@@ -344,7 +374,7 @@ private:
       heaterStatus.heatingstate = HeaterStatus::HeatingState::ON;
       heaterStatus.mode = HeaterStatus::Mode::POWER;
     }
-
+    // Mode Switch Logik
     if (inputdata.modeSwitchHasChanged) {
       if (heaterStatus.mode == HeaterStatus::Mode::POWER) {
         outputdevices.relais.request(RelaisDriver::RelaisDuration::short_);
@@ -354,8 +384,9 @@ private:
       heaterStatus.mode = HeaterStatus::Mode::POWER;
     }
 
-    // Hier wird der Modus geprüft, weil der Drehregler mit Knopf vllt mal die
-    // Ansicht auf Laufzeitdaten wechseln soll.
+    // Encoder Logik
+    //  Hier wird der Modus geprüft, weil der Drehregler mit Knopf vllt mal die
+    //  Ansicht auf Laufzeitdaten wechseln soll.
     if (inputdata.encoderVal != 0) {
       if (heaterStatus.mode == HeaterStatus::Mode::TEMP) {
         Solltemperatur +=
@@ -367,7 +398,7 @@ private:
       }
     }
   }
-
+  // Temperaturregelung
   void applyHeatingLogic() {
     constexpr float Solltoleranz = 1.5;
 
@@ -384,20 +415,11 @@ private:
     } else
       return;
   }
-
-  HeaterStatus heaterStatus;
-  InputData inputdata;
-  float Solltemperatur = 20;
-  uint8_t pin;
-  InputDevices inputdevices;
-  OutputDevices outputdevices;
 };
 
 // Dann in main.ino bzw main.cpp
-
 SystemController controller;
 
 void setup() { controller.init(); };
 
 void loop() { controller(); }
-

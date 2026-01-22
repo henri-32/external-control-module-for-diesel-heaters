@@ -2,10 +2,11 @@
 #pragma once
 #include "functions.h"
 #include "lcddisplay.h"
+#include "classes.h"
 #include <Arduino.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
-
+ 
 bool initComplete;
 
 void setup() {
