@@ -1,12 +1,10 @@
 #include "classes.h"
 #include "Arduino.h"
-#include "variables.h"
 #include <DallasTemperature.h>
 #include <Encoder.h>
 #include <LiquidCrystal_I2C.h>
 #include <OneWire.h>
 
- 
 // Werttypen
 struct InputData {
   bool powerSwitchHasChanged;
@@ -22,8 +20,27 @@ struct HeaterStatus {
 
   enum class Mode { TEMP, POWER };
   Mode mode;
+
+  float Solltemperatur = 20;
 };
- 
+
+struct Display_content {
+  float tempC;
+  float Solltemperatur;
+  HeaterStatus::HeatingState heatingstate;
+  HeaterStatus::Mode mode;
+};
+
+struct OutputIntent {
+  enum class RelaisIntent { long_, short_, neutral };
+  RelaisIntent relais_intent = RelaisIntent::neutral;
+
+  enum class LCD_Display_state { ON, OFF };
+  LCD_Display_state lcd_display_state = LCD_Display_state::OFF;
+
+  Display_content display_content;
+};
+
 // Hardwareadapter
 
 class ToggleSwitchDriver {
@@ -180,54 +197,48 @@ private:
 
 class RelaisDriver {
 public:
+  uint16_t m_relais_intent_int = 0;
+
   explicit RelaisDriver(const uint8_t pin) : m_pin(pin) {}
-  enum class RelaisDuration { long_, short_, init };
-  RelaisDuration m_relais_duration;
-  uint16_t m_relais_duration_int = 0;
 
 public:
   void init() {
     pinMode(m_pin, OUTPUT);
-    m_relais_duration = RelaisDuration::init;
     digitalWrite(m_pin, LOW);
   }
 
-  void request(RelaisDriver::RelaisDuration relais_duration) {
-    if (m_relaisState == RelaisState::ON)
-      return;
-    m_relais_duration = relais_duration;
-    activate();
-  }
-
-  void update() {
-    convertRelaisDurationToInt();
-    if (m_relaisState == RelaisState::OFF)
-      return;
-
-    if (millis() - m_lastRelaisActivation < m_relais_duration_int)
-      return;
-    deactivate();
+  void update(OutputIntent::RelaisIntent intent) {
+    if (m_relaisState == RelaisState::OFF) {
+      if (intent != OutputIntent::RelaisIntent::neutral) {
+        m_lastRelaisActivation = millis();
+        activate();
+        m_relaisState = RelaisState::ON;
+      }
+    };
+    if (m_relaisState == RelaisState::ON) {
+      convertRelaisIntentToInt(intent);
+      if (millis() - m_lastRelaisActivation < m_relais_intent_int)
+        return;
+      deactivate();
+      m_relaisState = RelaisState::OFF;
+    }
   }
 
 private:
-  void convertRelaisDurationToInt() {
-    if (m_relais_duration == RelaisDuration::long_)
-      m_relais_duration_int = 2000;
-    else if (m_relais_duration == RelaisDuration::short_)
-      m_relais_duration_int = 500;
-    else if (m_relais_duration == RelaisDuration::init)
-      m_relais_duration_int = 0;
+  void convertRelaisIntentToInt(OutputIntent::RelaisIntent l_intent) {
+    if (l_intent == OutputIntent::RelaisIntent::long_)
+      m_relais_intent_int = 2000;
+    else if (l_intent == OutputIntent::RelaisIntent::short_)
+      m_relais_intent_int = 500;
+    else if (l_intent == OutputIntent::RelaisIntent::neutral)
+      m_relais_intent_int = 0;
   }
   void activate() {
     digitalWrite(m_pin, HIGH);
     m_lastRelaisActivation = millis();
-    m_relaisState = RelaisState::ON;
   }
 
-  void deactivate() {
-    digitalWrite(m_pin, LOW);
-    m_relaisState = RelaisState::OFF;
-  }
+  void deactivate() { digitalWrite(m_pin, LOW); };
 
   const uint8_t m_pin;
   unsigned long m_lastRelaisActivation = 0;
@@ -237,24 +248,34 @@ private:
 
 class DisplayDriver {
 private:
-  friend class SystemController;
+  friend class OutputDevices;
   static constexpr uint8_t Rows = 4;
   static constexpr uint8_t Cols = 20;
   char content[Rows][Cols] = {};
   char stringOfStates[Rows][Cols] = {};
+  const Display_content &m_displaycontent;
+  OutputIntent::LCD_Display_state m_displaystate;
 
   LiquidCrystal_I2C lcd{0x27, 20, 4};
-  DisplayDriver() = default;
+  DisplayDriver(const Display_content &dc,
+                OutputIntent::LCD_Display_state
+                    ds) // Erläuterung für mich const weil nur gelesen wird und
+                        // lebende Daten, die möglichst aktuell seine solen. Das
+                        // kleine enum kann einfach kopiert werden
+      : m_displaycontent(dc), m_displaystate(ds) {}
 
+  // Hilfsfunktion leeren der Zeile
   void clearLine(uint8_t line) {
     lcd.setCursor(0, line);
     lcd.print("                    ");
     lcd.setCursor(0, line);
   }
 
-  // Hilfsfunktion: Zustände werden in Strings umgewandelt um sie auf dem Display anzuzeigen zu können
-void statesToStrings(HeaterStatus::HeatingState Heizungszustand, HeaterStatus::Mode Mode) {
-  switch (Heizungszustand) {
+  // Hilfsfunktion: Zustände werden in Strings umgewandelt um sie auf dem
+  // Display anzuzeigen zu können
+  void statesToStrings(HeaterStatus::HeatingState state,
+                       HeaterStatus::Mode mode) {
+    switch (state) {
     case HeaterStatus::HeatingState::ON:
       strncpy(stringOfStates[0], "ON", 21);
       stringOfStates[0][20] = '\0';
@@ -263,8 +284,8 @@ void statesToStrings(HeaterStatus::HeatingState Heizungszustand, HeaterStatus::M
       strncpy(stringOfStates[0], "OFF", 21);
       stringOfStates[0][20] = '\0';
       break;
-  }
-  switch (Mode) {
+    }
+    switch (mode) {
     case HeaterStatus::Mode::TEMP:
       strncpy(stringOfStates[1], "TEMP", 21);
       stringOfStates[0][20] = '\0';
@@ -273,16 +294,51 @@ void statesToStrings(HeaterStatus::HeatingState Heizungszustand, HeaterStatus::M
       strncpy(stringOfStates[1], "POWER", 21);
       stringOfStates[0][20] = '\0';
       break;
+    }
   }
-}
 
+  // Inhaltsfunktion die berechnet, was angezeigt wird (content)
 
+  void createDisplayContent() {
+    statesToStrings(
+        m_displaycontent.heatingstate,
+        m_displaycontent
+            .mode); // Es werden die aktuellen globalen Zustände eingelesen
+    // und in Strings umgewandelt
+    switch (m_displaystate) {
+    case OutputIntent::LCD_Display_state::ON: {
+      lcd.backlight();
+      lcd.display();
+      int t_int = int(m_displaycontent.tempC); 
+      int t_frac = abs((int)(m_displaycontent.tempC*10) % 10);
+      int s_int = int(m_displaycontent.Solltemperatur);
+      int s_frac = abs((int)(m_displaycontent.Solltemperatur * 10) % 10);
+
+      snprintf(content[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
+      snprintf(content[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
+      snprintf(content[2], 21, "Zustand:   %s", stringOfStates[0]);
+      snprintf(content[3], 21, "Mode:      %s", stringOfStates[1]);
+      break;
+    }
+
+    case OutputIntent::LCD_Display_state::OFF: {
+      lcd.noBacklight();
+      lcd.noDisplay();
+      break;
+    }
+    }
+  }
 
   void init() {
     Wire.begin();
     lcd.init();
     lcd.backlight();
     lcd.clear();
+  }
+
+  void update_wrapper(OutputIntent::LCD_Display_state state,
+                      Display_content content) {
+    statesToStrings(content.heatingstate, content.mode);
   }
 };
 
@@ -318,11 +374,26 @@ class OutputDevices {
 private:
   friend class SystemController;
   RelaisDriver relais{4};
-  OutputDevices() = default;
+  OutputIntent &m_outputintent;
+  DisplayDriver lcdDisplay; // Keine PIN Zuweisung nötig, da Arduino I2C Bus
+                            // automatisch erkennt.
+  OutputDevices(OutputIntent &oi)
+      : m_outputintent(oi), lcdDisplay(m_outputintent.display_content,
+                                       m_outputintent.lcd_display_state) {}
 
-  void init() { relais.init(); }
+  void init() {
+    relais.init();
+    lcdDisplay.init();
+  }
 
-  void update() { relais.update(); }
+  void update() {
+    relais.update(m_outputintent.relais_intent);
+    resetHandledOutputIntent();
+  }
+
+  void resetHandledOutputIntent() {
+    m_outputintent.relais_intent = OutputIntent::RelaisIntent::neutral;
+  }
 };
 
 class SystemController {
@@ -330,8 +401,8 @@ public:
   InputDevices inputdevices;
   InputData inputdata;
   HeaterStatus heaterStatus;
-  float Solltemperatur = 20;
-  OutputDevices outputdevices;
+  OutputIntent outputintent;
+  OutputDevices outputdevices{outputintent};
 
   SystemController() = default;
 
@@ -339,6 +410,7 @@ public:
     inputdevices.pollingDevicesAndUpdateData(inputdata);
     applyInputdata();
     applyHeatingLogic();
+    writeOutputIntent();
     outputdevices.update();
   }
 
@@ -365,22 +437,22 @@ private:
     // Power Switch Logik
     if (inputdata.powerSwitchHasChanged) {
       if (heaterStatus.heatingstate == HeaterStatus::HeatingState::ON) {
-        outputdevices.relais.request(RelaisDriver::RelaisDuration::long_);
+        outputintent.relais_intent = OutputIntent::RelaisIntent::long_;
         heaterStatus.heatingstate = HeaterStatus::HeatingState::OFF;
         heaterStatus.mode = HeaterStatus::Mode::POWER;
 
       } else
-        outputdevices.relais.request(RelaisDriver::RelaisDuration::long_);
+        outputintent.relais_intent = OutputIntent::RelaisIntent::long_;
       heaterStatus.heatingstate = HeaterStatus::HeatingState::ON;
       heaterStatus.mode = HeaterStatus::Mode::POWER;
     }
     // Mode Switch Logik
     if (inputdata.modeSwitchHasChanged) {
       if (heaterStatus.mode == HeaterStatus::Mode::POWER) {
-        outputdevices.relais.request(RelaisDriver::RelaisDuration::short_);
+        outputintent.relais_intent = OutputIntent::RelaisIntent::short_;
         heaterStatus.mode = HeaterStatus::Mode::TEMP;
       } else
-        outputdevices.relais.request(RelaisDriver::RelaisDuration::short_);
+        outputintent.relais_intent = OutputIntent::RelaisIntent::short_;
       heaterStatus.mode = HeaterStatus::Mode::POWER;
     }
 
@@ -389,37 +461,54 @@ private:
     //  Ansicht auf Laufzeitdaten wechseln soll.
     if (inputdata.encoderVal != 0) {
       if (heaterStatus.mode == HeaterStatus::Mode::TEMP) {
-        Solltemperatur +=
+        heaterStatus.Solltemperatur +=
             inputdata.encoderVal * TempStep; // encoderVal hat ist signed
-        if (Solltemperatur > TempMax)
-          Solltemperatur = TempMax;
-        else if (Solltemperatur < TempMin)
-          Solltemperatur = TempMin;
+        if (heaterStatus.Solltemperatur > TempMax)
+          heaterStatus.Solltemperatur = TempMax;
+        else if (heaterStatus.Solltemperatur < TempMin)
+          heaterStatus.Solltemperatur = TempMin;
       }
     }
+    if (inputdata.displayButtonHasChanged) {
+      if (outputintent.lcd_display_state == OutputIntent::LCD_Display_state::ON)
+        outputintent.lcd_display_state = OutputIntent::LCD_Display_state::OFF;
+      else if (outputintent.lcd_display_state ==
+               OutputIntent::LCD_Display_state::OFF)
+        outputintent.lcd_display_state = OutputIntent::LCD_Display_state::ON;
+    }
   }
+
   // Temperaturregelung
   void applyHeatingLogic() {
     constexpr float Solltoleranz = 1.5;
 
     if (heaterStatus.mode == HeaterStatus::Mode::TEMP) {
-      if (inputdata.DS18B20_tempC < Solltemperatur - Solltoleranz &&
+      if (inputdata.DS18B20_tempC <
+              heaterStatus.Solltemperatur - Solltoleranz &&
           heaterStatus.heatingstate == HeaterStatus::HeatingState::OFF) {
-        outputdevices.relais.request(RelaisDriver::RelaisDuration::long_);
+        outputintent.relais_intent = OutputIntent::RelaisIntent::long_;
         heaterStatus.heatingstate = HeaterStatus::HeatingState::ON;
-      } else if (inputdata.DS18B20_tempC > Solltemperatur + Solltoleranz &&
+      } else if (inputdata.DS18B20_tempC >
+                     heaterStatus.Solltemperatur + Solltoleranz &&
                  heaterStatus.heatingstate == HeaterStatus::HeatingState::ON) {
-        outputdevices.relais.request(RelaisDriver::RelaisDuration::long_);
+        outputintent.relais_intent == OutputIntent::RelaisIntent::long_;
         heaterStatus.heatingstate == HeaterStatus::HeatingState::OFF;
       }
     } else
       return;
   }
+
+  void writeOutputIntent() {
+    outputintent.display_content.tempC = inputdata.DS18B20_tempC;
+    outputintent.display_content.Solltemperatur = heaterStatus.Solltemperatur;
+    outputintent.display_content.heatingstate = heaterStatus.heatingstate;
+    outputintent.display_content.mode = heaterStatus.mode;
+  }
 };
 
-// Dann in main.ino bzw main.cpp
+/*Dann in main.ino bzw main.cpp
 SystemController controller;
 
 void setup() { controller.init(); };
 
-void loop() { controller(); }
+void loop() { controller(); }*/
