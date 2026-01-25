@@ -35,8 +35,8 @@ struct OutputIntent {
   enum class RelaisIntent { long_, short_, neutral };
   RelaisIntent relais_intent = RelaisIntent::neutral;
 
-  enum class LCD_Display_state { ON, OFF };
-  LCD_Display_state lcd_display_state = LCD_Display_state::OFF;
+  enum class LCD_StateIntent { ON, OFF };
+  LCD_StateIntent lcd_state_intent = LCD_StateIntent::OFF;
 
   Display_content display_content;
 };
@@ -249,32 +249,35 @@ private:
 class DisplayDriver {
 private:
   friend class OutputDevices;
+
   static constexpr uint8_t Rows = 4;
-  static constexpr uint8_t Cols = 20;
-  char content[Rows][Cols] = {};
+  static constexpr uint8_t Cols = 21;
+  char contentString[Rows][Cols] = {};
   char stringOfStates[Rows][Cols] = {};
+  int t_int = 0;
+  int t_frac = 0;
+  int s_int = 0;
+  int s_frac = 0;
+
   const Display_content &m_displaycontent;
-  OutputIntent::LCD_Display_state m_displaystate;
+  OutputIntent::LCD_StateIntent m_displaystate;
 
   LiquidCrystal_I2C lcd{0x27, 20, 4};
-  DisplayDriver(const Display_content &dc,
-                OutputIntent::LCD_Display_state
-                    ds) // Erläuterung für mich const weil nur gelesen wird und
-                        // lebende Daten, die möglichst aktuell seine solen. Das
-                        // kleine enum kann einfach kopiert werden
+  DisplayDriver(const Display_content &dc, OutputIntent::LCD_StateIntent ds)
       : m_displaycontent(dc), m_displaystate(ds) {}
+  /* // Erläuterung für mich: const weil nur gelesen wird und
+                    lebende Daten, die möglichst aktuell sein sollen. Das
+                     kleine enum kann stattdessen einfach kopiert werden*/
 
-  // Hilfsfunktion leeren der Zeile
+  // Hilfsfunktionen
   void clearLine(uint8_t line) {
     lcd.setCursor(0, line);
     lcd.print("                    ");
     lcd.setCursor(0, line);
   }
 
-  // Hilfsfunktion: Zustände werden in Strings umgewandelt um sie auf dem
-  // Display anzuzeigen zu können
-  void statesToStrings(HeaterStatus::HeatingState state,
-                       HeaterStatus::Mode mode) {
+  void convertStatesToStrings(HeaterStatus::HeatingState state,
+                              HeaterStatus::Mode mode) {
     switch (state) {
     case HeaterStatus::HeatingState::ON:
       strncpy(stringOfStates[0], "ON", 21);
@@ -297,31 +300,29 @@ private:
     }
   }
 
-  // Inhaltsfunktion die berechnet, was angezeigt wird (content)
-
+  void formatTempFloatsForDisplay() {
+    t_int = int(m_displaycontent.tempC);
+    t_frac = abs((int)(m_displaycontent.tempC * 10) % 10);
+    s_int = int(m_displaycontent.Solltemperatur);
+    s_frac = abs((int)(m_displaycontent.Solltemperatur * 10) % 10);
+  }
   void createDisplayContent() {
-    statesToStrings(
-        m_displaycontent.heatingstate,
-        m_displaycontent
-            .mode); // Es werden die aktuellen globalen Zustände eingelesen
-    // und in Strings umgewandelt
+    convertStatesToStrings(m_displaycontent.heatingstate,
+                           m_displaycontent.mode);
     switch (m_displaystate) {
-    case OutputIntent::LCD_Display_state::ON: {
+    case OutputIntent::LCD_StateIntent::ON: {
       lcd.backlight();
       lcd.display();
-      int t_int = int(m_displaycontent.tempC); 
-      int t_frac = abs((int)(m_displaycontent.tempC*10) % 10);
-      int s_int = int(m_displaycontent.Solltemperatur);
-      int s_frac = abs((int)(m_displaycontent.Solltemperatur * 10) % 10);
+      formatTempFloatsForDisplay();
 
-      snprintf(content[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
-      snprintf(content[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
-      snprintf(content[2], 21, "Zustand:   %s", stringOfStates[0]);
-      snprintf(content[3], 21, "Mode:      %s", stringOfStates[1]);
+      snprintf(contentString[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
+      snprintf(contentString[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
+      snprintf(contentString[2], 21, "Zustand:   %s", stringOfStates[0]);
+      snprintf(contentString[3], 21, "Mode:      %s", stringOfStates[1]);
       break;
     }
 
-    case OutputIntent::LCD_Display_state::OFF: {
+    case OutputIntent::LCD_StateIntent::OFF: {
       lcd.noBacklight();
       lcd.noDisplay();
       break;
@@ -329,6 +330,27 @@ private:
     }
   }
 
+  void writeUpdate(char content[4][21]) {
+    static char lastLine[4][21] = {"", "", "", ""}; // nötig für Vergleich
+    static long lastUpdate = 0;
+    constexpr uint8_t refreshRate = 100;
+
+    if (lastUpdate < refreshRate)
+      return;
+
+    for (uint8_t i = 0; i < 4; i++) {
+      if (strcmp(content[i], lastLine[i]) == 0)
+        return;
+
+      clearLine(i);
+      lcd.print(content[i]);
+      strncpy(lastLine[i], content[i], 21);
+      lastLine[i][20] = '\0';
+      lastUpdate = millis();
+    }
+  }
+
+public:
   void init() {
     Wire.begin();
     lcd.init();
@@ -336,9 +358,9 @@ private:
     lcd.clear();
   }
 
-  void update_wrapper(OutputIntent::LCD_Display_state state,
-                      Display_content content) {
-    statesToStrings(content.heatingstate, content.mode);
+  void update(OutputIntent::LCD_StateIntent state, Display_content content) {
+    convertStatesToStrings(content.heatingstate, content.mode);
+    writeUpdate(contentString);
   }
 };
 
@@ -379,7 +401,7 @@ private:
                             // automatisch erkennt.
   OutputDevices(OutputIntent &oi)
       : m_outputintent(oi), lcdDisplay(m_outputintent.display_content,
-                                       m_outputintent.lcd_display_state) {}
+                                       m_outputintent.lcd_state_intent) {}
 
   void init() {
     relais.init();
@@ -388,6 +410,7 @@ private:
 
   void update() {
     relais.update(m_outputintent.relais_intent);
+    lcdDisplay.update(m_outputintent.lcd_state_intent,m_outputintent.display_content);
     resetHandledOutputIntent();
   }
 
@@ -398,6 +421,7 @@ private:
 
 class SystemController {
 public:
+  int refTime;
   InputDevices inputdevices;
   InputData inputdata;
   HeaterStatus heaterStatus;
@@ -410,7 +434,7 @@ public:
     inputdevices.pollingDevicesAndUpdateData(inputdata);
     applyInputdata();
     applyHeatingLogic();
-    writeOutputIntent();
+    writeStatesToOutputIntent();
     outputdevices.update();
   }
 
@@ -469,12 +493,14 @@ private:
           heaterStatus.Solltemperatur = TempMin;
       }
     }
+
+    // Display Switch Logik
     if (inputdata.displayButtonHasChanged) {
-      if (outputintent.lcd_display_state == OutputIntent::LCD_Display_state::ON)
-        outputintent.lcd_display_state = OutputIntent::LCD_Display_state::OFF;
-      else if (outputintent.lcd_display_state ==
-               OutputIntent::LCD_Display_state::OFF)
-        outputintent.lcd_display_state = OutputIntent::LCD_Display_state::ON;
+      if (outputintent.lcd_state_intent == OutputIntent::LCD_StateIntent::ON)
+        outputintent.lcd_state_intent = OutputIntent::LCD_StateIntent::OFF;
+      else if (outputintent.lcd_state_intent ==
+               OutputIntent::LCD_StateIntent::OFF)
+        outputintent.lcd_state_intent = OutputIntent::LCD_StateIntent::ON;
     }
   }
 
@@ -498,7 +524,7 @@ private:
       return;
   }
 
-  void writeOutputIntent() {
+  void writeStatesToOutputIntent() {
     outputintent.display_content.tempC = inputdata.DS18B20_tempC;
     outputintent.display_content.Solltemperatur = heaterStatus.Solltemperatur;
     outputintent.display_content.heatingstate = heaterStatus.heatingstate;
