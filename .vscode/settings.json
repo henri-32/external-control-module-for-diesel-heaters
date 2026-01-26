@@ -1,9 +1,10 @@
 {
-  "C_Cpp.intelliSenseEngine": "Disabled",
   "editor.defaultFormatter": "xaver.clang-format",
+
   "files.associations": {
     "*.ino": "cpp"
   },
+
   "[cpp]": {
     "editor.formatOnSave": true
   },
@@ -11,6 +12,9 @@
   "clangd.arguments": [
     "--background-index",
     "--compile-commands-dir=."
-  ]
+  ],
 
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.autocomplete": "disabled",
+  "C_Cpp.errorSquiggles": "disabled"
 }
