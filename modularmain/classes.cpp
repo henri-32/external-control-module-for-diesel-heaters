@@ -7,38 +7,38 @@
 
 // Werttypen
 struct InputData {
-  bool powerSwitchHasChanged;
-  bool modeSwitchHasChanged;
-  bool displayButtonHasChanged;
-  int8_t encoderVal;
-  float DS18B20_tempC;
+  bool powerSwitchChanged;
+  bool modeSwitchChanged;
+  bool displayButtonChanged;
+  int8_t encoder_val;
+  float sensor_tempC;
 };
 
 struct HeaterStatus {
   enum class HeatingState { ON, OFF };
-  HeatingState heatingstate;
+  HeatingState heatingState;
 
   enum class Mode { TEMP, POWER };
   Mode mode;
 
-  float Solltemperatur = 20;
+  float target_temp_c = 20;
 };
 
-struct Display_content {
-  float tempC;
-  float Solltemperatur;
-  HeaterStatus::HeatingState heatingstate;
+struct DisplayContent {
+  float temp_c;
+  float target_temp_c;
+  HeaterStatus::HeatingState heatingState;
   HeaterStatus::Mode mode;
 };
 
 struct OutputIntent {
-  enum class RelaisIntent { long_, short_, neutral };
-  RelaisIntent relais_intent = RelaisIntent::neutral;
+  enum class RelaisCommand { Long, Short, None };
+  RelaisCommand relaisCommand = RelaisCommand::None;
 
   enum class LCD_StateIntent { ON, OFF };
-  LCD_StateIntent lcd_state_intent = LCD_StateIntent::OFF;
+  LCD_StateIntent lcd_stateIntent = LCD_StateIntent::OFF;
 
-  Display_content display_content;
+  DisplayContent displayContent;
 };
 
 // Hardwareadapter
@@ -49,27 +49,28 @@ public:
 
   void init() {
     pinMode(m_pin, INPUT_PULLUP);
-    m_switchVal = digitalRead(m_pin);
-    m_lastSwitchVal = m_switchVal;
+    m_current = digitalRead(m_pin);
+    m_prev = m_current;
   };
 
-  bool hasChanged() {
-    m_switchVal = digitalRead(m_pin);
-    if (m_switchVal == m_lastSwitchVal)
+  bool changed() {
+    m_current = digitalRead(m_pin);
+    if (m_current == m_prev)
       return false;
-    if (millis() - m_lastDebounce < m_debounceDelay)
+    if (millis() - m_last_debounce_ms < m_debounce_delay_ms)
       return false;
-    m_lastSwitchVal = m_switchVal;
-    m_lastDebounce = millis();
+
+    m_prev = m_current;
+    m_last_debounce_ms = millis();
     return true;
   };
 
 private:
   const uint8_t m_pin;
-  bool m_switchVal;
-  bool m_lastSwitchVal;
-  unsigned long m_lastDebounce = 0;
-  const unsigned long m_debounceDelay = 50;
+  bool m_current;
+  bool m_prev;
+  unsigned long m_last_debounce_ms = 0;
+  static constexpr unsigned long m_debounce_delay_ms = 50;
 };
 
 class PushButtonDriver {
@@ -77,30 +78,30 @@ public:
   explicit PushButtonDriver(uint8_t pin) : m_pin(pin) {}
   void init() {
     pinMode(m_pin, INPUT_PULLUP);
-    m_buttonVal = digitalRead(m_pin);
-    m_lastButtonVal = m_buttonVal;
+    m_current = digitalRead(m_pin);
+    m_prev = m_current;
   }
 
-  bool isPressed() {
-    m_buttonVal = digitalRead(m_pin);
-    if (m_buttonVal == m_lastButtonVal)
+  bool pressed() {
+    m_current = digitalRead(m_pin);
+    if (m_current == m_prev)
       return false;
-    if (millis() - m_lastDebounce < m_debounceDelay)
+    if (millis() - m_last_debounce_ms < m_debounce_delay_ms)
       return false;
-    if (m_buttonVal == HIGH)
+    if (m_current == HIGH)
       return false; // Hier wird im Gegensatz zum ToggleSwitch nur auf das
                     // Drücken reagiert, nicht aufs Loslassen
-    m_lastButtonVal = m_buttonVal;
-    m_lastDebounce = millis();
+    m_prev = m_current;
+    m_last_debounce_ms = millis();
     return true;
   }
 
 private:
   const uint8_t m_pin;
-  bool m_buttonVal;
-  bool m_lastButtonVal;
-  bool m_lastDebounce = 0;
-  const bool m_debounceDelay = 50;
+  bool m_current;
+  bool m_prev;
+  unsigned long m_last_debounce_ms = 0;
+  static constexpr unsigned long m_debounce_delay_ms = 50;
 };
 
 class MyEncoderDriver { // Name gewählt, da Bibliothek Encoder heißt.
@@ -110,17 +111,18 @@ public:
 
 private:
   void poll() {
-    long value = m_encoder.read();
-    long diff = value - m_lastValue;
+    m_prev = 0;
+    m_current = m_encoder.read();
+    long diff = m_current - m_prev;
     if (diff == 0)
       return;
     m_delta += diff;
-    m_lastAction = millis();
-    m_lastValue = value;
+    m_last_change_ms = millis();
+    m_prev = m_current;
   }
 
   int translateStepsToInput() {
-    if (millis() - m_lastAction < 100)
+    if (millis() - m_last_change_ms < 100)
       return 0;
     int steps = m_delta / 4; // Wird auf ganze Schritte runtergebrochen und rest
                              // vernichtet bei Ganzzahldivision
@@ -131,119 +133,119 @@ private:
   };
 
 public:
-  int updateVal() { // So kann nur ein Aufruf erfolgen, allerdings bleibt die
+  int readSteps() { // So kann nur ein Aufruf erfolgen, allerdings bleibt die
                     // Refreshrate der beiden Funktionen unterschiedlich
     poll();
     return translateStepsToInput();
   }
 
-  void init() { poll(); }
+  void init() {
+    poll();
+  } // Initialisierung passiert in lib. Trotzdem init() damit später gleichmäßig
+    // aufgerufen werden kann
 
 private:
   Encoder m_encoder; // Encoder library genutzt
-  long m_lastValue = 0;
+  long m_current = 0;
+  long m_prev = 0;
   long m_delta = 0;
-  unsigned long m_lastAction = 0;
+  unsigned long m_last_change_ms = 0;
 };
 
 class TemperatureSensorDriver {
 public:
   explicit TemperatureSensorDriver(uint8_t pin)
-      : m_oneWire(pin), m_sensors(&m_oneWire) {}
+      : m_one_wire(pin), m_sensors(&m_one_wire) {}
 
   void init() {
     m_sensors.begin();
     m_sensors.requestTemperatures();
-    m_tempC = m_sensors.getTempCByIndex(0);
+    m_temp_c = m_sensors.getTempCByIndex(0);
   }
 
-  float updateTemp() {
+  float pollTemp() {
     startTemperatureRequest();
     measureTemperature();
-    return m_tempC;
+    return m_temp_c;
   }
 
 private:
   void startTemperatureRequest() {
-    if (millis() - m_lastTempRequest < m_REQUEST_INTERVAL_MS)
+    if (millis() - m_last_temp_request < m_request_intervall_ms)
       return;
     if (m_tempRequestPending)
       return;
     m_sensors.requestTemperatures();
-    m_lastTempRequest = millis();
+    m_last_temp_request = millis();
     m_tempRequestPending = true;
   }
 
   void measureTemperature() {
     if (!m_tempRequestPending)
       return;
-    if (millis() - m_lastTempRequest < m_CONVERSION_TIME_MS)
+    if (millis() - m_last_temp_request < m_conversion_time_ms)
       return;
     // Zeit die Messung DS18B20 braucht
-    m_tempC = m_sensors.getTempCByIndex(0);
+    m_temp_c = m_sensors.getTempCByIndex(0);
     m_tempRequestPending = false;
   };
 
 private:
-  OneWire m_oneWire;
+  OneWire m_one_wire;
   DallasTemperature m_sensors;
-  float m_tempC;
-  unsigned long m_lastTempRequest = 0;
+  float m_temp_c;
+  unsigned long m_last_temp_request = 0;
   bool m_tempRequestPending = false;
-  static constexpr unsigned long m_REQUEST_INTERVAL_MS = 2000;
-  // Static heißt hier alle Objekte nutzen die gleiche Variable
-  static constexpr unsigned long m_CONVERSION_TIME_MS = 750;
+  static constexpr unsigned long m_request_intervall_ms = 2000;
+  static constexpr unsigned long m_conversion_time_ms = 750;
 };
 
 class RelaisDriver {
 public:
-  uint16_t m_relais_intent_int = 0;
-
   explicit RelaisDriver(const uint8_t pin) : m_pin(pin) {}
 
-public:
   void init() {
     pinMode(m_pin, OUTPUT);
     digitalWrite(m_pin, LOW);
   }
 
-  void update(OutputIntent::RelaisIntent intent) {
-    if (m_relaisState == RelaisState::OFF) {
-      if (intent != OutputIntent::RelaisIntent::neutral) {
-        m_lastRelaisActivation = millis();
-        activate();
-        m_relaisState = RelaisState::ON;
-      }
-    };
-    if (m_relaisState == RelaisState::ON) {
+  void update(OutputIntent::RelaisCommand intent) {
+    if (m_relais_state == RelaisState::OFF) {
+      /*muss hier als positiv Bedinung behandelt werden, damit der zweite Teil
+       der Funktion (Überprüfung des Ablaufs) unabhängig vom Zustand erfolgt*/
+      if (intent == OutputIntent::RelaisCommand::None)
+        return;
       convertRelaisIntentToInt(intent);
-      if (millis() - m_lastRelaisActivation < m_relais_intent_int)
+      m_pulse_start_ms = millis();
+      activate();
+      m_relais_state = RelaisState::ON;
+    } else if (m_relais_state == RelaisState::ON) {
+      if (millis() - m_pulse_start_ms < m_pulse_ms)
         return;
       deactivate();
-      m_relaisState = RelaisState::OFF;
+      m_relais_state = RelaisState::OFF;
     }
   }
 
 private:
-  void convertRelaisIntentToInt(OutputIntent::RelaisIntent l_intent) {
-    if (l_intent == OutputIntent::RelaisIntent::long_)
-      m_relais_intent_int = 2000;
-    else if (l_intent == OutputIntent::RelaisIntent::short_)
-      m_relais_intent_int = 500;
-    else if (l_intent == OutputIntent::RelaisIntent::neutral)
-      m_relais_intent_int = 0;
+  void convertRelaisIntentToInt(OutputIntent::RelaisCommand intent_copy) {
+    if (intent_copy == OutputIntent::RelaisCommand::Long)
+      m_pulse_ms = 2000;
+    else if (intent_copy == OutputIntent::RelaisCommand::Short)
+      m_pulse_ms = 500;
+    else if (intent_copy == OutputIntent::RelaisCommand::None)
+      m_pulse_ms = 0;
   }
-  void activate() {
-    digitalWrite(m_pin, HIGH);
-    m_lastRelaisActivation = millis();
-  }
+
+  void activate() { digitalWrite(m_pin, HIGH); }
 
   void deactivate() { digitalWrite(m_pin, LOW); };
 
   const uint8_t m_pin;
-  unsigned long m_lastRelaisActivation = 0;
+  uint16_t m_pulse_ms = 0;
+  unsigned long m_pulse_start_ms = 0;
   enum class RelaisState { ON, OFF };
-  RelaisState m_relaisState = RelaisState::OFF;
+  RelaisState m_relais_state = RelaisState::OFF;
 };
 
 class DisplayDriver {
@@ -252,18 +254,18 @@ private:
 
   static constexpr uint8_t Rows = 4;
   static constexpr uint8_t Cols = 21;
-  char contentString[Rows][Cols] = {};
-  char stringOfStates[Rows][Cols] = {};
+  char m_line_buf[Rows][Cols] = {};
+  char string_of_states[Rows][Cols] = {};
   int t_int = 0;
   int t_frac = 0;
   int s_int = 0;
   int s_frac = 0;
 
-  const Display_content &m_displaycontent;
+  DisplayContent &m_displaycontent;
   OutputIntent::LCD_StateIntent m_displaystate;
 
   LiquidCrystal_I2C lcd{0x27, 20, 4};
-  DisplayDriver(const Display_content &dc, OutputIntent::LCD_StateIntent ds)
+  DisplayDriver(DisplayContent &dc, OutputIntent::LCD_StateIntent ds)
       : m_displaycontent(dc), m_displaystate(ds) {}
   /* // Erläuterung für mich: const weil nur gelesen wird und
                     lebende Daten, die möglichst aktuell sein sollen. Das
@@ -280,34 +282,34 @@ private:
                               HeaterStatus::Mode mode) {
     switch (state) {
     case HeaterStatus::HeatingState::ON:
-      strncpy(stringOfStates[0], "ON", 21);
-      stringOfStates[0][20] = '\0';
+      strncpy(string_of_states[0], "ON", 21);
+      string_of_states[1][20] = '\0';
       break;
     case HeaterStatus::HeatingState::OFF:
-      strncpy(stringOfStates[0], "OFF", 21);
-      stringOfStates[0][20] = '\0';
+      strncpy(string_of_states[0], "OFF", 21);
+      string_of_states[1][20] = '\0';
       break;
     }
     switch (mode) {
     case HeaterStatus::Mode::TEMP:
-      strncpy(stringOfStates[1], "TEMP", 21);
-      stringOfStates[0][20] = '\0';
+      strncpy(string_of_states[1], "TEMP", 21);
+      string_of_states[1][20] = '\0';
       break;
     case HeaterStatus::Mode::POWER:
-      strncpy(stringOfStates[1], "POWER", 21);
-      stringOfStates[0][20] = '\0';
+      strncpy(string_of_states[1], "POWER", 21);
+      string_of_states[1][20] = '\0';
       break;
     }
   }
 
   void formatTempFloatsForDisplay() {
-    t_int = int(m_displaycontent.tempC);
-    t_frac = abs((int)(m_displaycontent.tempC * 10) % 10);
-    s_int = int(m_displaycontent.Solltemperatur);
-    s_frac = abs((int)(m_displaycontent.Solltemperatur * 10) % 10);
+    t_int = int(m_displaycontent.temp_c);
+    t_frac = abs((int)(m_displaycontent.temp_c * 10) % 10);
+    s_int = int(m_displaycontent.target_temp_c);
+    s_frac = abs((int)(m_displaycontent.target_temp_c * 10) % 10);
   }
-  void createDisplayContent() {
-    convertStatesToStrings(m_displaycontent.heatingstate,
+  void renderLines() {
+    convertStatesToStrings(m_displaycontent.heatingState,
                            m_displaycontent.mode);
     switch (m_displaystate) {
     case OutputIntent::LCD_StateIntent::ON: {
@@ -315,10 +317,10 @@ private:
       lcd.display();
       formatTempFloatsForDisplay();
 
-      snprintf(contentString[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
-      snprintf(contentString[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
-      snprintf(contentString[2], 21, "Zustand:   %s", stringOfStates[0]);
-      snprintf(contentString[3], 21, "Mode:      %s", stringOfStates[1]);
+      snprintf(m_line_buf[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
+      snprintf(m_line_buf[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
+      snprintf(m_line_buf[2], 21, "Zustand:   %s", string_of_states[0]);
+      snprintf(m_line_buf[3], 21, "Mode:      %s", string_of_states[1]);
       break;
     }
 
@@ -330,23 +332,23 @@ private:
     }
   }
 
-  void writeUpdate(char content[4][21]) {
+  void writeUpdate(char lines[4][21]) {
     static char lastLine[4][21] = {"", "", "", ""}; // nötig für Vergleich
-    static long lastUpdate = 0;
-    constexpr uint8_t refreshRate = 100;
+    static long last_update_ms = 0;
+    constexpr uint8_t min_update_interval_ms = 100;
 
-    if (lastUpdate < refreshRate)
+    if (millis() - last_update_ms < min_update_interval_ms)
       return;
 
     for (uint8_t i = 0; i < 4; i++) {
-      if (strcmp(content[i], lastLine[i]) == 0)
-        return;
+      if (strcmp(lines[i], lastLine[i]) == 0)
+        continue;
 
       clearLine(i);
-      lcd.print(content[i]);
-      strncpy(lastLine[i], content[i], 21);
+      lcd.print(lines[i]);
+      strncpy(lastLine[i], lines[i], 21);
       lastLine[i][20] = '\0';
-      lastUpdate = millis();
+      last_update_ms = millis();
     }
   }
 
@@ -358,9 +360,11 @@ public:
     lcd.clear();
   }
 
-  void update(OutputIntent::LCD_StateIntent state, Display_content content) {
-    convertStatesToStrings(content.heatingstate, content.mode);
-    writeUpdate(contentString);
+  void update() {
+    renderLines();
+    convertStatesToStrings(m_displaycontent.heatingState,
+                           m_displaycontent.mode);
+    writeUpdate(m_line_buf);
   }
 };
 
@@ -371,7 +375,7 @@ private:
   ToggleSwitchDriver m_modeSwitch{3};
   PushButtonDriver m_displayButton{8};
   MyEncoderDriver m_myEncoder{6, 7};
-  TemperatureSensorDriver m_DS18B20{5};
+  TemperatureSensorDriver m_tempSensor{5};
 
   InputDevices() = default;
 
@@ -380,70 +384,70 @@ private:
     m_modeSwitch.init();
     m_displayButton.init();
     m_myEncoder.init();
-    m_DS18B20.init();
+    m_tempSensor.init();
   }
 
-  void pollingDevicesAndUpdateData(InputData &output) {
-    output.powerSwitchHasChanged = m_powerSwitch.hasChanged();
-    output.modeSwitchHasChanged = m_modeSwitch.hasChanged();
-    output.displayButtonHasChanged = m_displayButton.isPressed();
-    output.encoderVal = m_myEncoder.updateVal();
-    output.DS18B20_tempC = m_DS18B20.updateTemp();
+  void poll(InputData &output) {
+    output.powerSwitchChanged = m_powerSwitch.changed();
+    output.modeSwitchChanged = m_modeSwitch.changed();
+    output.displayButtonChanged = m_displayButton.pressed();
+    output.encoder_val = m_myEncoder.readSteps();
+    output.sensor_tempC = m_tempSensor.pollTemp();
   }
 };
 
 class OutputDevices {
 private:
   friend class SystemController;
-  RelaisDriver relais{4};
-  OutputIntent &m_outputintent;
-  DisplayDriver lcdDisplay; // Keine PIN Zuweisung nötig, da Arduino I2C Bus
-                            // automatisch erkennt.
+  RelaisDriver m_relais{4};
+  OutputIntent &m_outputIntent;
+  DisplayDriver m_lcdDisplay; // Keine PIN Zuweisung nötig, da Arduino I2C Bus
+                              // automatisch erkennt.
   OutputDevices(OutputIntent &oi)
-      : m_outputintent(oi), lcdDisplay(m_outputintent.display_content,
-                                       m_outputintent.lcd_state_intent) {}
+      : m_outputIntent(oi), m_lcdDisplay(m_outputIntent.displayContent,
+                                         m_outputIntent.lcd_stateIntent) {}
 
   void init() {
-    relais.init();
-    lcdDisplay.init();
+    m_relais.init();
+    m_lcdDisplay.init();
   }
 
   void update() {
-    relais.update(m_outputintent.relais_intent);
-    lcdDisplay.update(m_outputintent.lcd_state_intent,m_outputintent.display_content);
+    m_relais.update(m_outputIntent.relaisCommand);
+    m_lcdDisplay.update();
     resetHandledOutputIntent();
   }
 
   void resetHandledOutputIntent() {
-    m_outputintent.relais_intent = OutputIntent::RelaisIntent::neutral;
+    m_outputIntent.relaisCommand = OutputIntent::RelaisCommand::None;
   }
 };
 
 class SystemController {
-public:
-  int refTime;
-  InputDevices inputdevices;
-  InputData inputdata;
+private:
+  InputDevices inputDevices;
+  InputData inputData;
   HeaterStatus heaterStatus;
-  OutputIntent outputintent;
-  OutputDevices outputdevices{outputintent};
+  OutputIntent outputIntent;
+  OutputDevices outputDevices{outputIntent};
 
+  public:
   SystemController() = default;
 
   void operator()() {
-    inputdevices.pollingDevicesAndUpdateData(inputdata);
+    inputDevices.poll(inputData);
     applyInputdata();
     applyHeatingLogic();
     writeStatesToOutputIntent();
-    outputdevices.update();
+    outputDevices.update();
   }
 
   void init() {
-    heaterStatus.heatingstate = HeaterStatus::HeatingState::OFF;
+    heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
     heaterStatus.mode = HeaterStatus::Mode::TEMP;
     delay(500); // Damit sich Hardware kurz einpendeln kann
-    inputdevices.init();
-    outputdevices.init();
+    inputDevices.init();
+    outputDevices.init();
   }
 
 private:
@@ -459,48 +463,55 @@ private:
     constexpr float TempMax = 30.0;
 
     // Power Switch Logik
-    if (inputdata.powerSwitchHasChanged) {
-      if (heaterStatus.heatingstate == HeaterStatus::HeatingState::ON) {
-        outputintent.relais_intent = OutputIntent::RelaisIntent::long_;
-        heaterStatus.heatingstate = HeaterStatus::HeatingState::OFF;
+    if (inputData.powerSwitchChanged) {
+
+      if (heaterStatus.heatingState == HeaterStatus::HeatingState::ON) {
+        outputIntent.relaisCommand = OutputIntent::RelaisCommand::Long;
+        heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
         heaterStatus.mode = HeaterStatus::Mode::POWER;
 
-      } else
-        outputintent.relais_intent = OutputIntent::RelaisIntent::long_;
-      heaterStatus.heatingstate = HeaterStatus::HeatingState::ON;
-      heaterStatus.mode = HeaterStatus::Mode::POWER;
+      } else {
+        outputIntent.relaisCommand = OutputIntent::RelaisCommand::Long;
+        heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
+        heaterStatus.mode = HeaterStatus::Mode::POWER;
+      }
     }
+
     // Mode Switch Logik
-    if (inputdata.modeSwitchHasChanged) {
+    if (inputData.modeSwitchChanged) {
+
       if (heaterStatus.mode == HeaterStatus::Mode::POWER) {
-        outputintent.relais_intent = OutputIntent::RelaisIntent::short_;
+        outputIntent.relaisCommand = OutputIntent::RelaisCommand::Short;
         heaterStatus.mode = HeaterStatus::Mode::TEMP;
-      } else
-        outputintent.relais_intent = OutputIntent::RelaisIntent::short_;
-      heaterStatus.mode = HeaterStatus::Mode::POWER;
+      } else {
+        outputIntent.relaisCommand = OutputIntent::RelaisCommand::Short;
+        heaterStatus.mode = HeaterStatus::Mode::POWER;
+      }
     }
 
     // Encoder Logik
     //  Hier wird der Modus geprüft, weil der Drehregler mit Knopf vllt mal die
     //  Ansicht auf Laufzeitdaten wechseln soll.
-    if (inputdata.encoderVal != 0) {
+    if (inputData.encoder_val != 0) {
+
       if (heaterStatus.mode == HeaterStatus::Mode::TEMP) {
-        heaterStatus.Solltemperatur +=
-            inputdata.encoderVal * TempStep; // encoderVal hat ist signed
-        if (heaterStatus.Solltemperatur > TempMax)
-          heaterStatus.Solltemperatur = TempMax;
-        else if (heaterStatus.Solltemperatur < TempMin)
-          heaterStatus.Solltemperatur = TempMin;
+        heaterStatus.target_temp_c +=
+            inputData.encoder_val * TempStep; // encoderVal ist signed
+        if (heaterStatus.target_temp_c > TempMax)
+          heaterStatus.target_temp_c = TempMax;
+        else if (heaterStatus.target_temp_c < TempMin)
+          heaterStatus.target_temp_c = TempMin;
       }
     }
 
     // Display Switch Logik
-    if (inputdata.displayButtonHasChanged) {
-      if (outputintent.lcd_state_intent == OutputIntent::LCD_StateIntent::ON)
-        outputintent.lcd_state_intent = OutputIntent::LCD_StateIntent::OFF;
-      else if (outputintent.lcd_state_intent ==
-               OutputIntent::LCD_StateIntent::OFF)
-        outputintent.lcd_state_intent = OutputIntent::LCD_StateIntent::ON;
+    if (inputData.displayButtonChanged) {
+
+      if (outputIntent.lcd_stateIntent == OutputIntent::LCD_StateIntent::ON)
+        outputIntent.lcd_stateIntent = OutputIntent::LCD_StateIntent::OFF;
+      else {
+        outputIntent.lcd_stateIntent = OutputIntent::LCD_StateIntent::ON;
+      }
     }
   }
 
@@ -508,27 +519,25 @@ private:
   void applyHeatingLogic() {
     constexpr float Solltoleranz = 1.5;
 
-    if (heaterStatus.mode == HeaterStatus::Mode::TEMP) {
-      if (inputdata.DS18B20_tempC <
-              heaterStatus.Solltemperatur - Solltoleranz &&
-          heaterStatus.heatingstate == HeaterStatus::HeatingState::OFF) {
-        outputintent.relais_intent = OutputIntent::RelaisIntent::long_;
-        heaterStatus.heatingstate = HeaterStatus::HeatingState::ON;
-      } else if (inputdata.DS18B20_tempC >
-                     heaterStatus.Solltemperatur + Solltoleranz &&
-                 heaterStatus.heatingstate == HeaterStatus::HeatingState::ON) {
-        outputintent.relais_intent == OutputIntent::RelaisIntent::long_;
-        heaterStatus.heatingstate == HeaterStatus::HeatingState::OFF;
-      }
-    } else
+    if (heaterStatus.mode != HeaterStatus::Mode::TEMP)
       return;
+    if (inputData.sensor_tempC < heaterStatus.target_temp_c - Solltoleranz &&
+        heaterStatus.heatingState == HeaterStatus::HeatingState::OFF) {
+      outputIntent.relaisCommand = OutputIntent::RelaisCommand::Long;
+      heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
+    } else if (inputData.sensor_tempC >
+                   heaterStatus.target_temp_c + Solltoleranz &&
+               heaterStatus.heatingState == HeaterStatus::HeatingState::ON) {
+      outputIntent.relaisCommand = OutputIntent::RelaisCommand::Long;
+      heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
+    }
   }
 
   void writeStatesToOutputIntent() {
-    outputintent.display_content.tempC = inputdata.DS18B20_tempC;
-    outputintent.display_content.Solltemperatur = heaterStatus.Solltemperatur;
-    outputintent.display_content.heatingstate = heaterStatus.heatingstate;
-    outputintent.display_content.mode = heaterStatus.mode;
+    outputIntent.displayContent.temp_c = inputData.sensor_tempC;
+    outputIntent.displayContent.target_temp_c = heaterStatus.target_temp_c;
+    outputIntent.displayContent.heatingState = heaterStatus.heatingState;
+    outputIntent.displayContent.mode = heaterStatus.mode;
   }
 };
 
