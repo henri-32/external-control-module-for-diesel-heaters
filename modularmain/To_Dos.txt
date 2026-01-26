@@ -1,0 +1,1 @@
+static constexpr für alle fixen ausdrücke, die zur Compile Zeit bekannt sein sollen
