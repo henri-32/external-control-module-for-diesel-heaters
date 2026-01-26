@@ -1,0 +1,10 @@
+# clangd / compilation database (machine-specific)
+compile_commands.json
+
+# optional: build/cache outputs
+.build/
+.cache/
+
+# optional: OS noise
+.DS_Store
+Thumbs.db
