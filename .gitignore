@@ -1,6 +1,13 @@
 # clangd / compilation database (machine-specific)
 compile_commands.json
 
+# Arduino VS Code extension local build options (machine-specific paths) 
+.vscode/build.options.json
+.vscode/compile_commands.json
+
+modularmain/.cache
+modularmain/build
+
 # optional: build/cache outputs
 .build/
 .cache/
