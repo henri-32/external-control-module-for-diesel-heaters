@@ -201,7 +201,6 @@ private:
       return;
     if (millis() - m_last_temp_request < m_conversion_time_ms)
       return;
-    // Zeit die Messung DS18B20 braucht
     m_temp_c = m_sensors.getTempCByIndex(0);
     m_tempRequestPending = false;
   };
@@ -209,6 +208,15 @@ private:
 };
 
 class RelaisDriver {
+//Config
+  const uint8_t m_pin;
+//States
+  enum class RelaisState { ON, OFF };
+  RelaisState m_relais_state = RelaisState::OFF;
+//Timing
+  uint16_t m_pulse_ms = 0;
+  unsigned long m_pulse_start_ms = 0;
+//API
 public:
   explicit RelaisDriver(const uint8_t pin) : m_pin(pin) {}
 
@@ -248,65 +256,82 @@ private:
   void activate() { digitalWrite(m_pin, HIGH); }
 
   void deactivate() { digitalWrite(m_pin, LOW); };
-
-  const uint8_t m_pin;
-  uint16_t m_pulse_ms = 0;
-  unsigned long m_pulse_start_ms = 0;
-  enum class RelaisState { ON, OFF };
-  RelaisState m_relais_state = RelaisState::OFF;
 };
 
 class DisplayDriver {
-private:
-  friend class OutputDevices;
-
+//Config
+//Lib benutzt, keine Pin Zuweisung nötig, da I2C automatisch erkannt
+  LiquidCrystal_I2C lcdLibObject{0x27, 20, 4}; 
   static constexpr uint8_t Rows = 4;
   static constexpr uint8_t Cols = 21;
   char m_line_buf[Rows][Cols] = {};
   char string_of_states[Rows][Cols] = {};
+  char lastLine[4][21] = {"", "", "", ""};
+//States
+  DisplayContent &m_displaycontent;
+  OutputIntent::LCD_StateIntent m_displaystate;
+//Formatting in Helperfunktion
   int t_int = 0;
   int t_frac = 0;
   int s_int = 0;
   int s_frac = 0;
-
-  DisplayContent &m_displaycontent;
-  OutputIntent::LCD_StateIntent m_displaystate;
-
-  LiquidCrystal_I2C lcd{0x27, 20, 4};
+//Timing
+  unsigned long last_update_ms = 0;
+  const uint8_t min_update_interval_ms = 100;
+//API
+public:
   DisplayDriver(DisplayContent &dc, OutputIntent::LCD_StateIntent &ds)
       : m_displaycontent(dc), m_displaystate(ds) {}
-  /* // Erläuterung für mich: const weil nur gelesen wird und
-                    lebende Daten, die möglichst aktuell sein sollen. Das
-                     kleine enum kann stattdessen einfach kopiert werden*/
 
-  // Hilfsfunktionen
-  void clearLine(uint8_t line) {
-    lcd.setCursor(0, line);
-    lcd.print("                    ");
-    lcd.setCursor(0, line);
+  void init() {
+    Wire.begin();
+    lcdLibObject.init();
+    lcdLibObject.backlight();
+    lcdLibObject.clear();
   }
 
-  void convertStatesToStrings(HeaterStatus::HeatingState state,
-                              HeaterStatus::Mode mode) {
-    switch (state) {
-    case HeaterStatus::HeatingState::ON:
-      strncpy(string_of_states[0], "ON", 21);
-      string_of_states[0][20] = '\0';
-      break;
-    case HeaterStatus::HeatingState::OFF:
-      strncpy(string_of_states[0], "OFF", 21);
-      string_of_states[0][20] = '\0';
+  void update() {
+    renderLines();
+    writeDisplay(m_line_buf);
+  }
+
+//Helperfunktionen
+  void renderLines() {   
+    switch (m_displaystate) {
+    case OutputIntent::LCD_StateIntent::ON: {
+      formatTempFloatsForDisplay();
+      createStateStringsForDisplay(m_displaycontent);
+      lcdLibObject.backlight();
+      lcdLibObject.display();
+      
+      snprintf(m_line_buf[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
+      snprintf(m_line_buf[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
+      snprintf(m_line_buf[2], 21, "Zustand:   %s", string_of_states[0]);
+      snprintf(m_line_buf[3], 21, "Mode:      %s", string_of_states[1]);
       break;
     }
-    switch (mode) {
-    case HeaterStatus::Mode::TEMP:
-      strncpy(string_of_states[1], "TEMP", 21);
-      string_of_states[0][20] = '\0';
+
+    case OutputIntent::LCD_StateIntent::OFF: {
+      lcdLibObject.noBacklight();
+      lcdLibObject.noDisplay();
       break;
-    case HeaterStatus::Mode::POWER:
-      strncpy(string_of_states[1], "POWER", 21);
-      string_of_states[0][20] = '\0';
-      break;
+    }
+    }
+  }
+
+  void writeDisplay(char lines[4][21]) {
+    if (millis() - last_update_ms < min_update_interval_ms)
+      return;
+
+    for (uint8_t i = 0; i < 4; i++) {
+      if (strcmp(lines[i], lastLine[i]) == 0)
+        continue;
+
+      clearLine(i);
+      lcdLibObject.print(lines[i]);
+      strncpy(lastLine[i], lines[i], 21);
+      lastLine[i][20] = '\0';
+      last_update_ms = millis();
     }
   }
 
@@ -316,63 +341,34 @@ private:
     s_int = int(m_displaycontent.target_temp_c);
     s_frac = abs((int)(m_displaycontent.target_temp_c * 10) % 10);
   }
-  void renderLines() {
-    convertStatesToStrings(m_displaycontent.heatingState,
-                           m_displaycontent.mode);
-    switch (m_displaystate) {
-    case OutputIntent::LCD_StateIntent::ON: {
-      lcd.backlight();
-      lcd.display();
-      formatTempFloatsForDisplay();
 
-      snprintf(m_line_buf[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
-      snprintf(m_line_buf[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
-      snprintf(m_line_buf[2], 21, "Zustand:   %s", string_of_states[0]);
-      snprintf(m_line_buf[3], 21, "Mode:      %s", string_of_states[1]);
+  void createStateStringsForDisplay(const DisplayContent& content) {
+    switch (content.heatingState) {
+    case HeaterStatus::HeatingState::ON:
+      strncpy(string_of_states[0], "ON", 21);
+      string_of_states[0][20] = '\0';
+      break;
+    case HeaterStatus::HeatingState::OFF:
+      strncpy(string_of_states[0], "OFF", 21);
+      string_of_states[0][20] = '\0';
       break;
     }
-
-    case OutputIntent::LCD_StateIntent::OFF: {
-      lcd.noBacklight();
-      lcd.noDisplay();
+    switch (content.mode) {
+    case HeaterStatus::Mode::TEMP:
+      strncpy(string_of_states[1], "TEMP", 21);
+      string_of_states[1][20] = '\0';
+      break;
+    case HeaterStatus::Mode::POWER:
+      strncpy(string_of_states[1], "POWER", 21);
+      string_of_states[1][20] = '\0';
       break;
     }
-    }
   }
 
-  void writeUpdate(char lines[4][21]) {
-    static char lastLine[4][21] = {"", "", "", ""}; // nötig für Vergleich
-    static long last_update_ms = 0;
-    constexpr uint8_t min_update_interval_ms = 100;
-
-    if (millis() - last_update_ms < min_update_interval_ms)
-      return;
-
-    for (uint8_t i = 0; i < 4; i++) {
-      if (strcmp(lines[i], lastLine[i]) == 0)
-        continue;
-
-      clearLine(i);
-      lcd.print(lines[i]);
-      strncpy(lastLine[i], lines[i], 21);
-      lastLine[i][20] = '\0';
-      last_update_ms = millis();
-    }
-  }
-
-public:
-  void init() {
-    Wire.begin();
-    lcd.init();
-    lcd.backlight();
-    lcd.clear();
-  }
-
-  void update() {
-    renderLines();
-    convertStatesToStrings(m_displaycontent.heatingState,
-                           m_displaycontent.mode);
-    writeUpdate(m_line_buf);
+  void clearLine(uint8_t line) {
+    lcdLibObject.setCursor(0, line);
+    lcdLibObject.print("                    ");
+    lcdLibObject.setCursor(0, line);
   }
 };
 
