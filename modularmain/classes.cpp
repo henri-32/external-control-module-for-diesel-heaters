@@ -16,10 +16,10 @@ struct InputData {
 
 struct HeaterStatus {
   enum class HeatingState { ON, OFF };
-  HeatingState heatingState;
+  HeatingState heatingState = HeatingState::OFF;
 
   enum class Mode { TEMP, POWER };
-  Mode mode;
+  Mode mode = Mode::TEMP;
 
   float target_temp_c = 20;
 };
@@ -44,6 +44,15 @@ struct OutputIntent {
 // Hardwareadapter
 
 class ToggleSwitchDriver {
+//Config
+  const uint8_t m_pin;
+//Statues
+  bool m_current;
+  bool m_prev;
+//Timing
+  unsigned long m_last_debounce_ms = 0;
+  static constexpr unsigned long m_debounce_delay_ms = 50;
+//API
 public:
   explicit ToggleSwitchDriver(uint8_t pin) : m_pin(pin){};
 
@@ -64,18 +73,21 @@ public:
     m_last_debounce_ms = millis();
     return true;
   };
-
-private:
-  const uint8_t m_pin;
-  bool m_current;
-  bool m_prev;
-  unsigned long m_last_debounce_ms = 0;
-  static constexpr unsigned long m_debounce_delay_ms = 50;
 };
 
 class PushButtonDriver {
+//Config
+  const uint8_t m_pin;
+//States
+  bool m_current;
+  bool m_prev;
+//Timing
+  unsigned long m_last_debounce_ms = 0;
+  static constexpr unsigned long m_debounce_delay_ms = 50;
+//API
 public:
   explicit PushButtonDriver(uint8_t pin) : m_pin(pin) {}
+
   void init() {
     pinMode(m_pin, INPUT_PULLUP);
     m_current = digitalRead(m_pin);
@@ -95,23 +107,34 @@ public:
     m_last_debounce_ms = millis();
     return true;
   }
-
-private:
-  const uint8_t m_pin;
-  bool m_current;
-  bool m_prev;
-  unsigned long m_last_debounce_ms = 0;
-  static constexpr unsigned long m_debounce_delay_ms = 50;
 };
 
-class MyEncoderDriver { // Name gewählt, da Bibliothek Encoder heißt.
-public:
-  explicit MyEncoderDriver(uint8_t pin1, uint8_t pin2)
-      : m_encoder(pin1, pin2){};
-
-private:
+// Name gewählt, da Bibliothek Encoder heißt.
+class MyEncoderDriver { 
+// Config
+    Encoder m_encoder; // Encoder library genutzt: Dort findet Pin Zuordnung statt
+//States
+    long m_current = 0;
+    long m_prev = 0;
+    long m_delta = 0;
+//Timing
+    unsigned long m_last_change_ms = 0;
+//API
+  public:
+    explicit MyEncoderDriver(uint8_t pin1, uint8_t pin2)
+        : m_encoder(pin1, pin2){};
+//Trotz Initialisierung durch Encoder Lib eigene init () Methode, damit optisch schön
+  void init() {
+    poll();
+  }
+//Ermöglicht einzelnen Aufruf, trotz unterschiedlichen Timings der Helperfunktionen
+  int readSteps() { 
+    poll();
+    return translateStepsToInput();
+  }
+  //Helperfunktionen
+  private:
   void poll() {
-    m_prev = 0;
     m_current = m_encoder.read();
     long diff = m_current - m_prev;
     if (diff == 0)
@@ -128,34 +151,27 @@ private:
                              // vernichtet bei Ganzzahldivision
     m_delta -= steps * 4;    // Das Delta wird um die Schritte die ganz gemacht
                              // wurden wieder reduziert (in Rohwerten) so bleibt
-                             // der Rest für den nächsten aufruf erhalten
+                             // der Rest für den nächsten Aufruf erhalten
     return steps;
   };
 
-public:
-  int readSteps() { // So kann nur ein Aufruf erfolgen, allerdings bleibt die
-                    // Refreshrate der beiden Funktionen unterschiedlich
-    poll();
-    return translateStepsToInput();
-  }
-
-  void init() {
-    poll();
-  } // Initialisierung passiert in lib. Trotzdem init() damit später gleichmäßig
-    // aufgerufen werden kann
-
-private:
-  Encoder m_encoder; // Encoder library genutzt
-  long m_current = 0;
-  long m_prev = 0;
-  long m_delta = 0;
-  unsigned long m_last_change_ms = 0;
 };
 
 class TemperatureSensorDriver {
+//Config
+  OneWire m_one_wire; // OneWire Lib genutzt: Dort findet Pin Zuweisung statt
+  DallasTemperature m_sensors; // DallasTemperature Lib genutzt für Temperatursensor
+//Timing
+  unsigned long m_last_temp_request = 0;
+  bool m_tempRequestPending = false;
+  static constexpr unsigned long m_request_intervall_ms = 2000;
+  static constexpr unsigned long m_conversion_time_ms = 750;
+//Ergebnis
+float m_temp_c;
+//API
 public:
   explicit TemperatureSensorDriver(uint8_t pin)
-      : m_one_wire(pin), m_sensors(&m_one_wire) {}
+      : m_one_wire(pin), m_sensors(&m_one_wire) {} //Verknüpfung von DallasTemperature & OneWire
 
   void init() {
     m_sensors.begin();
@@ -168,7 +184,7 @@ public:
     measureTemperature();
     return m_temp_c;
   }
-
+//Helperfunktionen
 private:
   void startTemperatureRequest() {
     if (millis() - m_last_temp_request < m_request_intervall_ms)
@@ -190,14 +206,6 @@ private:
     m_tempRequestPending = false;
   };
 
-private:
-  OneWire m_one_wire;
-  DallasTemperature m_sensors;
-  float m_temp_c;
-  unsigned long m_last_temp_request = 0;
-  bool m_tempRequestPending = false;
-  static constexpr unsigned long m_request_intervall_ms = 2000;
-  static constexpr unsigned long m_conversion_time_ms = 750;
 };
 
 class RelaisDriver {
@@ -265,7 +273,7 @@ private:
   OutputIntent::LCD_StateIntent m_displaystate;
 
   LiquidCrystal_I2C lcd{0x27, 20, 4};
-  DisplayDriver(DisplayContent &dc, OutputIntent::LCD_StateIntent ds)
+  DisplayDriver(DisplayContent &dc, OutputIntent::LCD_StateIntent &ds)
       : m_displaycontent(dc), m_displaystate(ds) {}
   /* // Erläuterung für mich: const weil nur gelesen wird und
                     lebende Daten, die möglichst aktuell sein sollen. Das
@@ -283,21 +291,21 @@ private:
     switch (state) {
     case HeaterStatus::HeatingState::ON:
       strncpy(string_of_states[0], "ON", 21);
-      string_of_states[1][20] = '\0';
+      string_of_states[0][20] = '\0';
       break;
     case HeaterStatus::HeatingState::OFF:
       strncpy(string_of_states[0], "OFF", 21);
-      string_of_states[1][20] = '\0';
+      string_of_states[0][20] = '\0';
       break;
     }
     switch (mode) {
     case HeaterStatus::Mode::TEMP:
       strncpy(string_of_states[1], "TEMP", 21);
-      string_of_states[1][20] = '\0';
+      string_of_states[0][20] = '\0';
       break;
     case HeaterStatus::Mode::POWER:
       strncpy(string_of_states[1], "POWER", 21);
-      string_of_states[1][20] = '\0';
+      string_of_states[0][20] = '\0';
       break;
     }
   }
@@ -443,8 +451,6 @@ private:
   }
 
   void init() {
-    heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
-    heaterStatus.mode = HeaterStatus::Mode::TEMP;
     delay(500); // Damit sich Hardware kurz einpendeln kann
     inputDevices.init();
     outputDevices.init();
