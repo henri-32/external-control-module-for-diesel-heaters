@@ -1,8 +1,8 @@
 [
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -21,23 +21,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\functions.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/classes.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\functions.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/classes.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\functions.cpp"
+  "file": "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/classes.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -56,23 +56,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\classes.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/modularmain.ino.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\classes.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/modularmain.ino.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\classes.cpp"
+  "file": "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/modularmain.ino.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -91,23 +91,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\lcddisplay.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/variables.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\lcddisplay.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/variables.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\lcddisplay.cpp"
+  "file": "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/variables.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -126,23 +126,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\modularmain.ino.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/lcddisplay.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\modularmain.ino.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/lcddisplay.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\modularmain.ino.cpp"
+  "file": "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/lcddisplay.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -161,23 +161,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\main.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/functions.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\main.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/functions.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\main.cpp"
+  "file": "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/functions.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -196,23 +196,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\variables.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/main.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\variables.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/main.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\sketch\\variables.cpp"
+  "file": "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/sketch/main.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -231,23 +231,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature\\DallasTemperature.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/Arduino/libraries/DallasTemperature/DallasTemperature.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\libraries\\DallasTemperature\\DallasTemperature.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/libraries/DallasTemperature/DallasTemperature.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature\\DallasTemperature.cpp"
+  "file": "/home/henri-32/Arduino/libraries/DallasTemperature/DallasTemperature.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -266,23 +266,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire\\OneWire.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/Arduino/libraries/OneWire/OneWire.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\libraries\\OneWire\\OneWire.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/libraries/OneWire/OneWire.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire\\OneWire.cpp"
+  "file": "/home/henri-32/Arduino/libraries/OneWire/OneWire.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -301,24 +301,24 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder\\utility",
-   "C:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder\\Encoder.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "-I/home/henri-32/Arduino/libraries/Encoder/utility",
+   "/home/henri-32/Arduino/libraries/Encoder/Encoder.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\libraries\\Encoder\\Encoder.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/libraries/Encoder/Encoder.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder\\Encoder.cpp"
+  "file": "/home/henri-32/Arduino/libraries/Encoder/Encoder.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -337,23 +337,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/Arduino/libraries/LiquidCrystal_I2C/LiquidCrystal_I2C.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\libraries\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/libraries/LiquidCrystal_I2C/LiquidCrystal_I2C.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp"
+  "file": "/home/henri-32/Arduino/libraries/LiquidCrystal_I2C/LiquidCrystal_I2C.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
    "-c",
    "-g",
    "-Os",
@@ -372,23 +372,23 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src\\Wire.cpp",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src/Wire.cpp",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\libraries\\Wire\\Wire.cpp.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/libraries/Wire/Wire.cpp.o"
   ],
-  "file": "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src\\Wire.cpp"
+  "file": "/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src/Wire.cpp"
  },
  {
-  "directory": "C:\\Repositorys\\Arduino_Projekte\\Heizungssteuerung_gitordner",
+  "directory": "/home/henri-32/Softwareprojekte/Arduinoprojekte/Heizungssteuerung_git",
   "arguments": [
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7/bin/avr-gcc",
+   "/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-gcc",
    "-c",
    "-g",
    "-Os",
@@ -404,17 +404,17 @@
    "-DARDUINO=10607",
    "-DARDUINO_AVR_UNO",
    "-DARDUINO_ARCH_AVR",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\standard",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\DallasTemperature",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\OneWire",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\Encoder",
-   "-IC:\\Users\\henri\\OneDrive\\Dokumente\\Arduino\\libraries\\LiquidCrystal_I2C",
-   "-IC:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src",
-   "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src\\utility\\twi.c",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/home/henri-32/Arduino/libraries/DallasTemperature",
+   "-I/home/henri-32/Arduino/libraries/OneWire",
+   "-I/home/henri-32/Arduino/libraries/Encoder",
+   "-I/home/henri-32/Arduino/libraries/LiquidCrystal_I2C",
+   "-I/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+   "/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src/utility/twi.c",
    "-o",
-   "C:\\Users\\henri\\AppData\\Local\\arduino\\sketches\\E08B4358CE36E7FBC0B7C5075C47AFCD\\libraries\\Wire\\utility\\twi.c.o"
+   "/home/henri-32/.cache/arduino/sketches/106FAC795CD0FC401B0281A9B98C9148/libraries/Wire/utility/twi.c.o"
   ],
-  "file": "C:\\Users\\henri\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src\\utility\\twi.c"
+  "file": "/home/henri-32/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src/utility/twi.c"
  }
 ]

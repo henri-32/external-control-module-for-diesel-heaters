@@ -11,9 +11,11 @@
 
   "clangd.arguments": [
     "--background-index",
-    "--compile-commands-dir=."
+    "--compile-commands-dir=.",
+    "--query-driver=/home/henri-32/.arduino15/packages/arduino/tools/avr-gcc/*/bin/avr-g++",
+    "--log=verbose"
   ],
-
+  
   "C_Cpp.intelliSenseEngine": "disabled",
   "C_Cpp.autocomplete": "disabled",
   "C_Cpp.errorSquiggles": "disabled"
