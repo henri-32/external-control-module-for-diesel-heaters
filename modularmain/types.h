@@ -10,7 +10,8 @@ struct ControllerInputData {
   float sensor_tempC;
 };
 
-struct HeaterStatus {
+class HeaterStatus {
+public:
   enum class HeatingState { ON, OFF };
   HeatingState heatingState = HeatingState::OFF;
 
@@ -20,7 +21,8 @@ struct HeaterStatus {
   float target_temp_c = 20;
 };
 
-struct ControllerOutputIntent {
+class ControllerOutputIntent {
+public:
   struct DisplayContent {
     float temp_c;
     float target_temp_c;
@@ -29,9 +31,28 @@ struct ControllerOutputIntent {
   };
   DisplayContent displayContent;
 
+  enum class LCD_StateIntent { ON, OFF };
+  LCD_StateIntent lcd_stateIntent = LCD_StateIntent::OFF;
+
   enum class RelaisCommand { Long, Short, None };
   RelaisCommand relaisCommand = RelaisCommand::None;
 
-  enum class LCD_StateIntent { ON, OFF };
-  LCD_StateIntent lcd_stateIntent = LCD_StateIntent::OFF;
+  enum RelaisPriority { None, Low, High };
+
+  RelaisPriority m_currentPriority = None;
+  RelaisCommand m_command;
+
+  void requestRelaisCommand(RelaisCommand command, RelaisPriority priority) {
+    if (priority >= m_currentPriority) {
+      m_command = command;
+      m_currentPriority = priority;
+    }
+  }
+
+  RelaisCommand consumeRelaisRequest() {
+    RelaisCommand command = m_command;
+    m_command = RelaisCommand::None;
+    m_currentPriority = None;
+    return command;
+  };
 };

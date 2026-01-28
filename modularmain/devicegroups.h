@@ -1,6 +1,6 @@
-#pragma once 
-#include "types.h"
+#pragma once
 #include "hardwaredrivers.h"
+#include "types.h"
 class InputDevices {
 private:
   friend class SystemController;
@@ -21,7 +21,7 @@ private:
     m_tempSensor.init();
   }
 
-  void pollAndWriteControllerInputData() {
+  void updateInputData() {
     m_devices_data.powerSwitchChanged = m_powerSwitch.changed();
     m_devices_data.modeSwitchChanged = m_modeSwitch.changed();
     m_devices_data.displayButtonChanged = m_displayButton.pressed();
@@ -48,6 +48,7 @@ private:
 
   void update() {
     m_relais.update(m_devices_intent.relaisCommand);
+     m_devices_intent.consumeRelaisRequest();
     m_lcdDisplay.update();
     resetHandledOutputIntent();
   }
