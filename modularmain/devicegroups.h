@@ -47,14 +47,7 @@ private:
   }
 
   void update() {
-    m_relais.update(m_devices_intent.relaisCommand);
-     m_devices_intent.consumeRelaisRequest();
+    m_relais.update(m_devices_intent.consumeRelaisRequest());
     m_lcdDisplay.update();
-    resetHandledOutputIntent();
-  }
-  // Helperfunktion
-  void resetHandledOutputIntent() {
-    m_devices_intent.relaisCommand =
-        ControllerOutputIntent::RelaisCommand::None;
   }
 };

@@ -38,38 +38,41 @@ public:
 };
 
 class PushButtonDriver {
-  // Config
   const uint8_t m_pin;
-  // States
-  bool m_current;
-  bool m_prev;
-  // Timing
+  bool m_stable;
+  bool m_last_read;
   unsigned long m_last_debounce_ms = 0;
   static constexpr unsigned long m_debounce_delay_ms = 50;
-  // API
+
 public:
   explicit PushButtonDriver(uint8_t pin) : m_pin(pin) {}
 
   void init() {
     pinMode(m_pin, INPUT_PULLUP);
-    m_current = digitalRead(m_pin);
-    m_prev = m_current;
+    m_stable = digitalRead(m_pin);
+    m_last_read = m_stable;
   }
 
   bool pressed() {
-    m_current = digitalRead(m_pin);
-    if (m_current == m_prev)
-      return false;
+    bool reading = digitalRead(m_pin);
+
+    if (reading != m_last_read) {
+      m_last_debounce_ms = millis();
+      m_last_read = reading;
+    }
+
     if (millis() - m_last_debounce_ms < m_debounce_delay_ms)
       return false;
-    if (m_current == HIGH)
-      return false; // Hier wird im Gegensatz zum ToggleSwitch nur auf das
-                    // Drücken reagiert, nicht aufs Loslassen
-    m_prev = m_current;
-    m_last_debounce_ms = millis();
-    return true;
+
+    if (m_stable != reading) {
+      m_stable = reading;
+      return m_stable == LOW; // nur bei stabilem HIGH->LOW
+    }
+
+    return false;
   }
 };
+
 
 // Name gewählt, da Bibliothek Encoder heißt.
 class MyEncoderDriver {
@@ -231,7 +234,7 @@ class DisplayDriver {
   char lastLine[4][21] = {"", "", "", ""};
   // States
   ControllerOutputIntent::DisplayContent &m_displaycontent;
-  ControllerOutputIntent::LCD_StateIntent m_displayState;
+  ControllerOutputIntent::LCD_StateIntent &m_displayState;
   // Formatting in Helperfunktion
   int t_int;
   int t_frac;

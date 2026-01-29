@@ -32,6 +32,7 @@ private:
   void applyInputdata() {
     applyPowerSwitchInput();
     applyModeSwitchInput();
+    applyDisplayButtonInput();
     applyEncoderInput();
   }
 
@@ -65,12 +66,10 @@ private:
     if (inputData.modeSwitchChanged) {
 
       if (heaterStatus.mode == HeaterStatus::Mode::POWER) {
-        outputIntent.relaisCommand =
-            ControllerOutputIntent::RelaisCommand::Short;
+        outputIntent.requestRelaisCommand(ControllerOutputIntent::RelaisCommand::Short);
         heaterStatus.mode = HeaterStatus::Mode::TEMP;
       } else {
-        outputIntent.relaisCommand =
-            ControllerOutputIntent::RelaisCommand::Short;
+        outputIntent.requestRelaisCommand(ControllerOutputIntent::RelaisCommand::Short);
         heaterStatus.mode = HeaterStatus::Mode::POWER;
       }
     }
