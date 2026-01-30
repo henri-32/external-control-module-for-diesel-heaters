@@ -1,7 +1,9 @@
 #pragma once
 #include "Arduino.h"
 #include "devicegroups.h"
+#include "statistics.h"
 #include "types.h"
+#include <avr/interrupt.h>
 
 class SystemController {
 private:
@@ -10,6 +12,7 @@ private:
   HeaterStatus heaterStatus;
   ControllerOutputIntent outputIntent;
   OutputDevices outputDevices{outputIntent};
+  SystemStatistics systemStatistic;
 
 public:
   SystemController() = default;
@@ -20,6 +23,7 @@ public:
     applyHeatingLogic();
     updateOutputIntent();
     outputDevices.update();
+    systemStatistic.update(inputData, heaterStatus);
   }
 
   void init() {
@@ -44,6 +48,12 @@ private:
     nötig, damit ich beim Verlassen des Bootes, die Heizung aus machen kann und
     sie korrekt herunterfährt, bevor ich den Strom wegnehme*/
     if (inputData.powerSwitchChanged) {
+      if (inputData.alternatorPressed) {
+        outputIntent.requestRelaisCommand(
+            ControllerOutputIntent::RelaisCommand::Short);
+            inputData.alternatorUsed = true;
+        return;
+      }
 
       if (heaterStatus.heatingState == HeaterStatus::HeatingState::ON) {
         outputIntent.requestRelaisCommand(
@@ -64,12 +74,23 @@ private:
 
   void applyModeSwitchInput() {
     if (inputData.modeSwitchChanged) {
+      /*Das Drücken mit Alternator ermöglicht hier das Auslösen des Relais, ohne
+      den internen Modus zu wechseln, um im Fehlerfall Unterschiede zum Original
+      Controller auszugleichen*/
+      if (inputData.alternatorPressed) {
+        outputIntent.requestRelaisCommand(
+            ControllerOutputIntent::RelaisCommand::Short);
+            inputData.alternatorUsed = true;
+        return;
+      }
 
       if (heaterStatus.mode == HeaterStatus::Mode::POWER) {
-        outputIntent.requestRelaisCommand(ControllerOutputIntent::RelaisCommand::Short);
+        outputIntent.requestRelaisCommand(
+            ControllerOutputIntent::RelaisCommand::Short);
         heaterStatus.mode = HeaterStatus::Mode::TEMP;
       } else {
-        outputIntent.requestRelaisCommand(ControllerOutputIntent::RelaisCommand::Short);
+        outputIntent.requestRelaisCommand(
+            ControllerOutputIntent::RelaisCommand::Short);
         heaterStatus.mode = HeaterStatus::Mode::POWER;
       }
     }
@@ -80,63 +101,63 @@ private:
     constexpr float TempMin = 5.0;
     constexpr float TempMax = 30.0;
 
-    // Encoder Logik
-    //  Hier wird der Mode geprüft, weil der Drehregler mit Knopf vllt mal die
-    //  Auf die Ansicht auf Laufzeitdaten wechseln soll.
     if (inputData.encoder_val != 0) {
 
-      if (heaterStatus.mode == HeaterStatus::Mode::TEMP) {
         heaterStatus.target_temp_c +=
-            inputData.encoder_val * TempStep; // encoderVal ist signed 
+            inputData.encoder_val * TempStep; // encoderVal ist signed
         if (heaterStatus.target_temp_c > TempMax)
           heaterStatus.target_temp_c = TempMax;
         else if (heaterStatus.target_temp_c < TempMin)
           heaterStatus.target_temp_c = TempMin;
-      }
     }
   }
 
   void applyDisplayButtonInput() {
-    if (inputData.displayButtonChanged) {
+    if (inputData.displayButtonReleased) {
+      if (inputData.alternatorUsed) {
+        inputData.alternatorPressed = false;
+        inputData.alternatorUsed = false;
+        return;
+      }
 
-      if (outputIntent.lcd_stateIntent ==
-          ControllerOutputIntent::LCD_StateIntent::ON)
+      if (outputIntent.lcd_stateIntent !=
+          ControllerOutputIntent::LCD_StateIntent::OFF) {
         outputIntent.lcd_stateIntent =
             ControllerOutputIntent::LCD_StateIntent::OFF;
-      else {
+      } else {
         outputIntent.lcd_stateIntent =
-            ControllerOutputIntent::LCD_StateIntent::ON;
+            ControllerOutputIntent::LCD_StateIntent::Page1;
       }
     }
   }
 
   // Temperaturregelung
   void applyHeatingLogic() {
-  constexpr float setpointTolerance = 1.5;
+    constexpr float setpointTolerance = 1.5;
 
-  if (heaterStatus.mode != HeaterStatus::Mode::TEMP)
-    return;
-  if (inputData.sensor_tempC < heaterStatus.target_temp_c - setpointTolerance &&
-      heaterStatus.heatingState == HeaterStatus::HeatingState::OFF) {
-    outputIntent.requestRelaisCommand(
-        ControllerOutputIntent::RelaisCommand::Long,
-        ControllerOutputIntent::RelaisPriority::Low);
-    heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
-  } else if (inputData.sensor_tempC >
-                 heaterStatus.target_temp_c + setpointTolerance &&
-             heaterStatus.heatingState == HeaterStatus::HeatingState::ON) {
-    outputIntent.requestRelaisCommand(
-        ControllerOutputIntent::RelaisCommand::Long,
-        ControllerOutputIntent::RelaisPriority::Low);
-    heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
+    if (heaterStatus.mode != HeaterStatus::Mode::TEMP)
+      return;
+    if (inputData.sensor_tempC <
+            heaterStatus.target_temp_c - setpointTolerance &&
+        heaterStatus.heatingState == HeaterStatus::HeatingState::OFF) {
+      outputIntent.requestRelaisCommand(
+          ControllerOutputIntent::RelaisCommand::Long,
+          ControllerOutputIntent::RelaisPriority::Low);
+      heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
+    } else if (inputData.sensor_tempC >
+                   heaterStatus.target_temp_c + setpointTolerance &&
+               heaterStatus.heatingState == HeaterStatus::HeatingState::ON) {
+      outputIntent.requestRelaisCommand(
+          ControllerOutputIntent::RelaisCommand::Long,
+          ControllerOutputIntent::RelaisPriority::Low);
+      heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
+    }
   }
-}
 
-void updateOutputIntent() {
-  outputIntent.displayContent.temp_c = inputData.sensor_tempC;
-  outputIntent.displayContent.target_temp_c = heaterStatus.target_temp_c;
-  outputIntent.displayContent.heatingState = heaterStatus.heatingState;
-  outputIntent.displayContent.mode = heaterStatus.mode;
-}
-}
-;
+  void updateOutputIntent() {
+    outputIntent.displayContent.temp_c = inputData.sensor_tempC;
+    outputIntent.displayContent.target_temp_c = heaterStatus.target_temp_c;
+    outputIntent.displayContent.heatingState = heaterStatus.heatingState;
+    outputIntent.displayContent.mode = heaterStatus.mode;
+  }
+};

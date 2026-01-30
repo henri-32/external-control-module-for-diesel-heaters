@@ -1,0 +1,12 @@
+Das hier sind gerade die relevanten Klassen für mein Problem. 
+Ich würde gerne eine Logik implementieren, dass ich mit dem DisplayModeSwitch (wird dann umbenannt)einen Alternator repräsentieren kann. 
+Das bedeutet, dass ich wenn ich den mode Schalter betätige, während der displaymodeswitch gedrückt ist, eine andere Reaktion hervorrufen kann. 
+
+Meine Ideen zur implementierung sind 
+
+- DisplayModeSwitch nicht auf LOW, sondern auf HIGH nach LOW reagieren lassen. Sodass der Displaymodus beim Loslassen des Switches gewechselt wird (unter der Bedingung dass keine andere aktion erfolgen sollte während er low war)
+Und dann in der ModeSwitchlogik immer auch den displayswitch als alternator lesen und als bedingung prüfen ob er gedrückt ist oder nicht und dann die aktion anpassen 
+
+- DisplayModeSwitch status als Membervariable außerhalb des eigenen Treibers veröffentlichen. bei anderen Schaltern dann diesen Zustand abfragen, statt neuem read. 
+
+Anwendung soll sein, dass ein betätigen des Modeswitches bei gedrücktem alternator das relais schaltet, ohne den modus zu wechseln, damit divergenzen zu dem externen steuergerät im fehlerfall angeglichen werden können

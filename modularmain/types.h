@@ -3,11 +3,13 @@
 
 // Werttypen
 struct ControllerInputData {
-  bool powerSwitchChanged;
-  bool modeSwitchChanged;
-  bool displayButtonChanged;
-  int8_t encoder_val;
-  float sensor_tempC;
+  bool powerSwitchChanged = false;
+  bool modeSwitchChanged = false;
+  bool displayButtonReleased = false;
+  int8_t encoder_val = 0;
+  float sensor_tempC = 0;
+  bool alternatorPressed = false;
+  bool alternatorUsed = false;
 };
 
 class HeaterStatus {
@@ -31,18 +33,19 @@ public:
   };
   DisplayContent displayContent;
 
-  enum class LCD_StateIntent { ON, OFF };
+  enum class LCD_StateIntent { Page1, Page2, OFF };
   LCD_StateIntent lcd_stateIntent = LCD_StateIntent::OFF;
 
   enum class RelaisCommand { Long, Short, None };
   RelaisCommand relaisCommand = RelaisCommand::None;
 
-  enum RelaisPriority {Low, High };
+  enum RelaisPriority { Low, High };
 
   RelaisPriority m_currentPriority = Low;
   RelaisCommand m_command;
 
-  void requestRelaisCommand(RelaisCommand command, RelaisPriority priority = RelaisPriority::Low) {
+  void requestRelaisCommand(RelaisCommand command,
+                            RelaisPriority priority = RelaisPriority::Low) {
     if (priority >= m_currentPriority) {
       m_command = command;
       m_currentPriority = priority;

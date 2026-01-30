@@ -1,10 +1,11 @@
 #pragma once
-#include <Arduino.h>
-#include <Encoder.h>
-#include <DallasTemperature.h>
-#include <OneWire.h>
-#include <LiquidCrystal_I2C.h>
 #include "types.h"
+#include <Arduino.h>
+#include <DallasTemperature.h>
+#include <Encoder.h>
+#include <LiquidCrystal_I2C.h>
+#include <OneWire.h>
+
 class ToggleSwitchDriver {
   // Config
   const uint8_t m_pin;
@@ -53,7 +54,7 @@ public:
     m_last_read = m_stable;
   }
 
-  bool pressed() {
+    bool pressed() {
     bool reading = digitalRead(m_pin);
 
     if (reading != m_last_read) {
@@ -66,13 +67,31 @@ public:
 
     if (m_stable != reading) {
       m_stable = reading;
-      return m_stable == LOW; // nur bei stabilem HIGH->LOW
+      return m_stable == LOW; // nur bei stabilem HIGH -> LOW 
+    }
+
+    return false;
+  }
+
+  bool released() {
+    bool reading = digitalRead(m_pin);
+
+    if (reading != m_last_read) {
+      m_last_debounce_ms = millis();
+      m_last_read = reading;
+    }
+
+    if (millis() - m_last_debounce_ms < m_debounce_delay_ms)
+      return false;
+
+    if (m_stable != reading) {
+      m_stable = reading;
+      return m_stable == HIGH; // nur bei stabilem LOW-> HIGH
     }
 
     return false;
   }
 };
-
 
 // Name gewählt, da Bibliothek Encoder heißt.
 class MyEncoderDriver {
@@ -264,7 +283,7 @@ public:
   // Helperfunktionen
   void renderLines() {
     switch (m_displayState) {
-    case ControllerOutputIntent::LCD_StateIntent::ON: {
+    case ControllerOutputIntent::LCD_StateIntent::Page1: 
       formatTempFloatsForDisplay();
       createStateStringsForDisplay(m_displaycontent);
       lcdLibObject.backlight();
@@ -275,13 +294,20 @@ public:
       snprintf(m_lineBuffer[2], 21, "Zustand:   %s", string_of_states[0]);
       snprintf(m_lineBuffer[3], 21, "Mode:      %s", string_of_states[1]);
       break;
-    }
+    
 
-    case ControllerOutputIntent::LCD_StateIntent::OFF: {
+    case ControllerOutputIntent::LCD_StateIntent::Page2: 
+      lcdLibObject.backlight();
+      lcdLibObject.display();
+
+      snprintf(m_lineBuffer[0], 21, "Logging Seite");
+      break;
+      
+
+    case ControllerOutputIntent::LCD_StateIntent::OFF: 
       lcdLibObject.noBacklight();
       lcdLibObject.noDisplay();
       break;
-    }
     }
   }
 

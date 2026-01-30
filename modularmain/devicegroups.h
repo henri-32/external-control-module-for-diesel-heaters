@@ -1,6 +1,7 @@
 #pragma once
 #include "hardwaredrivers.h"
 #include "types.h"
+
 class InputDevices {
 private:
   friend class SystemController;
@@ -22,9 +23,10 @@ private:
   }
 
   void updateInputData() {
+    m_devices_data.alternatorPressed = m_displayButton.pressed();
     m_devices_data.powerSwitchChanged = m_powerSwitch.changed();
     m_devices_data.modeSwitchChanged = m_modeSwitch.changed();
-    m_devices_data.displayButtonChanged = m_displayButton.pressed();
+    m_devices_data.displayButtonReleased = m_displayButton.released();
     m_devices_data.encoder_val = m_myEncoder.readSteps();
     m_devices_data.sensor_tempC = m_tempSensor.pollTemp();
   }
