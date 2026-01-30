@@ -1,19 +1,11 @@
-# clangd / compilation database (machine-specific)
-compile_commands.json
-
-# Arduino VS Code extension local build options (machine-specific paths) 
-.vscode/build.options.json
-.vscode/compile_commands.json
-.vscode/c_cpp_properties.json
-
-modularmain.cache
-modularmain/build
-modularmain/compile_commands.json
-
-# optional: build/cache outputs
-.build/
+# clangd
 .cache/
+index/
+*.idx
 
-# optional: OS noise
-.DS_Store
-Thumbs.db
+
+
+
+# Build / Tooling
+build/
+compile_commands.json
