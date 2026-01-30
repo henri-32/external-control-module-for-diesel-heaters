@@ -54,23 +54,8 @@ public:
     m_last_read = m_stable;
   }
 
-    bool pressed() {
-    bool reading = digitalRead(m_pin);
-
-    if (reading != m_last_read) {
-      m_last_debounce_ms = millis();
-      m_last_read = reading;
-    }
-
-    if (millis() - m_last_debounce_ms < m_debounce_delay_ms)
-      return false;
-
-    if (m_stable != reading) {
-      m_stable = reading;
-      return m_stable == LOW; // nur bei stabilem HIGH -> LOW 
-    }
-
-    return false;
+  bool isDown() const {
+    return m_stable == LOW;
   }
 
   bool released() {
@@ -271,11 +256,17 @@ public:
   void init() {
     Wire.begin();
     lcdLibObject.init();
-    lcdLibObject.backlight();
+    lcdLibObject.noBacklight();
+    lcdLibObject.noDisplay();
     lcdLibObject.clear();
   }
 
   void update() {
+    if (m_displayState == ControllerOutputIntent::LCD_StateIntent::OFF) {
+      lcdLibObject.noBacklight();
+      lcdLibObject.noDisplay();
+      return;
+    }
     renderLines();
     writeDisplay(m_lineBuffer);
   }

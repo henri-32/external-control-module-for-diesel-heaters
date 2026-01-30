@@ -23,7 +23,7 @@ private:
   }
 
   void updateInputData() {
-    m_devices_data.alternatorPressed = m_displayButton.pressed();
+    m_devices_data.alternatorPressed = m_displayButton.isDown();
     m_devices_data.powerSwitchChanged = m_powerSwitch.changed();
     m_devices_data.modeSwitchChanged = m_modeSwitch.changed();
     m_devices_data.displayButtonReleased = m_displayButton.released();
@@ -44,8 +44,8 @@ private:
                                            m_devices_intent.lcd_stateIntent) {}
 
   void init() {
-    m_relais.init();
     m_lcdDisplay.init();
+    m_relais.init();
   }
 
   void update() {

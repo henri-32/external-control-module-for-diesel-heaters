@@ -1,5 +1,4 @@
 #pragma once
-#include "Arduino.h"
 #include "devicegroups.h"
 #include "statistics.h"
 #include "types.h"
@@ -27,9 +26,8 @@ public:
   }
 
   void init() {
-    delay(500); // Damit sich Hardware kurz einpendeln kann
-    inputDevices.init();
     outputDevices.init();
+    inputDevices.init();
   }
 
 private:

@@ -42,7 +42,7 @@ public:
   enum RelaisPriority { Low, High };
 
   RelaisPriority m_currentPriority = Low;
-  RelaisCommand m_command;
+  RelaisCommand m_command = RelaisCommand::None;
 
   void requestRelaisCommand(RelaisCommand command,
                             RelaisPriority priority = RelaisPriority::Low) {
