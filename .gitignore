@@ -1,5 +1,5 @@
 # clangd / compilation database (machine-specific)
-C:\Repositorys\Arduino_Projekte\Heizungssteuerung_gitordner\compile_commands.json
+compile_commands.json
 
 # Arduino VS Code extension local build options (machine-specific paths) 
 .vscode/build.options.json
