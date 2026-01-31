@@ -24,10 +24,9 @@ struct CalculationData {
   unsigned long lastOFFperiodeLength = 0;
 };
 
-struct EEPROM_Adress {
-  const int dutyCycle = 0;
-  const int avgIdleTime = 1;
-  const int writeCycles = 2;
+struct LongtimeData {
+  int dutyCycle = 0;
+  int avgIdleTime = 0;
 };
 
 class SystemStatistics {
@@ -40,7 +39,7 @@ public:
     m_input = input;
     calculationData.updateCounter += 1;
     calculateDataValues();
-    writeLongTimeStats();
+    //writeLongTimeStats();
   }
 
 private:
@@ -54,7 +53,6 @@ private:
   HeaterStatus m_status;
   HeaterStatus::HeatingState m_lastState = HeaterStatus::HeatingState::OFF;
   CalculationData calculationData;
-  EEPROM_Adress eepromAdress;
 
   void calculateDataValues() {
     rememberLastON_OFF();
@@ -137,24 +135,24 @@ private:
   int millisecondsToMinutes(unsigned long millisecs) {
     return millisecs / 1000 / 60;
   }
-
+/*
   void writeLongTimeStats() {
     if (timeStamp - lastWrite < writingIntervall)
       return;
 
-    uint8_t longTimeDutyCycle = EEPROM.read(eepromAdress.dutyCycle);
-    uint8_t longTimeavgIdleTime_minutes = EEPROM.read(eepromAdress.avgIdleTime);
-    uint8_t writeCycles = EEPROM.read(eepromAdress.writeCycles);
+    uint8_t longTimeDutyCycle = EEPROM.read(memoryAdress.dutyCycle);
+    uint8_t longTimeavgIdleTime_minutes = EEPROM.read(memoryAdress.avgIdleTime);
+    uint8_t writeCycles = EEPROM.read(memoryAdress.writeCycles);
 
-    EEPROM.write(eepromAdress.dutyCycle,
+    EEPROM.write(memoryAdress.dutyCycle,
                  (longTimeDutyCycle += runtimeData.dutyCycle) /
                      max(1, writeCycles));
-    EEPROM.write(eepromAdress.avgIdleTime, (longTimeavgIdleTime_minutes +=
+    EEPROM.write(memoryAdress.avgIdleTime, (longTimeavgIdleTime_minutes +=
                                             runtimeData.avgIdleTime_minutes) /
                                                max(1, writeCycles));
 
     lastWrite = timeStamp;
     writeCycles += 1;
-    EEPROM.write(eepromAdress.writeCycles, writeCycles);
-  }
+    EEPROM.write(memoryAdress.writeCycles, writeCycles);
+  }*/
 };
