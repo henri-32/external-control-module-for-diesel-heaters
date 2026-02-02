@@ -12,6 +12,11 @@ struct ControllerInputData {
   bool alternatorUsed = false;
 };
 
+struct LongtimeData {
+  int dutyCycle = 0;
+  int avgIdleTime = 0;
+};
+
 class HeaterStatus {
 public:
   enum class HeatingState { ON, OFF };

@@ -215,9 +215,9 @@ private:
   void applyPulseLengthFromIntent(
       ControllerOutputIntent::RelaisCommand intent_copy) {
     if (intent_copy == ControllerOutputIntent::RelaisCommand::Long)
-      m_pulse_ms = 2000;
+      m_pulse_ms = 1500;
     else if (intent_copy == ControllerOutputIntent::RelaisCommand::Short)
-      m_pulse_ms = 500;
+      m_pulse_ms = 200;
     else if (intent_copy == ControllerOutputIntent::RelaisCommand::None)
       m_pulse_ms = 0;
   }

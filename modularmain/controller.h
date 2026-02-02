@@ -47,9 +47,11 @@ private:
     sie korrekt herunterfährt, bevor ich den Strom wegnehme*/
     if (inputData.powerSwitchChanged) {
       if (inputData.alternatorPressed) {
-        outputIntent.requestRelaisCommand(
-            ControllerOutputIntent::RelaisCommand::Short);
-            inputData.alternatorUsed = true;
+        if (heaterStatus.heatingState == HeaterStatus::HeatingState::OFF)
+          heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
+        else
+          heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
+        inputData.alternatorUsed = true;
         return;
       }
 
@@ -76,9 +78,11 @@ private:
       den internen Modus zu wechseln, um im Fehlerfall Unterschiede zum Original
       Controller auszugleichen*/
       if (inputData.alternatorPressed) {
-        outputIntent.requestRelaisCommand(
-            ControllerOutputIntent::RelaisCommand::Short);
-            inputData.alternatorUsed = true;
+        if (heaterStatus.heatingState == HeaterStatus::HeatingState::OFF)
+          heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
+        else
+          heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
+        inputData.alternatorUsed = true;
         return;
       }
 
@@ -101,12 +105,12 @@ private:
 
     if (inputData.encoder_val != 0) {
 
-        heaterStatus.target_temp_c +=
-            inputData.encoder_val * TempStep; // encoderVal ist signed
-        if (heaterStatus.target_temp_c > TempMax)
-          heaterStatus.target_temp_c = TempMax;
-        else if (heaterStatus.target_temp_c < TempMin)
-          heaterStatus.target_temp_c = TempMin;
+      heaterStatus.target_temp_c +=
+          inputData.encoder_val * TempStep; // encoderVal ist signed
+      if (heaterStatus.target_temp_c > TempMax)
+        heaterStatus.target_temp_c = TempMax;
+      else if (heaterStatus.target_temp_c < TempMin)
+        heaterStatus.target_temp_c = TempMin;
     }
   }
 

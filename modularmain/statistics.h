@@ -1,5 +1,6 @@
 #pragma once
 #include "Arduino.h"
+#include "memory.h"
 #include "types.h"
 #include <EEPROM.h>
 #include <avr/eeprom.h>
@@ -24,11 +25,6 @@ struct CalculationData {
   unsigned long lastOFFperiodeLength = 0;
 };
 
-struct LongtimeData {
-  int dutyCycle = 0;
-  int avgIdleTime = 0;
-};
-
 class SystemStatistics {
 public:
   SystemStatistics() = default;
@@ -48,11 +44,12 @@ private:
   unsigned long timeStamp;
 
   RuntimeData runtimeData;
-  RuntimeData statisticBuffer;
+  LongtimeData longTimeDataBuffer;
   ControllerInputData m_input;
   HeaterStatus m_status;
   HeaterStatus::HeatingState m_lastState = HeaterStatus::HeatingState::OFF;
   CalculationData calculationData;
+  StatisticMemoryController memoryController;
 
   void calculateDataValues() {
     rememberLastON_OFF();
