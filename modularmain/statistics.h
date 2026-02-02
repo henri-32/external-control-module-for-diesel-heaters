@@ -1,6 +1,5 @@
 #pragma once
 #include "Arduino.h"
-#include "memory.h"
 #include "types.h"
 #include <EEPROM.h>
 #include <avr/eeprom.h>
@@ -19,22 +18,27 @@ public:
     writeLongTimeStats();
   }
 
-  RuntimeData getRuntimeDate()const {
+  RuntimeData getRuntimeDate() const {
     return runtimeData;
+
   }
 
-private:
-  static constexpr unsigned long writingIntervall = 120000; // 2h
+  LongtimeData getLongTimeData() const { 
+    return longTimeDataBuffer;
+  }
+
+  static constexpr unsigned long writingIntervall = 2UL * 60UL * 60UL * 1000UL; // 2h
   unsigned long lastWrite = 0;
   unsigned long timeStamp;
 
+private:
   RuntimeData runtimeData;
   LongtimeData longTimeDataBuffer;
   ControllerInputData m_input;
   HeaterStatus m_status;
   HeaterStatus::HeatingState m_lastState = HeaterStatus::HeatingState::OFF;
   CalculationData calculationData;
-  StatisticMemoryController memoryController;
+  bool m_longTimeDataReady = false;
 
   void calculateDataValues() {
     rememberLastON_OFF();
@@ -128,7 +132,15 @@ private:
 
     longTimeDataBuffer.avgIdleTime = runtimeData.avgIdleTime_minutes;
     longTimeDataBuffer.dutyCycle = runtimeData.dutyCycle;
-
-    memoryController.update(longTimeDataBuffer);
+    m_longTimeDataReady = true;
   };
+
+public:
+  bool takeLongTimeData(LongtimeData &out) {
+    if (!m_longTimeDataReady)
+      return false;
+    out = longTimeDataBuffer;
+    m_longTimeDataReady = false;
+    return true;
+  }
 };

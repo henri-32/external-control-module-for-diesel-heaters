@@ -43,7 +43,7 @@ struct HeaterStatus {
   enum class Mode { TEMP, POWER };
   Mode mode = Mode::TEMP;
 
-  float target_temp_c = 20;
+  float target_temp_c = 17;
 };
 
 class ControllerOutputIntent {
@@ -54,14 +54,15 @@ public:
     HeaterStatus::HeatingState heatingState;
     HeaterStatus::Mode mode;
     RuntimeData runtimeDisplayData;
+    LongtimeData EEPROM_Values;
   };
   DisplayContent displayContent;
 
-  enum class LCD_StateIntent { Page1, Page2, Page3, OFF };
+  enum class LCD_StateIntent { Page1, Page2, Page3, Page4, OFF };
   LCD_StateIntent lcd_stateIntent = LCD_StateIntent::OFF;
 
-  enum class LCD_CycleDirection {none, right, left};
-  LCD_CycleDirection  lcd_cycleDirection = LCD_CycleDirection::none;
+  enum class LCD_CycleDirection { none, right, left };
+  LCD_CycleDirection lcd_cycleDirection = LCD_CycleDirection::none;
 
   enum class RelaisCommand { Long, Short, None };
   RelaisCommand relaisCommand = RelaisCommand::None;

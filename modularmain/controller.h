@@ -1,17 +1,19 @@
 #pragma once
 #include "devicegroups.h"
+#include "memory.h"
 #include "statistics.h"
 #include "types.h"
 #include <avr/interrupt.h>
 
 class SystemController {
 private:
-  InputDevices inputDevices{inputData};
   ControllerInputData inputData;
+  InputDevices inputDevices{inputData};
   HeaterStatus heaterStatus;
   ControllerOutputIntent outputIntent;
   OutputDevices outputDevices{outputIntent};
   SystemStatistics systemStatistic;
+  StatisticMemoryController memoryController;
 
 public:
   SystemController() = default;
@@ -23,6 +25,7 @@ public:
     updateOutputIntent();
     outputDevices.update();
     systemStatistic.update(inputData, heaterStatus);
+    updateMemory();
   }
 
   void init() {
@@ -107,14 +110,15 @@ private:
       return;
     if (inputData.alternatorPressed) {
       if (inputData.encoder_val >= 1 && inputData.encoder_val <= 6) {
-        outputDevices.m_lcdDisplay.cyclePages(ControllerOutputIntent::LCD_CycleDirection::right);
+        outputDevices.m_lcdDisplay.cyclePages(
+            ControllerOutputIntent::LCD_CycleDirection::right);
+        inputData.alternatorUsed = true;
+      } else if (inputData.encoder_val <= -1 && inputData.encoder_val >= -6) {
+        outputDevices.m_lcdDisplay.cyclePages(
+            ControllerOutputIntent::LCD_CycleDirection::left);
         inputData.alternatorUsed = true;
       }
-      else if (inputData.encoder_val <= -1 && inputData.encoder_val >= -6) {
-      outputDevices.m_lcdDisplay.cyclePages(ControllerOutputIntent::LCD_CycleDirection::left);
-      inputData.alternatorUsed = true;
-      }
-      }
+    }
 
     else {
 
@@ -176,5 +180,14 @@ private:
     outputIntent.displayContent.mode = heaterStatus.mode;
     outputIntent.displayContent.runtimeDisplayData =
         systemStatistic.getRuntimeDate();
+    outputIntent.displayContent.EEPROM_Values =
+        memoryController.getFinalAverages();
+  }
+
+  void updateMemory() {
+    LongtimeData newLongtimeData;
+    if (systemStatistic.takeLongTimeData(newLongtimeData)) {
+      memoryController.update(newLongtimeData);
+    }
   }
 };

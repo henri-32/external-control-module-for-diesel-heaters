@@ -296,15 +296,28 @@ public:
       snprintf(m_lineBuffer[0], 21, "DutyCycle: %u %%", m_displaycontent.runtimeDisplayData.dutyCycle);
       snprintf(m_lineBuffer[1], 21, "Cycles:    %u", m_displaycontent.runtimeDisplayData.cycleCounter);
       snprintf(m_lineBuffer[2], 21, "Avg Idle:  %lu m", m_displaycontent.runtimeDisplayData.avgIdleTime_minutes);
+      snprintf(m_lineBuffer[3], 21, "%s", "");
       break;
       
     case ControllerOutputIntent::LCD_StateIntent::Page3:
+      formatTempFloatsForDisplay();
       lcdLibObject.backlight();
       lcdLibObject.display();
 
       snprintf(m_lineBuffer[0], 21, "Max Idle:  %lu m", m_displaycontent.runtimeDisplayData.maxIdleTime_minutes);
       snprintf(m_lineBuffer[1], 21, "Min Idle:  %u m", m_displaycontent.runtimeDisplayData.minIdleTime_minutes);
       snprintf(m_lineBuffer[2], 21, "Avg diff:  %d.%d C", diff_int, diff_frac);
+      snprintf(m_lineBuffer[3], 21, "%s", "");
+      break;
+
+    case ControllerOutputIntent::LCD_StateIntent::Page4:
+      lcdLibObject.backlight();
+      lcdLibObject.display();
+
+      snprintf(m_lineBuffer[0], 21, "All Time DC %u %%", m_displaycontent.EEPROM_Values.dutyCycle); 
+      snprintf(m_lineBuffer[1], 21, "All Time IT %lu m", m_displaycontent.EEPROM_Values.avgIdleTime);
+      snprintf(m_lineBuffer[2], 21, "%s", "");
+      snprintf(m_lineBuffer[3], 21, "%s", "");
       break;
 
     case ControllerOutputIntent::LCD_StateIntent::OFF: 
@@ -340,7 +353,6 @@ public:
     s_frac = abs(static_cast<int>(m_displaycontent.target_temp_c * 10) % 10);
     break; 
 
-    case ControllerOutputIntent::LCD_StateIntent::Page2:
     case ControllerOutputIntent::LCD_StateIntent::Page3:
       diff_int = int(m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget);
       diff_frac = abs(static_cast<int>(m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget * 10) % 10);
@@ -390,9 +402,9 @@ public:
         m_displayState = ControllerOutputIntent::LCD_StateIntent::Page3;
         break;
       case ControllerOutputIntent::LCD_StateIntent::Page3:
-        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page1;
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page4;
         break;
-      case ControllerOutputIntent::LCD_StateIntent::OFF:
+      case ControllerOutputIntent::LCD_StateIntent::Page4:
         m_displayState = ControllerOutputIntent::LCD_StateIntent::Page1;
         break;
       }
@@ -409,10 +421,11 @@ public:
       case ControllerOutputIntent::LCD_StateIntent::Page3:
         m_displayState = ControllerOutputIntent::LCD_StateIntent::Page2;
         break;
-      case ControllerOutputIntent::LCD_StateIntent::OFF:
-        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page1;
+      case ControllerOutputIntent::LCD_StateIntent::Page4:
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page3;
         break;
       }
+      return;
     }
   }
 };

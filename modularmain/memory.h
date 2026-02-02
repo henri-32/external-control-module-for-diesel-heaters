@@ -10,7 +10,7 @@ public:
     updateRunningAverage(data);
     m_writeCounter++;
 
-    if (m_writeCounter >= kAddrCapacity) {
+    if (m_writeCounter >= kUpdateThreshold) {
       commitToBlock();
       m_writeCounter = 0;
       m_blockIndexOffset++;
@@ -27,11 +27,11 @@ public:
     LongtimeData result;
 
     int baselineWeight = readBaselineWeight();
-    int baselineDC = EEPROM.read(kDCBaselineAddr);
-    int baselineIT = EEPROM.read(kITBaselineAddr);
+    int baselineDC = readUint16(kDCBaselineAddr);
+    int baselineIT = readUint16(kITBaselineAddr);
 
-    int currentDC = EEPROM.read(kDCAvgAddr);
-    int currentIT = EEPROM.read(kITAvgAddr);
+    int currentDC = readUint16(kDCAvgAddr);
+    int currentIT = readUint16(kITAvgAddr);
 
     // Kombiniere aktuelle Mittelwerte mit Baseline gewichtet
     result.dutyCycle =
@@ -46,21 +46,20 @@ public:
 
 private:
   // === EEPROM-Adressen ===
-  static constexpr int kDCAvgAddr = 10; // Laufender Mittelwert
-  static constexpr int kITAvgAddr = 11;
+  static constexpr int kDCAvgAddr = 10; // Laufender Mittelwert (uint16_t)
+  static constexpr int kITAvgAddr = 12;
 
-  static constexpr int kDCBaselineAddr = 12; // Langzeitwert
-  static constexpr int kITBaselineAddr = 13;
+  static constexpr int kDCBaselineAddr = 14; // Langzeitwert (uint16_t)
+  static constexpr int kITBaselineAddr = 16;
 
-  static constexpr int kBaselineUpdateCountAddr = 14; // Zähler statt Gewicht
+  static constexpr int kBaselineUpdateCountAddr = 18; // Zähler statt Gewicht
 
-  static constexpr int kDCBlockBaseAddr = 20; // Block 0–9 für DutyCycle
+  static constexpr int kDCBlockBaseAddr = 20; // Block 0–9 (uint16_t)
   static constexpr int kITBlockBaseAddr = 40;
 
   // === Konstante Gewichtungskonfiguration ===
-  static constexpr int kAddrCapacity = 10; // Anzahl Blöcke bis Baseline
-  static constexpr int kBlockMaxCount = 10;
   static constexpr int kUpdateThreshold = 255; // Updates pro Block
+  static constexpr int kBlockMaxCount = 10;
   static constexpr int kBlockWeight = 255;     // Gewicht eines Blocks
   static constexpr int kWeightPerBaseline = kBlockMaxCount * kBlockWeight;
 
@@ -70,25 +69,25 @@ private:
 
   // === EEPROM-Mittelwert aktualisieren ===
   void updateRunningAverage(const LongtimeData &data) {
-    uint8_t prevDC = EEPROM.read(kDCAvgAddr);
-    uint8_t prevIT = EEPROM.read(kITAvgAddr);
+    uint16_t prevDC = readUint16(kDCAvgAddr);
+    uint16_t prevIT = readUint16(kITAvgAddr);
 
-    uint8_t newDC =
+    uint16_t newDC =
         (prevDC * kBlockWeight + data.dutyCycle) / (kBlockWeight + 1);
-    uint8_t newIT =
+    uint16_t newIT =
         (prevIT * kBlockWeight + data.avgIdleTime) / (kBlockWeight + 1);
 
-    EEPROM.write(kDCAvgAddr, newDC);
-    EEPROM.write(kITAvgAddr, newIT);
+    writeUint16(kDCAvgAddr, newDC);
+    writeUint16(kITAvgAddr, newIT);
   }
 
   // === Mittelwert in Block sichern ===
   void commitToBlock() {
-    int dcValue = EEPROM.read(kDCAvgAddr);
-    int itValue = EEPROM.read(kITAvgAddr);
+    int dcValue = readUint16(kDCAvgAddr);
+    int itValue = readUint16(kITAvgAddr);
 
-    EEPROM.write(kDCBlockBaseAddr + m_blockIndexOffset, dcValue);
-    EEPROM.write(kITBlockBaseAddr + m_blockIndexOffset, itValue);
+    writeUint16(kDCBlockBaseAddr + (m_blockIndexOffset * 2), dcValue);
+    writeUint16(kITBlockBaseAddr + (m_blockIndexOffset * 2), itValue);
   }
 
   // === Blöcke zu Baseline zusammenführen ===
@@ -97,15 +96,15 @@ private:
     int sumIT = 0;
 
     for (int i = 0; i < kBlockMaxCount; i++) {
-      sumDC += EEPROM.read(kDCBlockBaseAddr + i);
-      sumIT += EEPROM.read(kITBlockBaseAddr + i);
+      sumDC += readUint16(kDCBlockBaseAddr + (i * 2));
+      sumIT += readUint16(kITBlockBaseAddr + (i * 2));
     }
 
     int blockAvgDC = sumDC / kBlockMaxCount;
     int blockAvgIT = sumIT / kBlockMaxCount;
 
-    int oldBaselineDC = EEPROM.read(kDCBaselineAddr);
-    int oldBaselineIT = EEPROM.read(kITBaselineAddr);
+    int oldBaselineDC = readUint16(kDCBaselineAddr);
+    int oldBaselineIT = readUint16(kITBaselineAddr);
     int oldWeight = readBaselineWeight();
 
     int newBaselineDC =
@@ -115,8 +114,8 @@ private:
         (oldBaselineIT * oldWeight + blockAvgIT * kWeightPerBaseline) /
         (oldWeight + kWeightPerBaseline);
 
-    EEPROM.write(kDCBaselineAddr, newBaselineDC);
-    EEPROM.write(kITBaselineAddr, newBaselineIT);
+    writeUint16(kDCBaselineAddr, newBaselineDC);
+    writeUint16(kITBaselineAddr, newBaselineIT);
   }
 
   // === Baseline-Gewicht zur Laufzeit berechnen ===
@@ -130,5 +129,15 @@ private:
     if (count < 255) {
       EEPROM.write(kBaselineUpdateCountAddr, count + 1);
     }
+  }
+
+  uint16_t readUint16(int addr) const {
+    uint16_t value = 0;
+    EEPROM.get(addr, value);
+    return value;
+  }
+
+  void writeUint16(int addr, uint16_t value) {
+    EEPROM.put(addr, value);
   }
 };
