@@ -103,7 +103,20 @@ private:
     constexpr float TempMin = 5.0;
     constexpr float TempMax = 30.0;
 
-    if (inputData.encoder_val != 0) {
+    if (inputData.encoder_val == 0)
+      return;
+    if (inputData.alternatorPressed) {
+      if (inputData.encoder_val >= 1 && inputData.encoder_val <= 6) {
+        outputDevices.m_lcdDisplay.cyclePages(ControllerOutputIntent::LCD_CycleDirection::right);
+        inputData.alternatorUsed = true;
+      }
+      else if (inputData.encoder_val <= -1 && inputData.encoder_val >= -6) {
+      outputDevices.m_lcdDisplay.cyclePages(ControllerOutputIntent::LCD_CycleDirection::left);
+      inputData.alternatorUsed = true;
+      }
+      }
+
+    else {
 
       heaterStatus.target_temp_c +=
           inputData.encoder_val * TempStep; // encoderVal ist signed
@@ -161,5 +174,7 @@ private:
     outputIntent.displayContent.target_temp_c = heaterStatus.target_temp_c;
     outputIntent.displayContent.heatingState = heaterStatus.heatingState;
     outputIntent.displayContent.mode = heaterStatus.mode;
+    outputIntent.displayContent.runtimeDisplayData =
+        systemStatistic.getRuntimeDate();
   }
 };

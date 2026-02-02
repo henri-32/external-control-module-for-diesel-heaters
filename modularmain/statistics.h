@@ -4,26 +4,7 @@
 #include "types.h"
 #include <EEPROM.h>
 #include <avr/eeprom.h>
-#include <limits.h>
 
-struct RuntimeData {
-  unsigned int dutyCycle = 0;
-  unsigned long avgIdleTime_minutes;
-  unsigned long maxIdleTime_minutes;
-  unsigned int minIdleTime_minutes = UINT_MAX;
-  unsigned int cycleCounter = 0;
-  float mediumDiffTempToTarget = 0.0;
-};
-
-struct CalculationData {
-  uint16_t updateCounter = 0;
-  float TempDiffcontainer;
-  unsigned long lastON = 0;
-  unsigned long lastOFF = 0;
-  unsigned long accumulatedTimeOFF = 0;
-  unsigned long accumulatedTimeON = 0;
-  unsigned long lastOFFperiodeLength = 0;
-};
 
 class SystemStatistics {
 public:
@@ -35,7 +16,11 @@ public:
     m_input = input;
     calculationData.updateCounter += 1;
     calculateDataValues();
-    //writeLongTimeStats();
+    writeLongTimeStats();
+  }
+
+  RuntimeData getRuntimeDate()const {
+    return runtimeData;
   }
 
 private:
@@ -53,9 +38,10 @@ private:
 
   void calculateDataValues() {
     rememberLastON_OFF();
+    calculateDutyStats();
     calculateCycleCounter();
     calculateDiffTempToTarget();
-    calculateDutyStats();
+    m_lastState = m_status.heatingState;
   }
 
   void rememberLastON_OFF() {
@@ -74,7 +60,6 @@ private:
     if (m_status.heatingState == HeaterStatus::HeatingState::ON) {
       runtimeData.cycleCounter += 1;
     }
-    m_lastState = m_status.heatingState;
   }
 
   void calculateDiffTempToTarget() {
@@ -107,49 +92,43 @@ private:
   }
 
   void calculateMaxTimeBetweenDuty() {
-    if (calculationData.lastOFFperiodeLength >
-        runtimeData.maxIdleTime_minutes) {
-      runtimeData.maxIdleTime_minutes =
-          millisecondsToMinutes(calculationData.lastOFFperiodeLength);
+    unsigned long lastOffMinutes =
+        millisecondsToMinutes(calculationData.lastOFFperiodeLength);
+    if (lastOffMinutes > runtimeData.maxIdleTime_minutes) {
+      runtimeData.maxIdleTime_minutes = lastOffMinutes;
     }
   }
 
   void calculateMinTimeBetweenDuty() {
-    if (calculationData.lastOFFperiodeLength <
-        runtimeData.minIdleTime_minutes) {
-      runtimeData.minIdleTime_minutes =
-          millisecondsToMinutes(calculationData.lastOFFperiodeLength);
+    unsigned long lastOffMinutes =
+        millisecondsToMinutes(calculationData.lastOFFperiodeLength);
+    if (lastOffMinutes < runtimeData.minIdleTime_minutes) {
+      runtimeData.minIdleTime_minutes = lastOffMinutes;
     }
   }
 
   void calculateDutyCycle() {
-    runtimeData.dutyCycle = (calculationData.accumulatedTimeON /
-                             max(1, (calculationData.accumulatedTimeOFF +
-                                     calculationData.accumulatedTimeON))) *
-                            100;
+    unsigned long total =
+        max(1UL, (calculationData.accumulatedTimeOFF +
+                  calculationData.accumulatedTimeON));
+    runtimeData.dutyCycle =
+        static_cast<unsigned int>(
+            (static_cast<float>(calculationData.accumulatedTimeON) * 100.0f) /
+            static_cast<float>(total));
   }
 
   int millisecondsToMinutes(unsigned long millisecs) {
     return millisecs / 1000 / 60;
   }
-/*
+
   void writeLongTimeStats() {
     if (timeStamp - lastWrite < writingIntervall)
       return;
-
-    uint8_t longTimeDutyCycle = EEPROM.read(memoryAdress.dutyCycle);
-    uint8_t longTimeavgIdleTime_minutes = EEPROM.read(memoryAdress.avgIdleTime);
-    uint8_t writeCycles = EEPROM.read(memoryAdress.writeCycles);
-
-    EEPROM.write(memoryAdress.dutyCycle,
-                 (longTimeDutyCycle += runtimeData.dutyCycle) /
-                     max(1, writeCycles));
-    EEPROM.write(memoryAdress.avgIdleTime, (longTimeavgIdleTime_minutes +=
-                                            runtimeData.avgIdleTime_minutes) /
-                                               max(1, writeCycles));
-
     lastWrite = timeStamp;
-    writeCycles += 1;
-    EEPROM.write(memoryAdress.writeCycles, writeCycles);
-  }*/
+
+    longTimeDataBuffer.avgIdleTime = runtimeData.avgIdleTime_minutes;
+    longTimeDataBuffer.dutyCycle = runtimeData.dutyCycle;
+
+    memoryController.update(longTimeDataBuffer);
+  };
 };

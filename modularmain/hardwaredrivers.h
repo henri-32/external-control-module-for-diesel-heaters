@@ -244,6 +244,8 @@ class DisplayDriver {
   int t_frac;
   int s_int;
   int s_frac;
+  int diff_int; 
+  int diff_frac;
   // Timing
   unsigned long last_update_ms = 0;
   const uint8_t min_update_interval_ms = 100;
@@ -291,9 +293,19 @@ public:
       lcdLibObject.backlight();
       lcdLibObject.display();
 
-      snprintf(m_lineBuffer[0], 21, "Logging Seite");
+      snprintf(m_lineBuffer[0], 21, "DutyCycle: %u %%", m_displaycontent.runtimeDisplayData.dutyCycle);
+      snprintf(m_lineBuffer[1], 21, "Cycles:    %u", m_displaycontent.runtimeDisplayData.cycleCounter);
+      snprintf(m_lineBuffer[2], 21, "Avg Idle:  %lu m", m_displaycontent.runtimeDisplayData.avgIdleTime_minutes);
       break;
       
+    case ControllerOutputIntent::LCD_StateIntent::Page3:
+      lcdLibObject.backlight();
+      lcdLibObject.display();
+
+      snprintf(m_lineBuffer[0], 21, "Max Idle:  %lu m", m_displaycontent.runtimeDisplayData.maxIdleTime_minutes);
+      snprintf(m_lineBuffer[1], 21, "Min Idle:  %u m", m_displaycontent.runtimeDisplayData.minIdleTime_minutes);
+      snprintf(m_lineBuffer[2], 21, "Avg diff:  %d.%d C", diff_int, diff_frac);
+      break;
 
     case ControllerOutputIntent::LCD_StateIntent::OFF: 
       lcdLibObject.noBacklight();
@@ -319,10 +331,23 @@ public:
   }
 
   void formatTempFloatsForDisplay() {
+    switch (m_displayState) {
+    case ControllerOutputIntent::LCD_StateIntent::Page1:
+    
     t_int = int(m_displaycontent.temp_c);
     t_frac = abs(static_cast<int>(m_displaycontent.temp_c * 10) % 10);
     s_int = int(m_displaycontent.target_temp_c);
     s_frac = abs(static_cast<int>(m_displaycontent.target_temp_c * 10) % 10);
+    break; 
+
+    case ControllerOutputIntent::LCD_StateIntent::Page2:
+    case ControllerOutputIntent::LCD_StateIntent::Page3:
+      diff_int = int(m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget);
+      diff_frac = abs(static_cast<int>(m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget * 10) % 10);
+      break;
+    case ControllerOutputIntent::LCD_StateIntent::OFF:
+      break;
+    }
   }
 
   void createStateStringsForDisplay(
@@ -353,5 +378,41 @@ public:
     lcdLibObject.setCursor(0, line);
     lcdLibObject.print("                    ");
     lcdLibObject.setCursor(0, line);
+  }
+
+  void cyclePages(ControllerOutputIntent::LCD_CycleDirection direction) {
+    if (direction == ControllerOutputIntent::LCD_CycleDirection::right) {
+      switch (m_displayState) {
+      case ControllerOutputIntent::LCD_StateIntent::Page1:
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page2;
+        break;
+      case ControllerOutputIntent::LCD_StateIntent::Page2:
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page3;
+        break;
+      case ControllerOutputIntent::LCD_StateIntent::Page3:
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page1;
+        break;
+      case ControllerOutputIntent::LCD_StateIntent::OFF:
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page1;
+        break;
+      }
+      return;
+    }
+    if (direction == ControllerOutputIntent::LCD_CycleDirection::left) {
+      switch (m_displayState) {
+      case ControllerOutputIntent::LCD_StateIntent::Page1:
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page3;
+        break;
+      case ControllerOutputIntent::LCD_StateIntent::Page2:
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page1;
+        break;
+      case ControllerOutputIntent::LCD_StateIntent::Page3:
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page2;
+        break;
+      case ControllerOutputIntent::LCD_StateIntent::OFF:
+        m_displayState = ControllerOutputIntent::LCD_StateIntent::Page1;
+        break;
+      }
+    }
   }
 };
