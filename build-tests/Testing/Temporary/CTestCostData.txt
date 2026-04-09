@@ -1,0 +1,4 @@
+unity_entry 8 0.00010192
+unity.test_applyModeSwitchInput 17 4.72545e-05
+unity.test_applyPowerSwitchInput 11 6.48857e-05
+---

@@ -1,0 +1,2 @@
+TEST_CASE(test_applyModeSwitchInput)
+TEST_CASE(test_applyPowerSwitchInput)
