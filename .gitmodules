@@ -1,3 +1,18 @@
 [submodule "includes/libraries/ArduinoCore-avr"]
 	path = includes/libraries/ArduinoCore-avr
 	url = https://github.com/arduino/ArduinoCore-avr.git
+[submodule "Arduino-Temperature-Control-Library"]
+	path = Arduino-Temperature-Control-Library
+	url = https://github.com/milesburton/Arduino-Temperature-Control-Library.git
+[submodule "OneWire"]
+	path = OneWire
+	url = https://github.com/PaulStoffregen/OneWire.git
+[submodule "Encoder"]
+	path = Encoder
+	url = https://github.com/PaulStoffregen/Encoder.git
+[submodule "includes/libraries/LiquidCrystal"]
+	path = includes/libraries/LiquidCrystal
+	url = https://github.com/arduino-libraries/LiquidCrystal.git
+[submodule "includes/libraries/lib/LiquidCrystal_I2C"]
+	path = includes/libraries/lib/LiquidCrystal_I2C
+	url = https://github.com/johnrickman/LiquidCrystal_I2C

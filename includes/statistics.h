@@ -1,3 +1,7 @@
+/*
+Auch diese Datei war ein Versuch, der nicht funktioniert hat.
+
+
 #pragma once
 #include "Arduino.h"
 #include "types.h"
@@ -144,3 +148,5 @@ public:
     return true;
   }
 };
+
+*/

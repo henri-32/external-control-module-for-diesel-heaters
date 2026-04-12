@@ -1,9 +1,8 @@
 #pragma once
 #include "devicegroups.h"
-#include "memory.h"
-#include "statistics.h"
+//#include "memory.h"
+//#include "statistics.h"
 #include "types.h"
-#include <avr/interrupt.h>
 
 class SystemController {
 private:
@@ -12,8 +11,8 @@ private:
   HeaterStatus heaterStatus;
   ControllerOutputIntent outputIntent;
   OutputDevices outputDevices{outputIntent};
-  SystemStatistics systemStatistic;
-  StatisticMemoryController memoryController;
+  //SystemStatistics systemStatistic;
+  //StatisticMemoryController memoryController;
 
 public:
   SystemController() = default;
@@ -24,7 +23,7 @@ public:
     applyHeatingLogic();
     updateOutputIntent();
     outputDevices.update();
-    systemStatistic.update(inputData, heaterStatus);
+    //systemStatistic.update(inputData, heaterStatus);
     updateMemory();
   }
 
@@ -178,16 +177,16 @@ private:
     outputIntent.displayContent.target_temp_c = heaterStatus.target_temp_c;
     outputIntent.displayContent.heatingState = heaterStatus.heatingState;
     outputIntent.displayContent.mode = heaterStatus.mode;
-    outputIntent.displayContent.runtimeDisplayData =
-        systemStatistic.getRuntimeDate();
-    outputIntent.displayContent.EEPROM_Values =
-        memoryController.getFinalAverages();
+//    outputIntent.displayContent.runtimeDisplayData =
+//        systemStatistic.getRuntimeDate();
+//    outputIntent.displayContent.EEPROM_Values =
+        //memoryController.getFinalAverages();
   }
 
   void updateMemory() {
-    LongtimeData newLongtimeData;
+    /*LongtimeData newLongtimeData;
     if (systemStatistic.takeLongTimeData(newLongtimeData)) {
       memoryController.update(newLongtimeData);
     }
-  }
+  */}
 };

@@ -1,5 +1,0 @@
-Auf T520: 
-arduino-cli upload   -p /dev/ttyUSB0   --fqbn arduino:avr:uno   --verify   modularmain // Zum Hochladen des Sketches
-
-./update_compile_commands_<system>.sh
-

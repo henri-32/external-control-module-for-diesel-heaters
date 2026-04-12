@@ -1,3 +1,7 @@
+/* Diese Datei war eine Spaßimplementierung einer Statistik, die nicht funktioniert hat. 
+Vielleicht später nochmal.. 
+
+===========================================================================================
 #pragma once
 #include "types.h"
 #include <EEPROM.h>
@@ -141,3 +145,4 @@ private:
     EEPROM.put(addr, value);
   }
 };
+*/
