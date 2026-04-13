@@ -11,7 +11,6 @@ LIBRARIES = includes/libraries
 
 INCLUDES = \
 -I$(LIBRARIES)/ArduinoCore-avr/cores/arduino \
--I$(LIBRARIES)/ArduinoCore-avr/cores/arduino/avr \
 -I$(LIBRARIES)/ArduinoCore-avr/variants/standard \
 -I$(LIBRARIES)/Arduino-Temperature-Control-Library \
 -I$(LIBRARIES)/Encoder \
@@ -45,7 +44,7 @@ all:
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/Stream.cpp -o build/Stream.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/WString.cpp -o build/WString.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/HardwareSerial.cpp -o build/HardwareSerial.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/libraries/SoftwareSerial/src/SoftwareSerial.cpp
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/libraries/SoftwareSerial/src/SoftwareSerial.cpp -o build/SoftwareSerial.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src/Wire.cpp -o build/Wire.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/HardwareSerial0.cpp -o build/HardwareSerial0.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/main.cpp -o build/arduino_main.o
@@ -66,3 +65,5 @@ all:
 clean:
 	@cd build && find . -name "*.o" -delete
 	@echo "object files removed from build directory"
+	@rm compile_commands.json
+	@echo "compile commands removed" 

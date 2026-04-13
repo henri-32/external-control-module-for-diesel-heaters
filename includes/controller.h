@@ -1,7 +1,11 @@
 #pragma once
+#include "config.h"
+#ifdef MEMORYFUNCTIONS
+#include "memory.h"
+#include "statistics.h"
+#endif
+
 #include "devicegroups.h"
-//#include "memory.h"
-//#include "statistics.h"
 #include "types.h"
 
 class SystemController {
@@ -177,16 +181,17 @@ private:
     outputIntent.displayContent.target_temp_c = heaterStatus.target_temp_c;
     outputIntent.displayContent.heatingState = heaterStatus.heatingState;
     outputIntent.displayContent.mode = heaterStatus.mode;
-//    outputIntent.displayContent.runtimeDisplayData =
-//        systemStatistic.getRuntimeDate();
-//    outputIntent.displayContent.EEPROM_Values =
-        //memoryController.getFinalAverages();
+	#ifdef MEMORYFUNCTIONS
+	outputIntent.displayContent.runtimeDisplayData = systemStatistic.getRuntimeDate();
+    outputIntent.displayContent.EEPROM_Values = memoryController.getFinalAverages();
+	#endif
   }
 
   void updateMemory() {
-    /*LongtimeData newLongtimeData;
+	#ifdef MEMORYFUNCTIONS
+    LongtimeData newLongtimeData;
     if (systemStatistic.takeLongTimeData(newLongtimeData)) {
       memoryController.update(newLongtimeData);
     }
-  */}
+  	#endif}
 };
