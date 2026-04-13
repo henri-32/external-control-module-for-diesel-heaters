@@ -12,6 +12,7 @@ LIBRARIES = includes/libraries
 INCLUDES = \
 -I$(LIBRARIES)/ArduinoCore-avr/cores/arduino \
 -I$(LIBRARIES)/ArduinoCore-avr/variants/standard \
+-I$(LIBRARIES)/ArduinoCore-avr/libraries/EEPROM/src \
 -I$(LIBRARIES)/Arduino-Temperature-Control-Library \
 -I$(LIBRARIES)/Encoder \
 -I$(LIBRARIES)/LiquidCrystal_I2C \

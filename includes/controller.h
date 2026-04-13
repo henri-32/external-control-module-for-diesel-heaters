@@ -1,6 +1,7 @@
 #pragma once
 #include "config.h"
-#ifdef MEMORYFUNCTIONS
+
+#ifdef MEMORY_FUNCTIONS
 #include "memory.h"
 #include "statistics.h"
 #endif
@@ -15,8 +16,10 @@ private:
   HeaterStatus heaterStatus;
   ControllerOutputIntent outputIntent;
   OutputDevices outputDevices{outputIntent};
-  //SystemStatistics systemStatistic;
-  //StatisticMemoryController memoryController;
+#ifdef MEMORY_FUNCTIONS
+  SystemStatistics systemStatistic;
+  StatisticMemoryController memoryController;
+#endif
 
 public:
   SystemController() = default;
@@ -27,7 +30,7 @@ public:
     applyHeatingLogic();
     updateOutputIntent();
     outputDevices.update();
-    //systemStatistic.update(inputData, heaterStatus);
+    // systemStatistic.update(inputData, heaterStatus);
     updateMemory();
   }
 
@@ -181,17 +184,22 @@ private:
     outputIntent.displayContent.target_temp_c = heaterStatus.target_temp_c;
     outputIntent.displayContent.heatingState = heaterStatus.heatingState;
     outputIntent.displayContent.mode = heaterStatus.mode;
-	#ifdef MEMORYFUNCTIONS
-	outputIntent.displayContent.runtimeDisplayData = systemStatistic.getRuntimeDate();
-    outputIntent.displayContent.EEPROM_Values = memoryController.getFinalAverages();
-	#endif
+#ifdef MEMORY_FUNCTIONS
+    outputIntent.displayContent.runtimeDisplayData =
+        systemStatistic.getRuntimeDate();
+    outputIntent.displayContent.EEPROM_Values =
+        memoryController.getFinalAverages();
+#endif
   }
 
   void updateMemory() {
-	#ifdef MEMORYFUNCTIONS
+#ifdef MEMORY_FUNCTIONS
     LongtimeData newLongtimeData;
     if (systemStatistic.takeLongTimeData(newLongtimeData)) {
       memoryController.update(newLongtimeData);
     }
-  	#endif}
+#endif
+  }
 };
+
+
