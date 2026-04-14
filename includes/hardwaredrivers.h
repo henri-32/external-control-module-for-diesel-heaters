@@ -184,6 +184,7 @@ class RelaisDriver {
   // Timing
   uint16_t m_pulse_ms = 0;
   unsigned long m_pulse_start_ms = 0;
+
   // API
 public:
   explicit RelaisDriver(const uint8_t pin) : m_pin(pin) {}
