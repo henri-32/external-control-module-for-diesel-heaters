@@ -1,6 +1,7 @@
 #pragma once
-#include "hardwaredrivers.h"
+#include "config.h"
 #include "displaydriver.h"
+#include "hardwaredrivers.h"
 #include "types.h"
 
 class InputDevices {
@@ -10,11 +11,12 @@ public:
   void init();
   void updateInputData();
 
-  ToggleSwitchDriver m_powerSwitch{2};
-  ToggleSwitchDriver m_modeSwitch{3};
-  PushButtonDriver m_displayButton{8};
-  MyEncoderDriver m_myEncoder{6, 7};
-  TemperatureSensorDriver m_tempSensor{5};
+  ToggleSwitchDriver m_powerSwitch{my_pin_config::powerSwitch};
+  ToggleSwitchDriver m_modeSwitch{my_pin_config::modeSwitch};
+  PushButtonDriver m_displayButton{my_pin_config::displayButton};
+  MyEncoderDriver m_myEncoder{my_pin_config::myEncoder[0],
+                              my_pin_config::myEncoder[1]};
+  TemperatureSensorDriver m_tempSensor{my_pin_config::tempSensor};
   ControllerInputData &m_devices_data;
 };
 
@@ -25,7 +27,7 @@ public:
   void init();
   void update();
 
-  RelaisDriver m_relais{4};
+  RelaisDriver m_relais{my_pin_config::relais};
   ControllerOutputIntent &m_devices_intent;
   DisplayDriver m_lcdDisplay; // Keine PIN Zuweisung nötig, da Arduino I2C Bus
                               // automatisch erkennt.
