@@ -1,5 +1,6 @@
 #pragma once
 #include "hardwaredrivers.h"
+#include "displaydriver.h"
 #include "types.h"
 
 class InputDevices {

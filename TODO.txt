@@ -1,0 +1,9 @@
+Für die IO Devices lässt sich auf jeden Fall ein gemeinsames Interface für Init() und auch die Input() bzw. output Methoden definieren, damit man dann über die Driver iterieren kann. 
+
+=====================================================================
+Die ganzen PIN Belegungen aus den Konstruktoren sollten in die Config
+
+=====================================================================
+Switch Warnings im Display Driver
+==================================================================
+

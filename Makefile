@@ -52,11 +52,14 @@ all:
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/LiquidCrystal_I2C/LiquidCrystal_I2C.cpp -o build/LiquidCrystal.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/OneWire/OneWire.cpp -o build/OneWire.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/Arduino-Temperature-Control-Library/DallasTemperature.cpp -o build/DallasTemperature.o
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/Encoder/Encoder.cpp -o build/Encoder.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/linker_stubs.cpp -o build/linker_stubs.o
 	# ===== Heizungssteuerung =====
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/main.cpp -o build/heizungsteuerungmain.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/controller.cpp -o build/controller.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/devicegroups.cpp -o build/devicegroups.o
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/hardwaredrivers.cpp -o build/hardwaredrivers.o
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/displaydriver.cpp -o build/displaydriver.o
 	
 
 	# ===== Link =====
