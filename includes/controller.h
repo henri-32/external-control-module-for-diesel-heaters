@@ -5,7 +5,11 @@
 #include "statistics.h"
 #endif
 
+#ifdef TEST_BUILD
+#include "../tests/test_devices.h"
+#else
 #include "devicegroups.h"
+#endif
 #include "types.h"
 
 class SystemController {
@@ -28,10 +32,16 @@ private:
   void updateMemory();
 
   ControllerInputData inputData;
-  InputDevices inputDevices{inputData};
   HeaterStatus heaterStatus;
   ControllerOutputIntent outputIntent;
-  OutputDevices outputDevices{outputIntent};
+
+#ifdef TEST_BUILD 
+  TestInputDevices inputDevices {inputData}; 
+  TestOutputDevices outputDevices {outputIntent};
+#else
+  RealInputDevices inputDevices{inputData};
+  RealOutputDevices outputDevices{outputIntent};
+#endif
 
 #ifdef MEMORY_FUNCTIONS
   SystemStatistics systemStatistic;

@@ -1,12 +1,17 @@
 #pragma once
 #include "config.h"
+
+#ifndef TEST_BUILD
 #include "displaydriver.h"
 #include "hardwaredrivers.h"
-#include "types.h"
+#endif
 
-class InputDevices {
+#include "types.h"
+#include "interfaces.h"
+
+class RealInputDevices : public  InputDevices {
 public:
-  InputDevices(ControllerInputData &id);
+  RealInputDevices(ControllerInputData &id);
 
   void init();
   void updateInputData();
@@ -20,9 +25,9 @@ public:
   ControllerInputData &m_devices_data;
 };
 
-class OutputDevices {
+class RealOutputDevices : public OutputDevices {
 public:
-  OutputDevices(ControllerOutputIntent &oi);
+  RealOutputDevices(ControllerOutputIntent &oi);
 
   void init();
   void update();
