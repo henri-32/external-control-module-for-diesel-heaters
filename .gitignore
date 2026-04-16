@@ -4,6 +4,7 @@ index/
 *.idx
 =======
 build/
+includes/libraries/*
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake

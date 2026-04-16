@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 
 class DisplayDriver {
