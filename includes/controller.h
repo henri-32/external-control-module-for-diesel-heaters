@@ -18,7 +18,12 @@ public:
   void operator()();
   void init();
 
+#ifdef TEST_BUILD
+public:
+#else
 private:
+#endif
+
   void applyInputdata();
   void applyPowerSwitchInput();
   void applyModeSwitchInput();
