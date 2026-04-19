@@ -29,30 +29,34 @@ void SystemController::applyPowerSwitchInput() {
   unabhängig vom Zustand per modeSwitch gewechselt werden kann. Und es ist
   nötig, damit ich beim Verlassen des Bootes, die Heizung aus machen kann und
   sie korrekt herunterfährt, bevor ich den Strom wegnehme*/
-  if (inputData.powerSwitchChanged) {
-    if (inputData.alternatorPressed) {
-      if (heaterStatus.heatingState == HeaterStatus::HeatingState::OFF)
-        heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
-      else
-        heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
-      inputData.alternatorUsed = true;
-      return;
-    }
+  if (!inputData.powerSwitchChanged) {
+    return;
+  };
 
-    if (heaterStatus.heatingState == HeaterStatus::HeatingState::ON) {
-      outputIntent.requestRelaisCommand(
-          ControllerOutputIntent::RelaisCommand::Long,
-          ControllerOutputIntent::RelaisPriority::High);
-      heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
-      heaterStatus.mode = HeaterStatus::Mode::POWER;
-
-    } else {
-      outputIntent.requestRelaisCommand(
-          ControllerOutputIntent::RelaisCommand::Long,
-          ControllerOutputIntent::RelaisPriority::High);
+  if (inputData.alternatorPressed) {
+    if (heaterStatus.heatingState == HeaterStatus::HeatingState::OFF) {
       heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
-      heaterStatus.mode = HeaterStatus::Mode::POWER;
+    } else {
+      heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
     }
+
+    inputData.alternatorUsed = true;
+    return;
+  }
+
+  if (heaterStatus.heatingState == HeaterStatus::HeatingState::ON) {
+    outputIntent.requestRelaisCommand(
+        ControllerOutputIntent::RelaisCommand::Long,
+        ControllerOutputIntent::RelaisPriority::High);
+    heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
+    heaterStatus.mode = HeaterStatus::Mode::POWER;
+
+  } else {
+    outputIntent.requestRelaisCommand(
+        ControllerOutputIntent::RelaisCommand::Long,
+        ControllerOutputIntent::RelaisPriority::High);
+    heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
+    heaterStatus.mode = HeaterStatus::Mode::POWER;
   }
 }
 

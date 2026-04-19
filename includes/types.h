@@ -37,7 +37,7 @@ struct CalculationData {
 };
 
 struct HeaterStatus {
-  enum class HeatingState { ON, OFF };
+  enum class HeatingState {OFF , ON };
   HeatingState heatingState = HeatingState::OFF;
 
   enum class Mode { TEMP, POWER };

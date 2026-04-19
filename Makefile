@@ -7,7 +7,7 @@ F_CPU = 16000000UL
 
 CFLAGS   = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO -Os -ffunction-sections -fdata-sections
 CXXFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO --std=c++11	-Wcpp -Os -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections
-TESTCC_FLAGS = -std=c++17 -Wall  -Wextra  -Wno-unused-variable -Wno-unused-parameter -pthread
+TESTCC_FLAGS = -std=c++17 -Wall  -Wextra  -Wno-unused-variable -Wno-unused-parameter -pthread -g
 
 LIBRARIES = includes/libraries
 INCLUDES = \
@@ -37,6 +37,8 @@ TEST_INCLUDES = \
 CORE_SRC_C = (wildcard src/*.c)
 CORE_SRC_CXX = (wildcard src/*.cpp)
 
+.PHONY: all tests clean
+
 
 all:
 	@mkdir -p build
@@ -54,13 +56,6 @@ all:
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/Print.cpp -o build/Print.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/Stream.cpp -o build/Stream.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/WString.cpp -o build/WString.o
-Error detected while processing /home/henri-32/.config/nvim/init.lua:
-E5113: Error while calling lua chunk: vim/keymap.lua:0: rhs: expected string|function, got nil
-stack traceback:
-        [C]: in function 'error'
-        vim/shared.lua: in function 'validate'
-        vim/keymap.lua: in function 'set'
-        /home/henri-32/.config/nvim/init.lua:351: in main chunk
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/HardwareSerial.cpp -o build/HardwareSerial.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/libraries/SoftwareSerial/src/SoftwareSerial.cpp -o build/SoftwareSerial.o
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src/Wire.cpp -o build/Wire.o
@@ -85,8 +80,7 @@ stack traceback:
 	@avr-objcopy -O ihex build/main.elf build/main.hex
 	@echo ".elf and .hex file created"
 
-unit_tests:
-	
+tests: 	
 	@mkdir -p build_test
 	#============ Compiling ==========================
 	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c tests/unit_tests.cpp  -o build_test/unit_tests.o
@@ -95,13 +89,14 @@ unit_tests:
 	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c src/controller.cpp -o build_test/test_controller.o
 
 	#============= Link ==============================
-	@$(TESTCC) $(TESTCC_FLAGS) build_test/*.o -o unit_tests
+	@$(TESTCC) $(TESTCC_FLAGS) build_test/*.o  -o build_test/unit_tests
 	@echo "executable unit_tests created"
 	
 
 clean:
 	@cd build && find . -name "*.o" -delete
+	@cd build_test && find . -name "*.o" -delete 
 	@echo "object files removed from build directory"
 	@rm -f compile_commands.json
-	@rm -f unit_tests
+	@rm -f build_test/unit_tests
 	@echo "compile commands und executable unit_tests removed" 
