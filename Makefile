@@ -7,7 +7,7 @@ F_CPU = 16000000UL
 
 CFLAGS   = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO -Os -ffunction-sections -fdata-sections
 CXXFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO --std=c++11	-Wcpp -Os -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections
-TESTCC_FLAGS = -std=c++17 -Wall  -Wextra  -Wno-unused-variable -Wno-unused-parameter -pthread -g
+TESTCC_FLAGS = -std=c++20 -Wall  -Wextra  -Wno-unused-variable -Wno-unused-parameter -pthread -g
 
 LIBRARIES = includes/libraries
 INCLUDES = \
@@ -83,14 +83,14 @@ all:
 tests: 	
 	@mkdir -p build_test
 	#============ Compiling ==========================
-	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c tests/unit_tests.cpp  -o build_test/unit_tests.o
+	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c tests/input_switches_test.cpp  -o build_test/input_switches_test.o
 	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -c tests/test_devices.cpp -o build_test/test_devices.o
 	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -c $(GTEST_ROOT)/src/gtest-all.cc -o build_test/gtest-all.o
 	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c src/controller.cpp -o build_test/test_controller.o
 
-	#============= Link ==============================
+	#============= Linking ==============================
 	@$(TESTCC) $(TESTCC_FLAGS) build_test/*.o  -o build_test/unit_tests
-	@echo "executable unit_tests created"
+	@echo "build_tests/unit_tests created"
 	
 
 clean:
