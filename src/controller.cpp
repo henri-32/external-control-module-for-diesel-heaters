@@ -29,33 +29,34 @@ void SystemController::applyPowerSwitchInput() {
   unabhängig vom Zustand per modeSwitch gewechselt werden kann. Und es ist
   nötig, damit ich beim Verlassen des Bootes, die Heizung aus machen kann und
   sie korrekt herunterfährt, bevor ich den Strom wegnehme*/
+  using State = HeaterStatus::HeatingState;
+  using COI = ControllerOutputIntent;
+
   if (!inputData.powerSwitchChanged) {
     return;
   };
 
   if (inputData.alternatorPressed) {
-    if (heaterStatus.heatingState == HeaterStatus::HeatingState::OFF) {
-      heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
+    if (heaterStatus.heatingState == State::OFF) {
+      heaterStatus.heatingState = State::ON;
     } else {
-      heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
+      heaterStatus.heatingState = State::OFF;
     }
 
     inputData.alternatorUsed = true;
     return;
   }
 
-  if (heaterStatus.heatingState == HeaterStatus::HeatingState::ON) {
-    outputIntent.requestRelaisCommand(
-        ControllerOutputIntent::RelaisCommand::Long,
-        ControllerOutputIntent::RelaisPriority::High);
-    heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
+  if (heaterStatus.heatingState == State::ON) {
+    outputIntent.requestRelaisCommand(COI::RelaisCommand::Long,
+                                      COI::RelaisPriority::High);
+    heaterStatus.heatingState = State::OFF;
     heaterStatus.mode = HeaterStatus::Mode::POWER;
 
   } else {
-    outputIntent.requestRelaisCommand(
-        ControllerOutputIntent::RelaisCommand::Long,
-        ControllerOutputIntent::RelaisPriority::High);
-    heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
+    outputIntent.requestRelaisCommand(COI::RelaisCommand::Long,
+                                      COI::RelaisPriority::High);
+    heaterStatus.heatingState = State::ON;
     heaterStatus.mode = HeaterStatus::Mode::POWER;
   }
 }

@@ -12,5 +12,6 @@ Makefile
 
 
 # Build / Tooling
-build/
+build/*
+build_test/*
 compile_commands.json

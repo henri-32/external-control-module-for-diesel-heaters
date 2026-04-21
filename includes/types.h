@@ -70,19 +70,19 @@ public:
   enum RelaisPriority { Low, High };
 
   RelaisPriority m_currentPriority = Low;
-  RelaisCommand m_command = RelaisCommand::None;
+  RelaisCommand m_relaisCommand = RelaisCommand::None;
 
   void requestRelaisCommand(RelaisCommand command,
                             RelaisPriority priority = RelaisPriority::Low) {
     if (priority >= m_currentPriority) {
-      m_command = command;
+      m_relaisCommand = command;
       m_currentPriority = priority;
     }
   }
 
   RelaisCommand consumeRelaisRequest() {
-    RelaisCommand command = m_command;
-    m_command = RelaisCommand::None;
+    RelaisCommand command = m_relaisCommand;
+    m_relaisCommand = RelaisCommand::None;
     m_currentPriority = Low;
     return command;
   };
