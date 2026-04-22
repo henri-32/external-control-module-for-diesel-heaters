@@ -32,8 +32,8 @@ public:
   void init();
   void update();
 
-  RelaisDriver m_relais{my_pin_config::relais};
   ControllerOutputIntent &m_devices_intent;
-  DisplayDriver m_lcdDisplay; // Keine PIN Zuweisung nötig, da Arduino I2C Bus
-                              // automatisch erkennt.
+  RelaisDriver m_relais{my_pin_config::relais};
+  //No pin nessecary. Arduino can detect I2C Connection on the standard I2C pins
+  DisplayDriver m_lcdDisplay;
 };

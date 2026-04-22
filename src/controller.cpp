@@ -4,7 +4,7 @@ void SystemController::operator()() {
   inputDevices.updateInputData();
   applyInputdata();
   applyHeatingLogic();
-  updateOutputIntent();
+  writeOutputIntent();
   outputDevices.update();
   // systemStatistic.update(inputData, heaterStatus);
   updateMemory();
@@ -23,6 +23,7 @@ void SystemController::applyInputdata() {
 }
 
 void SystemController::applyPowerSwitchInput() {
+//{{{
   /* Der Heizungsmodus wird beim OnOff Schalter immer auf POWER gewechselt, um
   die Temperaturlogik daran zu hindern, direkt zurückzuschalten. Das ersetzt
   meine alte Temperatursperre. Das ist unproblematisch weil der Modus
@@ -36,7 +37,9 @@ void SystemController::applyPowerSwitchInput() {
     return;
   };
 
+  //Alternator Path switches only State, without relay action 
   if (inputData.alternatorPressed) {
+  //{{{
     if (heaterStatus.heatingState == State::OFF) {
       heaterStatus.heatingState = State::ON;
     } else {
@@ -46,6 +49,7 @@ void SystemController::applyPowerSwitchInput() {
     inputData.alternatorUsed = true;
     return;
   }
+//}}}
 
   if (heaterStatus.heatingState == State::ON) {
     outputIntent.requestRelaisCommand(COI::RelaisCommand::Long,
@@ -60,6 +64,8 @@ void SystemController::applyPowerSwitchInput() {
     heaterStatus.mode = HeaterStatus::Mode::POWER;
   }
 }
+//}}}
+
 
 void SystemController::applyModeSwitchInput() {
   //{{{
@@ -153,7 +159,7 @@ void SystemController::applyHeatingLogic() {
   }
 }
 
-void SystemController::updateOutputIntent() {
+void SystemController::writeOutputIntent() {
   outputIntent.displayContent.temp_c = inputData.sensor_tempC;
   outputIntent.displayContent.target_temp_c = heaterStatus.target_temp_c;
   outputIntent.displayContent.heatingState = heaterStatus.heatingState;
