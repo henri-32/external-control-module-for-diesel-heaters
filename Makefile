@@ -80,10 +80,10 @@ all:
 	@avr-objcopy -O ihex build/main.elf build/main.hex
 	@echo ".elf and .hex file created"
 
-tests: 	
+test: 	
 	@mkdir -p build_test
 	#============ Compiling ==========================
-	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c tests/input_switches_test.cpp  -o build_test/input_switches_test.o
+	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c tests/input_handle_test.cpp -o build_test/input_switches_test.o
 	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -c tests/test_devices.cpp -o build_test/test_devices.o
 	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -c $(GTEST_ROOT)/src/gtest-all.cc -o build_test/gtest-all.o
 	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c src/controller.cpp -o build_test/test_controller.o
