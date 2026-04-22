@@ -33,7 +33,7 @@ private:
 
   // Nur implementiert ifdef MEMORY_FUNCTIONS
   //  Für stabile API immer deklariert.
-  void updateOutputIntent();
+  void writeOutputIntent();
   void updateMemory();
 
   ControllerInputData inputData;

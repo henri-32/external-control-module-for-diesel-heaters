@@ -7,3 +7,7 @@ Die ganzen PIN Belegungen aus den Konstruktoren sollten in die Config
 Switch Warnings im Display Driver
 ==================================================================
 
+Aktuell wird im Outputintent mit der Funktion requestRelaisCommand darüber entschieden, welcher Befehl vorrang hat, wenn beide Schalter gleichzeitig gedrückt werden. 
+Das ist mindestens grenzwertig, gehört aber eher in die outputDevices
+
+========================================================================
