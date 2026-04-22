@@ -4,13 +4,12 @@
 class TestDisplay {
 public:
   TestDisplay();
-  void cyclePages(ControllerOutputIntent::LCD_CycleDirection ci) {
-  }
+  void cyclePages(ControllerOutputIntent::LCD_CycleDirection ci) {}
 };
 
 class TestInputDevices : public InputDevices {
 public:
-  TestInputDevices(ControllerInputData& id);
+  TestInputDevices(ControllerInputData &id);
   void init() override {}
   void updateInputData() override {}
 };

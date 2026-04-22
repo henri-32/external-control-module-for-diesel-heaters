@@ -62,30 +62,36 @@ void SystemController::applyPowerSwitchInput() {
 }
 
 void SystemController::applyModeSwitchInput() {
-  if (inputData.modeSwitchChanged) {
-    /*Das Drücken mit Alternator ermöglicht hier das Auslösen des Relais, ohne
-    den internen Modus zu wechseln, um im Fehlerfall Unterschiede zum Original
-    Controller auszugleichen*/
-    if (inputData.alternatorPressed) {
-      if (heaterStatus.heatingState == HeaterStatus::HeatingState::OFF)
-        heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
-      else
-        heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
-      inputData.alternatorUsed = true;
-      return;
+  //{{{
+  using Mode = HeaterStatus::Mode;
+  using COI = ControllerOutputIntent;
+
+  if (!inputData.modeSwitchChanged) {
+    return;
+  }
+  // Alternator Path only switches Mode without Relay Action
+  if (inputData.alternatorPressed) {
+    //{{{
+    if (heaterStatus.mode == Mode::POWER) {
+	  heaterStatus.mode = Mode::TEMP;
+    } else {
+	  heaterStatus.mode = Mode::POWER;	
     }
 
-    if (heaterStatus.mode == HeaterStatus::Mode::POWER) {
-      outputIntent.requestRelaisCommand(
-          ControllerOutputIntent::RelaisCommand::Short);
-      heaterStatus.mode = HeaterStatus::Mode::TEMP;
-    } else {
-      outputIntent.requestRelaisCommand(
-          ControllerOutputIntent::RelaisCommand::Short);
-      heaterStatus.mode = HeaterStatus::Mode::POWER;
-    }
+    inputData.alternatorUsed = true;
+    return;
+  }
+  //}}}
+
+  if (heaterStatus.mode == Mode::POWER) {
+    outputIntent.requestRelaisCommand(COI::RelaisCommand::Short);
+    heaterStatus.mode = Mode::TEMP;
+  } else {
+    outputIntent.requestRelaisCommand(COI::RelaisCommand::Short);
+    heaterStatus.mode = Mode::POWER;
   }
 }
+//}}}
 
 void SystemController::applyEncoderInput() {
   constexpr float TempStep = 0.5;
@@ -108,7 +114,7 @@ void SystemController::applyEncoderInput() {
 }
 
 void SystemController::applyDisplayButtonInput() {
-  if (inputData.displayButtonReleased) {
+  if (inputData.alternatorReleased) {
     if (inputData.alternatorUsed) {
       inputData.alternatorPressed = false;
       inputData.alternatorUsed = false;

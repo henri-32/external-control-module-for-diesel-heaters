@@ -6,10 +6,10 @@
 struct ControllerInputData {
   bool powerSwitchChanged = false;
   bool modeSwitchChanged = false;
-  bool displayButtonReleased = false;
   int8_t encoder_val = 0;
   float sensor_tempC = 0;
   bool alternatorPressed = false;
+  bool alternatorReleased = false;
   bool alternatorUsed = false;
 };
 
@@ -65,7 +65,6 @@ public:
   LCD_CycleDirection lcd_cycleDirection = LCD_CycleDirection::none;
 
   enum class RelaisCommand { Long, Short, None };
-  RelaisCommand relaisCommand = RelaisCommand::None;
 
   enum RelaisPriority { Low, High };
 

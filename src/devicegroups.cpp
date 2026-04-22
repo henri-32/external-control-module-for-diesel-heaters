@@ -14,7 +14,7 @@ void RealInputDevices::updateInputData() {
   m_devices_data.alternatorPressed = m_displayButton.isDown();
   m_devices_data.powerSwitchChanged = m_powerSwitch.changed();
   m_devices_data.modeSwitchChanged = m_modeSwitch.changed();
-  m_devices_data.displayButtonReleased = m_displayButton.released();
+  m_devices_data.alternatorReleased = m_displayButton.released();
   m_devices_data.encoder_val = m_myEncoder.readSteps();
   m_devices_data.sensor_tempC = m_tempSensor.pollTemp();
 }
