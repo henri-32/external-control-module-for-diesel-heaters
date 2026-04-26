@@ -4,7 +4,13 @@
 class TestDisplay {
 public:
   TestDisplay();
-  void cyclePages(ControllerOutputIntent::LCD_CycleDirection ci) {}
+  
+  using intent = ControllerOutputIntent::LCD_StateIntent; 
+
+  intent m_displayState;
+
+  void cyclePages(ControllerOutputIntent::LCD_CycleDirection direction);
+
 };
 
 class TestInputDevices : public InputDevices {

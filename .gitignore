@@ -10,8 +10,13 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 
-
 # Build / Tooling
 build/*
 build_test/*
 compile_commands.json
+.logs/
+
+# Python 
+venv/
+__pycache__/
+*.pyc

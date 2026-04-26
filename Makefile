@@ -1,3 +1,29 @@
+VENV =venv
+PYTHON = $(VENV)/bin/python 
+PIP = $(VENV)/bin/pip 
+
+.PHONY: setup install clean run_test
+
+setup: 
+	python3 -m venv $(VENV) 
+	$(PIP) install --upgrade pip 
+	$(PIP) install pip-tools 
+
+
+requirements.txt: requirements.in
+	$(PYTHON) -m piptools compile 
+
+install: requirements.txt
+	$(PIP) install -r requirements.txt
+
+compiledb: 
+	rm -f compile_commands.json 
+	bear -- make all 
+
+compiledb_test: 
+	rm -f compile_commands.json 
+	bear -- $(MAKE) test 
+
 CC  = avr-gcc
 CXX = avr-g++
 TESTCC = g++
@@ -34,11 +60,8 @@ TEST_INCLUDES = \
 	-Iincludes
 
 
-CORE_SRC_C = (wildcard src/*.c)
-CORE_SRC_CXX = (wildcard src/*.cpp)
-
-.PHONY: all tests clean
-
+CORE_SRC_C = $(wildcard src/*.c)
+CORE_SRC_CXX = $(wildcard src/*.cpp)
 
 all:
 	@mkdir -p build
@@ -92,6 +115,10 @@ test:
 	@$(TESTCC) $(TESTCC_FLAGS) build_test/*.o  -o build_test/unit_tests
 	@echo "build_tests/unit_tests created"
 	
+
+run_test: 
+	#============= Running Test ==============================
+	@$(PYTHON) scripts/run_test.py
 
 clean:
 	@cd build && find . -name "*.o" -delete
