@@ -11,6 +11,7 @@
 #include "devicegroups.h"
 #endif
 #include "types.h"
+#include "config.h"
 
 class SystemController {
 public:

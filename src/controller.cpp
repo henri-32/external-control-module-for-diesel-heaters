@@ -23,7 +23,7 @@ void SystemController::applyInputdata() {
 }
 
 void SystemController::applyPowerSwitchInput() {
-//{{{
+  //{{{
   /* Der Heizungsmodus wird beim OnOff Schalter immer auf POWER gewechselt, um
   die Temperaturlogik daran zu hindern, direkt zurückzuschalten. Das ersetzt
   meine alte Temperatursperre. Das ist unproblematisch weil der Modus
@@ -37,9 +37,9 @@ void SystemController::applyPowerSwitchInput() {
     return;
   };
 
-  //Alternator Path switches only State, without relay action 
+  // Alternator Path switches only State, without relay action
   if (inputData.alternatorPressed) {
-  //{{{
+    //{{{
     if (heaterStatus.heatingState == State::OFF) {
       heaterStatus.heatingState = State::ON;
     } else {
@@ -49,7 +49,7 @@ void SystemController::applyPowerSwitchInput() {
     inputData.alternatorUsed = true;
     return;
   }
-//}}}
+  //}}}
 
   if (heaterStatus.heatingState == State::ON) {
     outputIntent.requestRelaisCommand(COI::RelaisCommand::Long,
@@ -66,7 +66,6 @@ void SystemController::applyPowerSwitchInput() {
 }
 //}}}
 
-
 void SystemController::applyModeSwitchInput() {
   //{{{
   using Mode = HeaterStatus::Mode;
@@ -79,9 +78,9 @@ void SystemController::applyModeSwitchInput() {
   if (inputData.alternatorPressed) {
     //{{{
     if (heaterStatus.mode == Mode::POWER) {
-	  heaterStatus.mode = Mode::TEMP;
+      heaterStatus.mode = Mode::TEMP;
     } else {
-	  heaterStatus.mode = Mode::POWER;	
+      heaterStatus.mode = Mode::POWER;
     }
 
     inputData.alternatorUsed = true;
@@ -100,43 +99,61 @@ void SystemController::applyModeSwitchInput() {
 //}}}
 
 void SystemController::applyEncoderInput() {
-  constexpr float TempStep = 0.5;
-  constexpr float TempMin = 5.0;
-  constexpr float TempMax = 30.0;
-
   if (inputData.encoder_val == 0)
     return;
   if (inputData.alternatorPressed) {
-    if (inputData.encoder_val >= 1 && inputData.encoder_val <= 6) {
+    if (inputData.encoder_val >= 1 &&
+        inputData.encoder_val <= guards::encoderValCutoff) {
       outputDevices.m_lcdDisplay.cyclePages(
           ControllerOutputIntent::LCD_CycleDirection::right);
       inputData.alternatorUsed = true;
-    } else if (inputData.encoder_val <= -1 && inputData.encoder_val >= -6) {
+    } else if (inputData.encoder_val <= -1 &&
+               inputData.encoder_val >= -guards::encoderValCutoff) {
       outputDevices.m_lcdDisplay.cyclePages(
           ControllerOutputIntent::LCD_CycleDirection::left);
       inputData.alternatorUsed = true;
+ //TODO: HIER FEHLT LOGIK OHNE ALTERNATOR PATH ???? 
     }
   }
 }
 
 void SystemController::applyDisplayButtonInput() {
-  if (inputData.alternatorReleased) {
-    if (inputData.alternatorUsed) {
-      inputData.alternatorPressed = false;
-      inputData.alternatorUsed = false;
-      return;
-    }
+  //{{{
+  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
 
-    if (outputIntent.lcd_stateIntent !=
-        ControllerOutputIntent::LCD_StateIntent::OFF) {
-      outputIntent.lcd_stateIntent =
-          ControllerOutputIntent::LCD_StateIntent::OFF;
-    } else {
-      outputIntent.lcd_stateIntent =
-          ControllerOutputIntent::LCD_StateIntent::Page1;
+  if (!inputData.alternatorReleased) {
+    return;
+  }
+  // Path where alternator was used in combination with other Inputs.
+  // No toggling of display expected
+  if (inputData.alternatorUsed) {
+    inputData.alternatorPressed = false;
+    inputData.alternatorUsed = false;
+    return;
+
+    // Path without alternator for toggling display. Action happens  on
+    // release of the button
+
+  } else {
+    switch (outputIntent.lcd_stateIntent) {
+    case LCDIntent::OFF:
+      outputIntent.lcd_stateIntent = LCDIntent::Page1;
+      break;
+    case LCDIntent::Page1:
+      outputIntent.lcd_stateIntent = LCDIntent::OFF;
+      break;
+    case LCDIntent::Page2:
+      outputIntent.lcd_stateIntent = LCDIntent::OFF;
+      break;
+    case LCDIntent::Page3:
+      outputIntent.lcd_stateIntent = LCDIntent::OFF;
+      break;
+    case LCDIntent::Page4:
+      outputIntent.lcd_stateIntent = LCDIntent::OFF;
     }
   }
 }
+//}}}
 
 void SystemController::applyHeatingLogic() {
   constexpr float setpointTolerance = 1.5;

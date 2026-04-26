@@ -24,36 +24,42 @@ void DisplayDriver::update() {
 
 void DisplayDriver::cyclePages(
     ControllerOutputIntent::LCD_CycleDirection direction) {
+
+  using intent = ControllerOutputIntent::LCD_StateIntent;
   if (direction == ControllerOutputIntent::LCD_CycleDirection::right) {
     switch (m_displayState) {
-    case ControllerOutputIntent::LCD_StateIntent::Page1:
-      m_displayState = ControllerOutputIntent::LCD_StateIntent::Page2;
+    case intent::OFF: 
+      return; 
+    case intent::Page1:
+      m_displayState = intent::Page2;
       break;
-    case ControllerOutputIntent::LCD_StateIntent::Page2:
-      m_displayState = ControllerOutputIntent::LCD_StateIntent::Page3;
+    case intent::Page2:
+      m_displayState = intent::Page3;
       break;
-    case ControllerOutputIntent::LCD_StateIntent::Page3:
-      m_displayState = ControllerOutputIntent::LCD_StateIntent::Page4;
+    case intent::Page3:
+      m_displayState = intent::Page4;
       break;
-    case ControllerOutputIntent::LCD_StateIntent::Page4:
-      m_displayState = ControllerOutputIntent::LCD_StateIntent::Page1;
+    case intent::Page4:
+      m_displayState = intent::Page1;
       break;
     }
     return;
   }
   if (direction == ControllerOutputIntent::LCD_CycleDirection::left) {
     switch (m_displayState) {
-    case ControllerOutputIntent::LCD_StateIntent::Page1:
-      m_displayState = ControllerOutputIntent::LCD_StateIntent::Page3;
+    case intent::OFF: 
+       return; 
+    case intent::Page1:
+      m_displayState = intent::Page3;
       break;
-    case ControllerOutputIntent::LCD_StateIntent::Page2:
-      m_displayState = ControllerOutputIntent::LCD_StateIntent::Page1;
+    case intent::Page2:
+      m_displayState = intent::Page1;
       break;
-    case ControllerOutputIntent::LCD_StateIntent::Page3:
-      m_displayState = ControllerOutputIntent::LCD_StateIntent::Page2;
+    case intent::Page3:
+      m_displayState = intent::Page2;
       break;
-    case ControllerOutputIntent::LCD_StateIntent::Page4:
-      m_displayState = ControllerOutputIntent::LCD_StateIntent::Page3;
+    case intent::Page4:
+      m_displayState = intent::Page3;
       break;
     }
     return;
