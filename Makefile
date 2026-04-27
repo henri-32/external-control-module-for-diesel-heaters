@@ -1,122 +1,156 @@
-.PHONY: setup install clean run_test
+.DEFAULT_GOAL := all
 
-setup: 
+.PHONY: all setup install compiledb compiledb_test test run_test clean
+
+setup:
 	@scripts/setup.sh
 
 requirements.txt: requirements.in
-	$(PYTHON) -m piptools compile 
+	python -m piptools compile
 
 install: requirements.txt
 	venv/bin/pip install -r requirements.txt
 
-compiledb: 
-	rm -f compile_commands.json 
-	bear -- make all 
+compiledb:
+	@rm -f compile_commands.json
+	@bear -- $(MAKE) all 
+	@echo "compiledb updated to production build"
 
-compiledb_test: 
-	rm -f compile_commands.json 
-	bear -- $(MAKE) test 
+compiledb_test:
+	@rm -f compile_commands.json
+	@bear -- $(MAKE) test
+	@echo "compiledb updated to test build"
 
-CC  = avr-gcc
-CXX = avr-g++
-TESTCC = g++
+CC := avr-gcc
+CXX := avr-g++
+TESTCC := g++
 
-MCU   = atmega328p
-F_CPU = 16000000UL
+MCU := atmega328p
+F_CPU := 16000000UL
 
-CFLAGS   = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO -Os -ffunction-sections -fdata-sections
-CXXFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO --std=c++11	-Wcpp -Os -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections
-TESTCC_FLAGS = -std=c++20 -Wall  -Wextra  -Wno-unused-variable -Wno-unused-parameter -pthread -g
+LIBRARIES := includes/libraries
+BUILD_DIR := build
+TEST_BUILD_DIR := build_test
 
-LIBRARIES = includes/libraries
-INCLUDES = \
--I$(LIBRARIES)/ArduinoCore-avr/cores/arduino \
--I$(LIBRARIES)/ArduinoCore-avr/variants/standard \
--I$(LIBRARIES)/ArduinoCore-avr/libraries/EEPROM/src \
--I$(LIBRARIES)/Arduino-Temperature-Control-Library \
--I$(LIBRARIES)/Encoder \
--I$(LIBRARIES)/LiquidCrystal_I2C \
--I$(LIBRARIES)/OneWire \
--I$(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src \
--I$(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src/utility \
--I$(LIBRARIES)/ArduinoCore-avr/libraries/SoftwareSerial/src \
--I$(LIBRARIES)/LiquidCrystal_I2C \
--I$(LIBRARIES) \
--Iincludes \
+COMMON_DEFINES := -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO
+COMMON_OPT := -Os -ffunction-sections -fdata-sections
 
-GTEST_ROOT = $(LIBRARIES)/googletest/googletest
-TEST_INCLUDES = \
+CPPFLAGS := $(COMMON_DEFINES)
+INCLUDES := \
+	-I$(LIBRARIES)/ArduinoCore-avr/cores/arduino \
+	-I$(LIBRARIES)/ArduinoCore-avr/variants/standard \
+	-I$(LIBRARIES)/ArduinoCore-avr/libraries/EEPROM/src \
+	-I$(LIBRARIES)/Arduino-Temperature-Control-Library \
+	-I$(LIBRARIES)/Encoder \
+	-I$(LIBRARIES)/LiquidCrystal_I2C \
+	-I$(LIBRARIES)/OneWire \
+	-I$(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src \
+	-I$(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src/utility \
+	-I$(LIBRARIES)/ArduinoCore-avr/libraries/SoftwareSerial/src \
+	-I$(LIBRARIES) \
+	-Iincludes
+
+CFLAGS := -mmcu=$(MCU) $(COMMON_OPT) -MMD -MP
+CXXFLAGS := -mmcu=$(MCU) -std=c++11 -Wcpp $(COMMON_OPT) -fno-exceptions -fno-rtti -MMD -MP
+
+GTEST_ROOT := $(LIBRARIES)/googletest/googletest
+TEST_INCLUDES := \
 	-I$(LIBRARIES) \
 	-I$(GTEST_ROOT) \
 	-I$(GTEST_ROOT)/include \
-    -Itests \
+	-Itests \
 	-Iincludes
 
+TEST_CPPFLAGS := -DTEST_BUILD
+TEST_CXXFLAGS := -std=c++20 -Wall -Wextra -pthread -g -MMD -MP
 
-CORE_SRC_C = $(wildcard src/*.c)
-CORE_SRC_CXX = $(wildcard src/*.cpp)
+AVR_C_SRCS := \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring.c \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring_digital.c \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring_analog.c \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring_pulse.c \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring_shift.c \
+	$(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src/utility/twi.c \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/WInterrupts.c
 
-all:
-	@mkdir -p build
+AVR_CPP_SRCS := \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/Print.cpp \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/Stream.cpp \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/WString.cpp \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/HardwareSerial.cpp \
+	$(LIBRARIES)/ArduinoCore-avr/libraries/SoftwareSerial/src/SoftwareSerial.cpp \
+	$(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src/Wire.cpp \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/HardwareSerial0.cpp \
+	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/main.cpp \
+	$(LIBRARIES)/LiquidCrystal_I2C/LiquidCrystal_I2C.cpp \
+	$(LIBRARIES)/OneWire/OneWire.cpp \
+	$(LIBRARIES)/Arduino-Temperature-Control-Library/DallasTemperature.cpp \
+	$(LIBRARIES)/Encoder/Encoder.cpp
 
-	# ===== C Core =====
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring.c -o build/wiring.o
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring_digital.c -o build/wiring_digital.o
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring_analog.c -o build/wiring_analog.o
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring_pulse.c -o build/wiring_pulse.o
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring_shift.c -o build/wiring_shift.o
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src/utility/twi.c -o build/twi.o
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/WInterrupts.c -o build/WInterrupts.o
+APP_CPP_SRCS := \
+	src/linker_stubs.cpp \
+	src/main.cpp \
+	src/controller.cpp \
+	src/devicegroups.cpp \
+	src/hardwaredrivers.cpp \
+	src/displaydriver.cpp
 
-	# ===== C++ Core =====
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/Print.cpp -o build/Print.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/Stream.cpp -o build/Stream.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/WString.cpp -o build/WString.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/HardwareSerial.cpp -o build/HardwareSerial.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/libraries/SoftwareSerial/src/SoftwareSerial.cpp -o build/SoftwareSerial.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src/Wire.cpp -o build/Wire.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/HardwareSerial0.cpp -o build/HardwareSerial0.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/ArduinoCore-avr/cores/arduino/main.cpp -o build/arduino_main.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/LiquidCrystal_I2C/LiquidCrystal_I2C.cpp -o build/LiquidCrystal.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/OneWire/OneWire.cpp -o build/OneWire.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/Arduino-Temperature-Control-Library/DallasTemperature.cpp -o build/DallasTemperature.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(LIBRARIES)/Encoder/Encoder.cpp -o build/Encoder.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/linker_stubs.cpp -o build/linker_stubs.o
-	# ===== Heizungssteuerung =====
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/main.cpp -o build/heizungsteuerungmain.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/controller.cpp -o build/controller.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/devicegroups.cpp -o build/devicegroups.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/hardwaredrivers.cpp -o build/hardwaredrivers.o
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c src/displaydriver.cpp -o build/displaydriver.o
-	
+C_OBJS := $(addprefix $(BUILD_DIR)/,$(AVR_C_SRCS:.c=.o))
+CPP_OBJS := $(addprefix $(BUILD_DIR)/,$(AVR_CPP_SRCS:.cpp=.o) $(APP_CPP_SRCS:.cpp=.o))
+OBJS := $(C_OBJS) $(CPP_OBJS)
+DEPS := $(OBJS:.o=.d)
 
-	# ===== Link =====
-	@$(CXX) -mmcu=$(MCU) -Wl,--gc-sections build/*.o -o build/main.elf 
-	@echo "linked to build/main.elf"
-	@avr-objcopy -O ihex build/main.elf build/main.hex
+TEST_CPP_SRCS := \
+	tests/input_handle_test.cpp \
+	tests/test_devices.cpp \
+	src/controller.cpp
+
+TEST_CC_SRCS := \
+	$(GTEST_ROOT)/src/gtest-all.cc
+
+TEST_CPP_OBJS := $(addprefix $(TEST_BUILD_DIR)/,$(TEST_CPP_SRCS:.cpp=.o))
+TEST_CC_OBJS := $(addprefix $(TEST_BUILD_DIR)/,$(TEST_CC_SRCS:.cc=.o))
+TEST_OBJS := $(TEST_CPP_OBJS) $(TEST_CC_OBJS)
+TEST_DEPS := $(TEST_OBJS:.o=.d)
+
+all: $(BUILD_DIR)/main.hex
+
+$(BUILD_DIR)/main.elf: $(OBJS)
+	@$(CXX) -mmcu=$(MCU) -Wl,--gc-sections $^ -o $@
+	@echo "linked to $@"
+
+$(BUILD_DIR)/main.hex: $(BUILD_DIR)/main.elf
+	@avr-objcopy -O ihex $< $@
 	@echo ".elf and .hex file created"
 
-test: 	
-	@mkdir -p build_test
-	#============ Compiling ==========================
-	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c tests/input_handle_test.cpp -o build_test/input_switches_test.o
-	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -c tests/test_devices.cpp -o build_test/test_devices.o
-	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -c $(GTEST_ROOT)/src/gtest-all.cc -o build_test/gtest-all.o
-	@$(TESTCC) $(TESTCC_FLAGS) $(TEST_INCLUDES) -DTEST_BUILD -c src/controller.cpp -o build_test/test_controller.o
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	@$(CC) $(CPPFLAGS) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-	#============= Linking ==============================
-	@$(TESTCC) $(TESTCC_FLAGS) build_test/*.o  -o build_test/unit_tests
+$(BUILD_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+test: $(TEST_BUILD_DIR)/unit_tests
+
+$(TEST_BUILD_DIR)/unit_tests: $(TEST_OBJS)
+	@$(TESTCC) $(TEST_CXXFLAGS) $^ -o $@
 	@echo "build_tests/unit_tests created"
-	
 
-run_test: 
-	#============= Running Test ==============================
-	@$(PYTHON) scripts/run_test.py
+$(TEST_BUILD_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_INCLUDES) -c $< -o $@
+
+$(TEST_BUILD_DIR)/%.o: %.cc
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_INCLUDES) -c $< -o $@
+
+run_test:
+	python3 scripts/run_test.py
 
 clean:
-	@cd build && find . -name "*.o" -delete
-	@cd build_test && find . -name "*.o" -delete 
-	@echo "object files removed from build directory"
-	@rm -f compile_commands.json
-	@rm -f build_test/unit_tests
-	@echo "compile commands und executable unit_tests removed" 
+	@rm -rf $(BUILD_DIR) $(TEST_BUILD_DIR) compile_commands.json
+	@echo "build artifacts, compile commands and test binary removed"
+
+-include $(DEPS) $(TEST_DEPS)
+

@@ -6,6 +6,6 @@ void TestDisplay::cyclePages(
   m_lastGivenDirection = direction;
 };
 
-TestInputDevices::TestInputDevices(ControllerInputData &id){};
+TestInputDevices::TestInputDevices(ControllerInputData &id) { (void)id; }
 
-TestOutputDevices::TestOutputDevices(ControllerOutputIntent &oi){};
+TestOutputDevices::TestOutputDevices(ControllerOutputIntent &oi) { (void)oi; }
