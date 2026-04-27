@@ -1,23 +1,21 @@
-# clangd
-.cache/
-index/
+# clangd / language server
+/.cache/
+/index/
 *.idx
-=======
-build/
-includes/libraries/*
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
 
-# Build / Tooling
-build/*
-build_test/*
-compile_commands.json
-.logs/
-neovim_utils/quickfix_list.txt
+# Build artifacts
+/build/
+/build_test/
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/compile_commands.json
 
-# Python 
-venv/
-__pycache__/
-*.pyc
+# Local tooling output
+/.logs/
+/neovim_utils/quickfix_list.txt
+
+# Python
+/venv/
+/__pycache__/
+*.py[cod]
