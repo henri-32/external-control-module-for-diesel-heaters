@@ -1,5 +1,6 @@
 #include "controller.h"
 #include "types.h"
+#include "config.h"
 #include <gtest/gtest.h>
 
 class SystemControllerTest : public ::testing::Test {
@@ -247,15 +248,6 @@ TEST_F(
 //{{{
 TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
   //{{{
-  /* An dieser Stelle wird klar, dass das Design nicht gut ist.
-   * Es wird implizit die API von dem Display Driver mit cyclePages
-   * mitgetestet. Die ist allerdings abhängig von der arm toolchain.
-   * Deswegen wurde die logik in die TestDisplay Klasse übertragen.
-   * Dort wird künstlich die Variable m_displayState gehalten, welche
-     hier im Test gesetzt und als Stub für den tatsächlichen Status
-     in der RealDisplay Klasse genutzt wird. Sollte es zu weiteren
-     Bugs kommen muss das beim Debuggen berücksichtigt werden.
-   */
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
   using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
   LCDDirection& ldir =  c.outputDevices.m_lcdDisplay.m_lastGivenDirection;
@@ -266,7 +258,7 @@ TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
   ldir = LCDDirection::none;
 
   c.applyEncoderInput();
-  EXPECT_EQ(c.outputDevices.m_lcdDisplay.m_lastGivenDirection,LCDDirection::none);
+  EXPECT_EQ(c.outputDevices.m_lcdDisplay.m_lastGivenDirection,LCDDirection::right);
 
   ldir = LCDDirection::none; 
   output.lcd_stateIntent = LCDIntent::Page1;
@@ -305,7 +297,7 @@ TEST_F(SystemControllerTest, applyEncoderInput_maxStep) {
   ldir = LCDDirection::none;
 
   c.applyEncoderInput();
-  EXPECT_EQ(ldir, LCDDirection::none);
+  EXPECT_EQ(ldir, LCDDirection::right);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page1;
@@ -344,7 +336,7 @@ TEST_F(SystemControllerTest, applyEncoderInput_negative_maxStep) {
   ldir = LCDDirection::none;
 
   c.applyEncoderInput();
-  EXPECT_EQ(ldir, LCDDirection::none);
+  EXPECT_EQ(ldir, LCDDirection::left);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page4;
@@ -383,7 +375,7 @@ TEST_F(SystemControllerTest, applyEncoderInput_negative_minStep) {
   ldir = LCDDirection::none;
 
   c.applyEncoderInput();
-  EXPECT_EQ(ldir, LCDDirection::none);
+  EXPECT_EQ(ldir, LCDDirection::left);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page4;

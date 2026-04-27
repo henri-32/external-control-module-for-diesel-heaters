@@ -1,4 +1,5 @@
 #include "controller.h"
+#include "config.h"
 
 void SystemController::operator()() {
   inputDevices.updateInputData();
