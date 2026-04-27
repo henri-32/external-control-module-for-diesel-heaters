@@ -1,25 +1,13 @@
-VENV =venv
-PYTHON = $(VENV)/bin/python 
-PIP = $(VENV)/bin/pip 
-
 .PHONY: setup install clean run_test
 
 setup: 
-	python3 -m venv $(VENV) 
-	$(PIP) install --upgrade pip 
-	$(PIP) install pip-tools 
-	mkdir ./.logs
-	mkdir build
-	mkdir build_test
-	touch ./.logs/unit_tests.log
-	
-
+	@scripts/setup.sh
 
 requirements.txt: requirements.in
 	$(PYTHON) -m piptools compile 
 
 install: requirements.txt
-	$(PIP) install -r requirements.txt
+	venv/bin/pip install -r requirements.txt
 
 compiledb: 
 	rm -f compile_commands.json 
