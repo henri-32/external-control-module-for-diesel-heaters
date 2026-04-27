@@ -15,6 +15,7 @@ build/*
 build_test/*
 compile_commands.json
 .logs/
+neovim_utils/quickfix_list.txt
 
 # Python 
 venv/

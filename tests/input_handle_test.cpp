@@ -247,104 +247,164 @@ TEST_F(
 //{{{
 TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
   //{{{
-  /* An dieser Stelle wird klar, dass das Design nicht gut ist. 
-   * Es wird implizit die API von dem Display Driver mit cyclePages 
-   * mitgetestet. Die ist allerdings abhängig von der arm toolchain. 
-   * Deswegen wurde die logik in die TestDisplay Klasse übertragen. 
+  /* An dieser Stelle wird klar, dass das Design nicht gut ist.
+   * Es wird implizit die API von dem Display Driver mit cyclePages
+   * mitgetestet. Die ist allerdings abhängig von der arm toolchain.
+   * Deswegen wurde die logik in die TestDisplay Klasse übertragen.
    * Dort wird künstlich die Variable m_displayState gehalten, welche
-     hier im Test gesetzt und als Stub für den tatsächlichen Status  
-     in der RealDisplay Klasse genutzt wird. Sollte es zu weiteren 
-     Bugs kommen muss das beim Debuggen berücksichtigt werden. 
+     hier im Test gesetzt und als Stub für den tatsächlichen Status
+     in der RealDisplay Klasse genutzt wird. Sollte es zu weiteren
+     Bugs kommen muss das beim Debuggen berücksichtigt werden.
    */
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  LCDIntent &displayState = c.outputDevices.m_lcdDisplay.m_displayState;
+  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  LCDDirection& ldir =  c.outputDevices.m_lcdDisplay.m_lastGivenDirection;
+
   input.encoder_val = 1;
   input.alternatorPressed = true;
-  displayState = LCDIntent::Page1;
+  output.lcd_stateIntent = LCDIntent::OFF;
+  ldir = LCDDirection::none;
 
   c.applyEncoderInput();
+  EXPECT_EQ(c.outputDevices.m_lcdDisplay.m_lastGivenDirection,LCDDirection::none);
 
-  EXPECT_EQ(displayState, LCDIntent::Page2);
-
-  c.applyEncoderInput();
-
-  EXPECT_EQ(displayState, LCDIntent::Page3);
+  ldir = LCDDirection::none; 
+  output.lcd_stateIntent = LCDIntent::Page1;
 
   c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::right);
+  ldir = LCDDirection::none; 
+  output.lcd_stateIntent = LCDIntent::Page2;
 
-  EXPECT_EQ(displayState, LCDIntent::Page4);
+  c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::right);
+  ldir = LCDDirection::none; 
+  output.lcd_stateIntent = LCDIntent::Page3;
+
+  c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::right);
+  ldir = LCDDirection::none; 
+  output.lcd_stateIntent = LCDIntent::Page4;
+
+  c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::right);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyEncoderInput_maxStep) {
   //{{{
-  /*Sollte beim Debuggen hier ein Problem auftauchen 
+  /*Sollte beim Debuggen hier ein Problem auftauchen
    *siehe Zeile 250 */
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  LCDIntent &displayState = c.outputDevices.m_lcdDisplay.m_displayState;
+  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  LCDDirection &ldir = c.outputDevices.m_lcdDisplay.m_lastGivenDirection;
 
   input.encoder_val = guards::encoderValCutoff;
   input.alternatorPressed = true;
-  displayState = LCDIntent::Page1;
+  output.lcd_stateIntent = LCDIntent::OFF;
+  ldir = LCDDirection::none;
 
   c.applyEncoderInput();
-  EXPECT_EQ(displayState, LCDIntent::Page2);
+  EXPECT_EQ(ldir, LCDDirection::none);
+
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page1;
 
   c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::right);
 
-  EXPECT_EQ(displayState, LCDIntent::Page3);
-
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page2;
   c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::right);
 
-  EXPECT_EQ(displayState, LCDIntent::Page4);
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page3;
+  c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::right);
+
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page4;
+  c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::right);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyEncoderInput_negative_maxStep) {
   //{{{
-  /*Sollte beim Debuggen hier ein Problem auftauchen 
+  /*Sollte beim Debuggen hier ein Problem auftauchen
    *siehe Zeile 250 */
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  LCDIntent &displayState = c.outputDevices.m_lcdDisplay.m_displayState;
+  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  LCDDirection &ldir = c.outputDevices.m_lcdDisplay.m_lastGivenDirection;
 
   input.encoder_val = -guards::encoderValCutoff;
   input.alternatorPressed = true;
-  displayState = LCDIntent::Page4;
+  output.lcd_stateIntent = LCDIntent::OFF;
+  ldir = LCDDirection::none;
 
   c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::none);
 
-  EXPECT_EQ(displayState, LCDIntent::Page3);
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page4;
+
   c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::left);
 
-  EXPECT_EQ(displayState, LCDIntent::Page2);
-
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page3;
   c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::left);
 
-  EXPECT_EQ(displayState, LCDIntent::Page1);
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page2;
+  c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::left);
+
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page1;
+  c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::left);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyEncoderInput_negative_minStep) {
   //{{{
-  /*Sollte beim Debuggen hier ein Problem auftauchen 
+  /*Sollte beim Debuggen hier ein Problem auftauchen
    *siehe Zeile 250 */
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  LCDIntent &displayState = c.outputDevices.m_lcdDisplay.m_displayState;
+  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  LCDDirection &ldir = c.outputDevices.m_lcdDisplay.m_lastGivenDirection;
 
   input.encoder_val = -1;
   input.alternatorPressed = true;
-  displayState = LCDIntent::Page4;
+  output.lcd_stateIntent = LCDIntent::OFF;
+  ldir = LCDDirection::none;
 
   c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::none);
 
-  EXPECT_EQ(displayState, LCDIntent::Page3);
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page4;
+
   c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::left);
 
-  EXPECT_EQ(displayState, LCDIntent::Page2);
-
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page3;
   c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::left);
 
-  EXPECT_EQ(displayState, LCDIntent::Page1);
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page2;
+  c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::left);
+
+  ldir = LCDDirection::none;
+  output.lcd_stateIntent = LCDIntent::Page1;
+  c.applyEncoderInput();
+  EXPECT_EQ(ldir, LCDDirection::left);
 }
 //}}}
 

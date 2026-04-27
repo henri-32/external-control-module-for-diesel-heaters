@@ -4,12 +4,13 @@
 class TestDisplay {
 public:
   TestDisplay();
-  
-  using intent = ControllerOutputIntent::LCD_StateIntent; 
+  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection; 
+  using LCDIntent = ControllerOutputIntent::LCD_StateIntent; 
 
-  intent m_displayState;
+  LCDDirection m_lastGivenDirection = LCDDirection::none;
+  LCDIntent m_stateIntent = LCDIntent::OFF;
 
-  void cyclePages(ControllerOutputIntent::LCD_CycleDirection direction);
+  void cyclePages(LCDDirection direction);
 
 };
 
