@@ -1,6 +1,6 @@
+#include "config.h"
 #include "controller.h"
 #include "types.h"
-#include "config.h"
 #include <gtest/gtest.h>
 
 class SystemControllerTest : public ::testing::Test {
@@ -250,7 +250,7 @@ TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
   //{{{
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
   using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
-  LCDDirection& ldir =  c.outputDevices.m_lcdDisplay.m_lastGivenDirection;
+  LCDDirection &ldir = c.outputDevices.m_lcdDisplay.m_lastGivenDirection;
 
   input.encoder_val = 1;
   input.alternatorPressed = true;
@@ -258,24 +258,25 @@ TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
   ldir = LCDDirection::none;
 
   c.applyEncoderInput();
-  EXPECT_EQ(c.outputDevices.m_lcdDisplay.m_lastGivenDirection,LCDDirection::right);
+  EXPECT_EQ(c.outputDevices.m_lcdDisplay.m_lastGivenDirection,
+            LCDDirection::right);
 
-  ldir = LCDDirection::none; 
+  ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page1;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
-  ldir = LCDDirection::none; 
+  ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page2;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
-  ldir = LCDDirection::none; 
+  ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page3;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
-  ldir = LCDDirection::none; 
+  ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page4;
 
   c.applyEncoderInput();
@@ -400,6 +401,87 @@ TEST_F(SystemControllerTest, applyEncoderInput_negative_minStep) {
 }
 //}}}
 
+TEST_F(SystemControllerTest, applyEncoderInput_minStep_without_alternator) {
+  //{{{
+  float &target = c.heaterStatus.target_temp_c;
+  input.encoder_val = 1;
+  input.alternatorPressed = false;
+  target = 10.0;
+
+  c.applyEncoderInput();
+
+  EXPECT_EQ(target, 10.5);
+}
+//}}}
+
+TEST_F(SystemControllerTest, applyEncoderInput_maxStep_without_alternator) {
+  //{{{
+  float &target = c.heaterStatus.target_temp_c;
+  input.encoder_val = guards::encoderValCutoff;
+  input.alternatorPressed = false;
+  target = 10.0;
+
+  c.applyEncoderInput();
+
+  EXPECT_EQ(target, 10 + guards::encoderValCutoff * guards::tempStep);
+}
+//}}}
+
+TEST_F(SystemControllerTest,
+       applyEncoderInput_maxStep_without_alternator_over_guard) {
+  //{{{
+  float &target = c.heaterStatus.target_temp_c;
+  input.encoder_val = guards::encoderValCutoff;
+  input.alternatorPressed = false;
+  target = guards::tempMax - 1;
+
+  c.applyEncoderInput();
+
+  EXPECT_EQ(target, guards::tempMax);
+}
+//}}}
+
+TEST_F(SystemControllerTest,
+       applyEncoderInput_negative_maxStep_without_alternator_below_guard) {
+  //{{{
+  float &target = c.heaterStatus.target_temp_c;
+  input.encoder_val = -guards::encoderValCutoff;
+  input.alternatorPressed = false;
+  target = guards::tempMin + 1;
+
+  c.applyEncoderInput();
+
+  EXPECT_EQ(target, guards::tempMin);
+}
+//}}}
+
+TEST_F(SystemControllerTest,
+       applyEncoderInput_negative_min_Step_without_alternator) {
+  //{{{
+  float &target = c.heaterStatus.target_temp_c;
+  input.encoder_val = -1;
+  input.alternatorPressed = false;
+  target = 10.0;
+
+  c.applyEncoderInput();
+
+  EXPECT_EQ(target, 9.5);
+}
+//}}}
+
+TEST_F(SystemControllerTest,
+       applyEncoderInput_negative_max_Step_without_alternator) {
+  //{{{
+  float &target = c.heaterStatus.target_temp_c;
+  input.encoder_val = -guards::encoderValCutoff;
+  input.alternatorPressed = false;
+  target = 10.0;
+
+  c.applyEncoderInput();
+
+  EXPECT_EQ(target, 10 - guards::encoderValCutoff*guards::tempStep );
+}
+//}}}
 //}}}
 
 // Handling of Display Button
