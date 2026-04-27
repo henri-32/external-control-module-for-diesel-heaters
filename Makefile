@@ -8,6 +8,11 @@ setup:
 	python3 -m venv $(VENV) 
 	$(PIP) install --upgrade pip 
 	$(PIP) install pip-tools 
+	mkdir ./.logs
+	mkdir build
+	mkdir build_test
+	touch ./.logs/unit_tests.log
+	
 
 
 requirements.txt: requirements.in

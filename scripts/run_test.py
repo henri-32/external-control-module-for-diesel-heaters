@@ -9,8 +9,6 @@ log_file = project_root / ".logs" / "unit_tests.log"
 xml_file = project_root / ".logs" / "unit_tests_report.xml"
 ql_file = project_root / "neovim_utils" / "quickfix_list.txt" 
 
-if not log_file.exists(): 
-    open(log_file, "x") 
 
 with open (log_file, "w") as f: 
     process = subprocess.Popen(
@@ -47,8 +45,6 @@ for testcase in root_xml.iter("testcase"):
         quickfix_lines.append("{}:{}: {}".format(file, line, msg)
 )
 
-if not ql_file.exists(): 
-    open(ql_file, "x")
 
 with open(ql_file, "w") as f:
     for line in quickfix_lines: 
