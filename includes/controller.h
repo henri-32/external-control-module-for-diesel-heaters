@@ -36,6 +36,9 @@ private:
   void writeOutputIntent();
   void updateMemory();
 
+  //Helper
+  void clampTargetTempC(float& target);
+
   ControllerInputData inputData;
   HeaterStatus heaterStatus;
   ControllerOutputIntent outputIntent;

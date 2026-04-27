@@ -13,5 +13,8 @@ struct my_pin_config {
 
 struct guards {
   static constexpr int encoderValCutoff = 6;
+  static constexpr float tempStep = 0.5; 
+  static constexpr int tempMax = 30; 
+  static constexpr int tempMin = 5; 
 };
 

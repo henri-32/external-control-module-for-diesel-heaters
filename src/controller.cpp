@@ -100,23 +100,31 @@ void SystemController::applyModeSwitchInput() {
 //}}}
 
 void SystemController::applyEncoderInput() {
-  if (inputData.encoder_val == 0)
+  //{{{
+  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  const int val = inputData.encoder_val;
+
+  if (val == 0)
     return;
+
   if (inputData.alternatorPressed) {
-    if (inputData.encoder_val >= 1 &&
-        inputData.encoder_val <= guards::encoderValCutoff) {
-      outputDevices.m_lcdDisplay.cyclePages(
-          ControllerOutputIntent::LCD_CycleDirection::right);
+    if (val >= 1 && val <= guards::encoderValCutoff) {
+      outputDevices.m_lcdDisplay.cyclePages(LCDDirection::right);
       inputData.alternatorUsed = true;
-    } else if (inputData.encoder_val <= -1 &&
-               inputData.encoder_val >= -guards::encoderValCutoff) {
-      outputDevices.m_lcdDisplay.cyclePages(
-          ControllerOutputIntent::LCD_CycleDirection::left);
+      return;
+    }
+    if (val <= -1 && val >= -guards::encoderValCutoff) {
+      outputDevices.m_lcdDisplay.cyclePages(LCDDirection::left);
       inputData.alternatorUsed = true;
- //TODO: HIER FEHLT LOGIK OHNE ALTERNATOR PATH ???? 
+      return;
     }
   }
+  heaterStatus.target_temp_c += val * guards::tempStep; // encoderVal ist signed
+
+  // Limits to config.h guards
+   clampTargetTempC(heaterStatus.target_temp_c);
 }
+//}}}
 
 void SystemController::applyDisplayButtonInput() {
   //{{{
@@ -197,4 +205,12 @@ void SystemController::updateMemory() {
     memoryController.update(newLongtimeData);
   }
 #endif
+};
+
+// =============Helper Functions
+void SystemController::clampTargetTempC(float &target) {
+  if (target > guards::tempMax)
+    target = guards::tempMax;
+  else if (target < guards::tempMin)
+    target = guards::tempMin;
 };
