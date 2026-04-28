@@ -255,39 +255,43 @@ TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
   input.encoder_val = 1;
   input.alternatorPressed = true;
   output.lcd_stateIntent = LCDIntent::OFF;
+  c.heaterStatus.target_temp_c = 10;
   ldir = LCDDirection::none;
 
   c.applyEncoderInput();
   EXPECT_EQ(c.outputDevices.m_lcdDisplay.m_lastGivenDirection,
             LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page1;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page2;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page3;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page4;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyEncoderInput_maxStep) {
   //{{{
-  /*Sollte beim Debuggen hier ein Problem auftauchen
-   *siehe Zeile 250 */
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
   using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
   LCDDirection &ldir = c.outputDevices.m_lcdDisplay.m_lastGivenDirection;
@@ -296,37 +300,41 @@ TEST_F(SystemControllerTest, applyEncoderInput_maxStep) {
   input.alternatorPressed = true;
   output.lcd_stateIntent = LCDIntent::OFF;
   ldir = LCDDirection::none;
+  c.heaterStatus.target_temp_c = 10;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page1;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page2;
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page3;
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page4;
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::right);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyEncoderInput_negative_maxStep) {
   //{{{
-  /*Sollte beim Debuggen hier ein Problem auftauchen
-   *siehe Zeile 250 */
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
   using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
   LCDDirection &ldir = c.outputDevices.m_lcdDisplay.m_lastGivenDirection;
@@ -335,30 +343,36 @@ TEST_F(SystemControllerTest, applyEncoderInput_negative_maxStep) {
   input.alternatorPressed = true;
   output.lcd_stateIntent = LCDIntent::OFF;
   ldir = LCDDirection::none;
+  c.heaterStatus.target_temp_c = 10;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::left);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page4;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::left);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page3;
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::left);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page2;
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::left);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page1;
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::left);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 }
 //}}}
 
@@ -374,25 +388,30 @@ TEST_F(SystemControllerTest, applyEncoderInput_negative_minStep) {
   input.alternatorPressed = true;
   output.lcd_stateIntent = LCDIntent::OFF;
   ldir = LCDDirection::none;
+  c.heaterStatus.target_temp_c = 10;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::left);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page4;
 
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::left);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page3;
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::left);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page2;
   c.applyEncoderInput();
   EXPECT_EQ(ldir, LCDDirection::left);
+  EXPECT_EQ(c.heaterStatus.target_temp_c, 10);
 
   ldir = LCDDirection::none;
   output.lcd_stateIntent = LCDIntent::Page1;
