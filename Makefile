@@ -121,7 +121,7 @@ $(BUILD_DIR)/main.elf: $(OBJS)
 
 $(BUILD_DIR)/main.hex: $(BUILD_DIR)/main.elf
 	@avr-objcopy -O ihex $< $@
-	@echo ".elf and .hex file created"
+	@echo ".hex file created"
 
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
