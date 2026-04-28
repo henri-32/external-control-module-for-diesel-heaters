@@ -13,11 +13,13 @@ install: requirements.txt
 
 compiledb:
 	@rm -f compile_commands.json
+	@make clean 
 	@bear -- $(MAKE) all 
 	@echo "compiledb updated to production build"
 
 compiledb_test:
 	@rm -f compile_commands.json
+	@make clean
 	@bear -- $(MAKE) test
 	@echo "compiledb updated to test build"
 
@@ -101,7 +103,7 @@ OBJS := $(C_OBJS) $(CPP_OBJS)
 DEPS := $(OBJS:.o=.d)
 
 TEST_CPP_SRCS := \
-	tests/input_handle_test.cpp \
+	tests/SystemController_unit_tests.cpp \
 	tests/test_devices.cpp \
 	src/controller.cpp
 

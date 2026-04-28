@@ -11,10 +11,11 @@ struct my_pin_config {
 };
 
 
-struct guards {
+struct config {
   static constexpr int encoderValCutoff = 6;
   static constexpr float tempStep = 0.5; 
   static constexpr int tempMax = 30; 
   static constexpr int tempMin = 5; 
+  static constexpr float tolerance = 1.5;
 };
 

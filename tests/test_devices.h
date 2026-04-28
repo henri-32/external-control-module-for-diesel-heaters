@@ -14,7 +14,7 @@ public:
 
 };
 
-class TestInputDevices : public InputDevices {
+class TestInputDevices : public IInputDevices {
 public:
   TestInputDevices(ControllerInputData &id);
   void init() override {}

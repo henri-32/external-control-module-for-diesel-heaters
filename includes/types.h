@@ -43,14 +43,14 @@ struct HeaterStatus {
   enum class Mode { TEMP, POWER };
   Mode mode = Mode::TEMP;
 
-  float target_temp_c = 17;
+  float target_tempC = 17;
 };
 
 class ControllerOutputIntent {
 public:
   struct DisplayContent {
     float temp_c;
-    float target_temp_c;
+    float target_tempC;
     HeaterStatus::HeatingState heatingState;
     HeaterStatus::Mode mode;
     RuntimeData runtimeDisplayData;

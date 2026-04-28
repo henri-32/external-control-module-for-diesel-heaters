@@ -1,4 +1,4 @@
-class InputDevices { 
+class IInputDevices { 
 public:
 	virtual void init() = 0; 
 	virtual void updateInputData() = 0; 
