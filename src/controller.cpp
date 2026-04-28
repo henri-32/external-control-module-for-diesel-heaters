@@ -7,7 +7,9 @@ void SystemController::operator()() {
   applyHeatingLogic();
   writeOutputIntent();
   outputDevices.update();
-  // systemStatistic.update(inputData, heaterStatus);
+  #ifdef MEMORY_FUNCTIONS 
+  systemStatistic.update(inputData, heaterStatus);
+  #endif
   updateMemory();
 }
 
@@ -17,11 +19,13 @@ void SystemController::init() {
 }
 
 void SystemController::applyInputdata() {
+//{{{
   applyPowerSwitchInput();
   applyModeSwitchInput();
   applyDisplayButtonInput();
   applyEncoderInput();
 }
+//}}}
 
 void SystemController::applyPowerSwitchInput() {
   //{{{
@@ -99,33 +103,6 @@ void SystemController::applyModeSwitchInput() {
 }
 //}}}
 
-void SystemController::applyEncoderInput() {
-  //{{{
-  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
-  const int val = inputData.encoder_val;
-
-  if (val == 0)
-    return;
-
-  if (inputData.alternatorPressed) {
-    if (val >= 1 && val <= guards::encoderValCutoff) {
-      outputDevices.m_lcdDisplay.cyclePages(LCDDirection::right);
-      inputData.alternatorUsed = true;
-      return;
-    }
-    if (val <= -1 && val >= -guards::encoderValCutoff) {
-      outputDevices.m_lcdDisplay.cyclePages(LCDDirection::left);
-      inputData.alternatorUsed = true;
-      return;
-    }
-  }
-  heaterStatus.target_temp_c += val * guards::tempStep; // encoderVal ist signed
-
-  // Limits to config.h guards
-   clampTargetTempC(heaterStatus.target_temp_c);
-}
-//}}}
-
 void SystemController::applyDisplayButtonInput() {
   //{{{
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
@@ -164,30 +141,65 @@ void SystemController::applyDisplayButtonInput() {
 }
 //}}}
 
+void SystemController::applyEncoderInput() {
+  //{{{
+  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  const int val = inputData.encoder_val;
+
+  if (val == 0)
+    return;
+
+  if (inputData.alternatorPressed) {
+    if (val >= 1 && val <= config::encoderValCutoff) {
+      outputDevices.m_lcdDisplay.cyclePages(LCDDirection::right);
+      inputData.alternatorUsed = true;
+      return;
+    }
+    if (val <= -1 && val >= -config::encoderValCutoff) {
+      outputDevices.m_lcdDisplay.cyclePages(LCDDirection::left);
+      inputData.alternatorUsed = true;
+      return;
+    }
+  }
+  heaterStatus.target_tempC += val * config::tempStep; // encoderVal ist signed
+
+  // Limits to config.h struct limits
+  clampTargetTempC(heaterStatus.target_tempC);
+}
+//}}}
+
 void SystemController::applyHeatingLogic() {
-  constexpr float setpointTolerance = 1.5;
+  //{{{
+  using State = HeaterStatus::HeatingState;
+  using Command = ControllerOutputIntent::RelaisCommand;
+  using Priority = ControllerOutputIntent::RelaisPriority;
 
   if (heaterStatus.mode != HeaterStatus::Mode::TEMP)
     return;
-  if (inputData.sensor_tempC < heaterStatus.target_temp_c - setpointTolerance &&
-      heaterStatus.heatingState == HeaterStatus::HeatingState::OFF) {
-    outputIntent.requestRelaisCommand(
-        ControllerOutputIntent::RelaisCommand::Long,
-        ControllerOutputIntent::RelaisPriority::Low);
-    heaterStatus.heatingState = HeaterStatus::HeatingState::ON;
-  } else if (inputData.sensor_tempC >
-                 heaterStatus.target_temp_c + setpointTolerance &&
-             heaterStatus.heatingState == HeaterStatus::HeatingState::ON) {
-    outputIntent.requestRelaisCommand(
-        ControllerOutputIntent::RelaisCommand::Long,
-        ControllerOutputIntent::RelaisPriority::Low);
-    heaterStatus.heatingState = HeaterStatus::HeatingState::OFF;
+
+  if (inputData.sensor_tempC <=
+          (heaterStatus.target_tempC - config::tolerance) &&
+      heaterStatus.heatingState == State::OFF) {
+
+    outputIntent.requestRelaisCommand(Command::Long, Priority::Low);
+    heaterStatus.heatingState = State::ON;
+    return;
+  }
+  if (inputData.sensor_tempC >=
+          (heaterStatus.target_tempC + config::tolerance) &&
+      heaterStatus.heatingState == State::ON) {
+
+    outputIntent.requestRelaisCommand(Command::Long, Priority::Low);
+    heaterStatus.heatingState = State::OFF;
+    return;
   }
 }
+//}}}
 
 void SystemController::writeOutputIntent() {
+//{{{
   outputIntent.displayContent.temp_c = inputData.sensor_tempC;
-  outputIntent.displayContent.target_temp_c = heaterStatus.target_temp_c;
+  outputIntent.displayContent.target_tempC = heaterStatus.target_tempC;
   outputIntent.displayContent.heatingState = heaterStatus.heatingState;
   outputIntent.displayContent.mode = heaterStatus.mode;
 #ifdef MEMORY_FUNCTIONS
@@ -197,8 +209,10 @@ void SystemController::writeOutputIntent() {
       memoryController.getFinalAverages();
 #endif
 }
+//}}}
 
 void SystemController::updateMemory() {
+//{{{
 #ifdef MEMORY_FUNCTIONS
   LongtimeData newLongtimeData;
   if (systemStatistic.takeLongTimeData(newLongtimeData)) {
@@ -206,11 +220,14 @@ void SystemController::updateMemory() {
   }
 #endif
 };
+//}}}
 
 // =============Helper Functions
 void SystemController::clampTargetTempC(float &target) {
-  if (target > guards::tempMax)
-    target = guards::tempMax;
-  else if (target < guards::tempMin)
-    target = guards::tempMin;
+//{{{
+  if (target > config::tempMax)
+    target = config::tempMax;
+  else if (target < config::tempMin)
+    target = config::tempMin;
 };
+//}}}

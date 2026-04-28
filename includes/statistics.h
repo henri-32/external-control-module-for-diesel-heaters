@@ -68,7 +68,7 @@ private:
 
   void calculateDiffTempToTarget() {
     calculationData.TempDiffcontainer +=
-        m_input.sensor_tempC - m_status.target_temp_c;
+        m_input.sensor_tempC - m_status.target_tempC;
     runtimeData.mediumDiffTempToTarget =
         calculationData.TempDiffcontainer / calculationData.updateCounter;
   }

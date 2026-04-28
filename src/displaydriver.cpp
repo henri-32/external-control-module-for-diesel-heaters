@@ -25,41 +25,41 @@ void DisplayDriver::update() {
 void DisplayDriver::cyclePages(
     ControllerOutputIntent::LCD_CycleDirection direction) {
 
-  using intent = ControllerOutputIntent::LCD_StateIntent;
+  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
   if (direction == ControllerOutputIntent::LCD_CycleDirection::right) {
     switch (m_displayState) {
-    case intent::OFF: 
+    case LCDIntent::OFF: 
       return; 
-    case intent::Page1:
-      m_displayState = intent::Page2;
+    case LCDIntent::Page1:
+      m_displayState = LCDIntent::Page2;
       break;
-    case intent::Page2:
-      m_displayState = intent::Page3;
+    case LCDIntent::Page2:
+      m_displayState = LCDIntent::Page3;
       break;
-    case intent::Page3:
-      m_displayState = intent::Page4;
+    case LCDIntent::Page3:
+      m_displayState = LCDIntent::Page4;
       break;
-    case intent::Page4:
-      m_displayState = intent::Page1;
+    case LCDIntent::Page4:
+      m_displayState = LCDIntent::Page1;
       break;
     }
     return;
   }
   if (direction == ControllerOutputIntent::LCD_CycleDirection::left) {
     switch (m_displayState) {
-    case intent::OFF: 
+    case LCDIntent::OFF: 
        return; 
-    case intent::Page1:
-      m_displayState = intent::Page3;
+    case LCDIntent::Page1:
+      m_displayState = LCDIntent::Page3;
       break;
-    case intent::Page2:
-      m_displayState = intent::Page1;
+    case LCDIntent::Page2:
+      m_displayState = LCDIntent::Page1;
       break;
-    case intent::Page3:
-      m_displayState = intent::Page2;
+    case LCDIntent::Page3:
+      m_displayState = LCDIntent::Page2;
       break;
-    case intent::Page4:
-      m_displayState = intent::Page3;
+    case LCDIntent::Page4:
+      m_displayState = LCDIntent::Page3;
       break;
     }
     return;
@@ -147,8 +147,8 @@ void DisplayDriver::formatTempFloatsForDisplay() {
 
     t_int = int(m_displaycontent.temp_c);
     t_frac = abs(static_cast<int>(m_displaycontent.temp_c * 10) % 10);
-    s_int = int(m_displaycontent.target_temp_c);
-    s_frac = abs(static_cast<int>(m_displaycontent.target_temp_c * 10) % 10);
+    s_int = int(m_displaycontent.target_tempC);
+    s_frac = abs(static_cast<int>(m_displaycontent.target_tempC * 10) % 10);
     break;
 
   case ControllerOutputIntent::LCD_StateIntent::Page3:

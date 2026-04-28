@@ -9,7 +9,7 @@
 #include "types.h"
 #include "interfaces.h"
 
-class RealInputDevices : public  InputDevices {
+class RealInputDevices : public  IInputDevices {
 public:
   RealInputDevices(ControllerInputData &id);
 
