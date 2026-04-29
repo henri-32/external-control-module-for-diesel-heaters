@@ -2,6 +2,8 @@
 
 .PHONY: all setup install compiledb compiledb_test test run_test clean
 
+MAKEFLAGS += --no-print-directory
+
 setup:
 	@scripts/setup.sh
 
@@ -107,15 +109,17 @@ TEST_CPP_SRCS := \
 	tests/test_devices.cpp \
 	src/controller.cpp \
 
-TEST_CC_SRCS := \
-	$(GTEST_ROOT)/src/gtest-all.cc
+
+GTEST_LIB :=$(TEST_BUILD_DIR)/libtest.a
+GTEST_OBJ :=$(TEST_BUILD_DIR)/gtest-all.o
 
 TEST_CPP_OBJS := $(addprefix $(TEST_BUILD_DIR)/,$(TEST_CPP_SRCS:.cpp=.o))
-TEST_CC_OBJS := $(addprefix $(TEST_BUILD_DIR)/,$(TEST_CC_SRCS:.cc=.o))
 TEST_OBJS := $(TEST_CPP_OBJS) $(TEST_CC_OBJS)
 TEST_DEPS := $(TEST_OBJS:.o=.d)
 
 all: $(BUILD_DIR)/main.hex
+
+test: $(TEST_BUILD_DIR)/unit_tests
 
 $(BUILD_DIR)/main.elf: $(OBJS)
 	@$(CXX) -mmcu=$(MCU) -Wl,--gc-sections $^ -o $@
@@ -133,11 +137,18 @@ $(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-test: $(TEST_BUILD_DIR)/unit_tests
 
-$(TEST_BUILD_DIR)/unit_tests: $(TEST_OBJS)
+$(TEST_BUILD_DIR)/unit_tests: $(TEST_OBJS) $(GTEST_LIB)
 	@$(TESTCC) $(TEST_CXXFLAGS) $^ -o $@
 	@echo "build_tests/unit_tests created"
+
+$(GTEST_OBJ): $(GTEST_ROOT)/src/gtest-all.cc
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_INCLUDES) -c $< -o $@
+ 
+$(GTEST_LIB): $(GTEST_OBJ)
+	@ar rcs $@ $^ 
+	@echo "gtest library build" 
 
 $(TEST_BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
