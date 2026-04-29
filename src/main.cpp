@@ -1,7 +1,14 @@
-#include <Arduino.h>
 #include "controller.h"
+#include "types.h"
+#include <Arduino.h>
 
-SystemController controller;
-void setup() {controller.init(); };
+ControllerInputData inputData; 
+ControllerOutputIntent outputData; 
+RealInputDevices inputDevices {inputData}; 
+RealOutputDevices outputDevices {outputData}; 
+
+SystemController controller {inputDevices, outputDevices}  ;
+
+void setup() {controller.init(); }
 
 void loop() { controller(); }

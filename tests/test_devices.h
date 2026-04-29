@@ -21,7 +21,7 @@ public:
   void updateInputData() override {}
 };
 
-class TestOutputDevices : public OutputDevices {
+class TestOutputDevices : public IOutputDevices {
 public:
   TestOutputDevices(ControllerOutputIntent &oi);
   void init() override {}
@@ -29,3 +29,4 @@ public:
 
   TestDisplay m_lcdDisplay{};
 };
+

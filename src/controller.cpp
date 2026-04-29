@@ -1,6 +1,9 @@
 #include "controller.h"
 #include "config.h"
 
+SystemController::SystemController(IInputDevices &i, IOutputDevices &o)
+    : inputDevices(i), outputDevices(o) {}
+
 void SystemController::operator()() {
   inputDevices.updateInputData();
   applyInputdata();
@@ -9,8 +12,8 @@ void SystemController::operator()() {
   outputDevices.update();
 #ifdef MEMORY_FUNCTIONS
   systemStatistic.update(inputData, heaterStatus);
-#endif
   updateMemory();
+#endif
 }
 
 void SystemController::init() {
@@ -152,13 +155,13 @@ void SystemController::applyEncoderInput() {
   if (inputData.alternatorPressed) {
     if (val >= 1 && val <= config::encoderValCutoff) {
       outputIntent.lcd_cycleDirection = LCDDirection::right;
-	  cyclePages();
+      cyclePages();
       inputData.alternatorUsed = true;
       return;
     }
     if (val <= -1 && val >= -config::encoderValCutoff) {
       outputIntent.lcd_cycleDirection = LCDDirection::left;
-	  cyclePages();
+      cyclePages();
       inputData.alternatorUsed = true;
       return;
     }
@@ -235,7 +238,7 @@ void SystemController::clampTargetTempC(float &target) {
 //}}}
 
 void SystemController::cyclePages() {
-//{{{
+  //{{{
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
 
   if (outputIntent.lcd_cycleDirection ==

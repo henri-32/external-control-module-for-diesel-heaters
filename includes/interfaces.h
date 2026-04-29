@@ -4,7 +4,7 @@ public:
 	virtual void updateInputData() = 0; 
 }; 
 
-class OutputDevices {
+class IOutputDevices {
 public: 
   virtual void init() = 0; 
   virtual void update() = 0; 

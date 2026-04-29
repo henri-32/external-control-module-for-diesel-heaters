@@ -3,9 +3,15 @@
 #include "types.h"
 #include <gtest/gtest.h>
 
+ControllerInputData inputData; 
+ControllerOutputIntent outputData; 
+
+TestInputDevices inputDevices{inputData}; 
+TestOutputDevices outputDevices{outputData}; 
+
 class SystemControllerTest : public ::testing::Test {
 protected:
-  SystemController c;
+  SystemController c{inputDevices, outputDevices};
   ControllerInputData &input = c.inputData;
   ControllerOutputIntent &output = c.outputIntent;
 };

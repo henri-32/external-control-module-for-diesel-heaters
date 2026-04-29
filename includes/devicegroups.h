@@ -1,10 +1,7 @@
 #pragma once
 #include "config.h"
-
-#ifndef TEST_BUILD
 #include "displaydriver.h"
 #include "hardwaredrivers.h"
-#endif
 
 #include "types.h"
 #include "interfaces.h"
@@ -25,7 +22,7 @@ public:
   ControllerInputData &m_devices_data;
 };
 
-class RealOutputDevices : public OutputDevices {
+class RealOutputDevices : public IOutputDevices {
 public:
   RealOutputDevices(ControllerOutputIntent &oi);
 

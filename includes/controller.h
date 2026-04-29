@@ -14,7 +14,7 @@
 
 class SystemController {
 public:
-  SystemController() = default;
+  SystemController(IInputDevices& i, IOutputDevices& o);
   void operator()();
   void init();
 
@@ -43,14 +43,9 @@ private:
   ControllerInputData inputData;
   HeaterStatus heaterStatus;
   ControllerOutputIntent outputIntent;
+  IInputDevices& inputDevices;
+  IOutputDevices& outputDevices;
 
-#ifdef TEST_BUILD 
-  TestInputDevices inputDevices {inputData}; 
-  TestOutputDevices outputDevices {outputIntent};
-#else
-  RealInputDevices inputDevices{inputData};
-  RealOutputDevices outputDevices{outputIntent};
-#endif
 
 #ifdef MEMORY_FUNCTIONS
   SystemStatistics systemStatistic;

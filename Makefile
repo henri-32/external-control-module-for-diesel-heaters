@@ -105,7 +105,7 @@ DEPS := $(OBJS:.o=.d)
 TEST_CPP_SRCS := \
 	tests/SystemController_unit_tests.cpp \
 	tests/test_devices.cpp \
-	src/controller.cpp
+	src/controller.cpp \
 
 TEST_CC_SRCS := \
 	$(GTEST_ROOT)/src/gtest-all.cc
