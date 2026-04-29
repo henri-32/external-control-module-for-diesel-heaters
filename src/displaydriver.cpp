@@ -22,49 +22,6 @@ void DisplayDriver::update() {
   writeDisplay(m_lineBuffer);
 }
 
-void DisplayDriver::cyclePages(
-    ControllerOutputIntent::LCD_CycleDirection direction) {
-
-  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  if (direction == ControllerOutputIntent::LCD_CycleDirection::right) {
-    switch (m_displayState) {
-    case LCDIntent::OFF: 
-      return; 
-    case LCDIntent::Page1:
-      m_displayState = LCDIntent::Page2;
-      break;
-    case LCDIntent::Page2:
-      m_displayState = LCDIntent::Page3;
-      break;
-    case LCDIntent::Page3:
-      m_displayState = LCDIntent::Page4;
-      break;
-    case LCDIntent::Page4:
-      m_displayState = LCDIntent::Page1;
-      break;
-    }
-    return;
-  }
-  if (direction == ControllerOutputIntent::LCD_CycleDirection::left) {
-    switch (m_displayState) {
-    case LCDIntent::OFF: 
-       return; 
-    case LCDIntent::Page1:
-      m_displayState = LCDIntent::Page3;
-      break;
-    case LCDIntent::Page2:
-      m_displayState = LCDIntent::Page1;
-      break;
-    case LCDIntent::Page3:
-      m_displayState = LCDIntent::Page2;
-      break;
-    case LCDIntent::Page4:
-      m_displayState = LCDIntent::Page3;
-      break;
-    }
-    return;
-  }
-}
 
 void DisplayDriver::renderLines() {
   switch (m_displayState) {

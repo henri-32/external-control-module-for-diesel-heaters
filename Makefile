@@ -34,7 +34,7 @@ LIBRARIES := includes/libraries
 BUILD_DIR := build
 TEST_BUILD_DIR := build_test
 
-COMMON_DEFINES := -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO
+COMMON_DEFINES := -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO -DARDUINO_ARCH_AVR -DDECIMAL_DIG=__DECIMAL_DIG__
 COMMON_OPT := -Os -ffunction-sections -fdata-sections
 
 CPPFLAGS := $(COMMON_DEFINES)
@@ -52,8 +52,8 @@ INCLUDES := \
 	-I$(LIBRARIES) \
 	-Iincludes
 
-CFLAGS := -mmcu=$(MCU) $(COMMON_OPT) -MMD -MP
-CXXFLAGS := -mmcu=$(MCU) -std=c++11 -Wcpp $(COMMON_OPT) -fno-exceptions -fno-rtti -MMD -MP
+CFLAGS := -mmcu=$(MCU) -std=gnu11 $(COMMON_OPT) -MMD -MP
+CXXFLAGS := -mmcu=$(MCU) -std=gnu++11 -Wcpp $(COMMON_OPT) -fno-exceptions -fno-rtti -MMD -MP
 
 GTEST_ROOT := $(LIBRARIES)/googletest/googletest
 TEST_INCLUDES := \
@@ -155,4 +155,3 @@ clean:
 	@echo "build artifacts, compile commands and test binary removed"
 
 -include $(DEPS) $(TEST_DEPS)
-
