@@ -7,9 +7,9 @@ void SystemController::operator()() {
   applyHeatingLogic();
   writeOutputIntent();
   outputDevices.update();
-  #ifdef MEMORY_FUNCTIONS 
+#ifdef MEMORY_FUNCTIONS
   systemStatistic.update(inputData, heaterStatus);
-  #endif
+#endif
   updateMemory();
 }
 
@@ -19,7 +19,7 @@ void SystemController::init() {
 }
 
 void SystemController::applyInputdata() {
-//{{{
+  //{{{
   applyPowerSwitchInput();
   applyModeSwitchInput();
   applyDisplayButtonInput();
@@ -151,12 +151,14 @@ void SystemController::applyEncoderInput() {
 
   if (inputData.alternatorPressed) {
     if (val >= 1 && val <= config::encoderValCutoff) {
-      outputDevices.m_lcdDisplay.cyclePages(LCDDirection::right);
+      outputIntent.lcd_cycleDirection = LCDDirection::right;
+	  cyclePages();
       inputData.alternatorUsed = true;
       return;
     }
     if (val <= -1 && val >= -config::encoderValCutoff) {
-      outputDevices.m_lcdDisplay.cyclePages(LCDDirection::left);
+      outputIntent.lcd_cycleDirection = LCDDirection::left;
+	  cyclePages();
       inputData.alternatorUsed = true;
       return;
     }
@@ -197,7 +199,7 @@ void SystemController::applyHeatingLogic() {
 //}}}
 
 void SystemController::writeOutputIntent() {
-//{{{
+  //{{{
   outputIntent.displayContent.temp_c = inputData.sensor_tempC;
   outputIntent.displayContent.target_tempC = heaterStatus.target_tempC;
   outputIntent.displayContent.heatingState = heaterStatus.heatingState;
@@ -224,10 +226,57 @@ void SystemController::updateMemory() {
 
 // =============Helper Functions
 void SystemController::clampTargetTempC(float &target) {
-//{{{
+  //{{{
   if (target > config::tempMax)
     target = config::tempMax;
   else if (target < config::tempMin)
     target = config::tempMin;
 };
+//}}}
+
+void SystemController::cyclePages() {
+//{{{
+  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
+
+  if (outputIntent.lcd_cycleDirection ==
+      ControllerOutputIntent::LCD_CycleDirection::right) {
+    switch (outputIntent.lcd_stateIntent) {
+    case LCDIntent::OFF:
+      return;
+    case LCDIntent::Page1:
+      outputIntent.lcd_stateIntent = LCDIntent::Page2;
+      break;
+    case LCDIntent::Page2:
+      outputIntent.lcd_stateIntent = LCDIntent::Page3;
+      break;
+    case LCDIntent::Page3:
+      outputIntent.lcd_stateIntent = LCDIntent::Page4;
+      break;
+    case LCDIntent::Page4:
+      outputIntent.lcd_stateIntent = LCDIntent::Page1;
+      break;
+    }
+    return;
+  }
+  if (outputIntent.lcd_cycleDirection ==
+      ControllerOutputIntent::LCD_CycleDirection::left) {
+    switch (outputIntent.lcd_stateIntent) {
+    case LCDIntent::OFF:
+      return;
+    case LCDIntent::Page1:
+      outputIntent.lcd_stateIntent = LCDIntent::Page3;
+      break;
+    case LCDIntent::Page2:
+      outputIntent.lcd_stateIntent = LCDIntent::Page1;
+      break;
+    case LCDIntent::Page3:
+      outputIntent.lcd_stateIntent = LCDIntent::Page2;
+      break;
+    case LCDIntent::Page4:
+      outputIntent.lcd_stateIntent = LCDIntent::Page3;
+      break;
+    }
+    return;
+  }
+}
 //}}}

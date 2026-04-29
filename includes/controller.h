@@ -38,6 +38,7 @@ private:
 
   //Helper
   void clampTargetTempC(float& target);
+  void cyclePages();
 
   ControllerInputData inputData;
   HeaterStatus heaterStatus;

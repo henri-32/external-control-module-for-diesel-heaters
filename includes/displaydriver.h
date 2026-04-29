@@ -33,7 +33,6 @@ public:
   void init();
   void update();
 
-  void cyclePages(ControllerOutputIntent::LCD_CycleDirection direction);
 
 private:
   void renderLines();
