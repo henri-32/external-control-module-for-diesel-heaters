@@ -1,4 +1,5 @@
 #pragma once
+#include "interfaces.h"
 #include "types.h"
 #include <Arduino.h>
 #include <DallasTemperature.h>
@@ -79,7 +80,7 @@ class RelaisDriver {
 public:
   explicit RelaisDriver(const uint8_t pin);
 
-  void init();
+  void init() ;
   void update(ControllerOutputIntent::RelaisCommand intent);
 
 private:
@@ -94,4 +95,3 @@ private:
   uint16_t m_pulse_ms = 0;
   unsigned long m_pulse_start_ms = 0;
 };
-

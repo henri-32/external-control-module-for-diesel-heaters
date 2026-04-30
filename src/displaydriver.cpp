@@ -1,8 +1,10 @@
 #include "displaydriver.h"
+#include <Arduino.h>
 
-DisplayDriver::DisplayDriver(ControllerOutputIntent::DisplayContent &dc,
+DisplayDriver::DisplayDriver(IDisplay &display,
+                             ControllerOutputIntent::DisplayContent &dc,
                              ControllerOutputIntent::LCD_StateIntent &ds)
-    : m_displaycontent(dc), m_displayState(ds) {}
+    : lcdLibObject(display), m_displaycontent(dc), m_displayState(ds) {}
 
 void DisplayDriver::init() {
   Wire.begin();
@@ -21,7 +23,6 @@ void DisplayDriver::update() {
   renderLines();
   writeDisplay(m_lineBuffer);
 }
-
 
 void DisplayDriver::renderLines() {
   switch (m_displayState) {

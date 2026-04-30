@@ -24,10 +24,10 @@ public:
 
 class RealOutputDevices : public IOutputDevices {
 public:
-  RealOutputDevices(ControllerOutputIntent &oi);
+  RealOutputDevices(ControllerOutputIntent &oi, IDisplay& display);
 
-  void init();
-  void update();
+  void init() override;
+  void update() override;
 
   ControllerOutputIntent &m_devices_intent;
   RelaisDriver m_relais{my_pin_config::relais};

@@ -71,13 +71,6 @@ public:
   RelaisPriority m_currentPriority = Low;
   RelaisCommand m_relaisCommand = RelaisCommand::None;
 
-  void requestRelaisCommand(RelaisCommand command,
-                            RelaisPriority priority = RelaisPriority::Low) {
-    if (priority >= m_currentPriority) {
-      m_relaisCommand = command;
-      m_currentPriority = priority;
-    }
-  }
 
   RelaisCommand consumeRelaisRequest() {
     RelaisCommand command = m_relaisCommand;

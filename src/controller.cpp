@@ -60,13 +60,13 @@ void SystemController::applyPowerSwitchInput() {
   //}}}
 
   if (heaterStatus.heatingState == State::ON) {
-    outputIntent.requestRelaisCommand(COI::RelaisCommand::Long,
+    requestRelaisCommand(COI::RelaisCommand::Long,
                                       COI::RelaisPriority::High);
     heaterStatus.heatingState = State::OFF;
     heaterStatus.mode = HeaterStatus::Mode::POWER;
 
   } else {
-    outputIntent.requestRelaisCommand(COI::RelaisCommand::Long,
+    requestRelaisCommand(COI::RelaisCommand::Long,
                                       COI::RelaisPriority::High);
     heaterStatus.heatingState = State::ON;
     heaterStatus.mode = HeaterStatus::Mode::POWER;
@@ -97,10 +97,10 @@ void SystemController::applyModeSwitchInput() {
   //}}}
 
   if (heaterStatus.mode == Mode::POWER) {
-    outputIntent.requestRelaisCommand(COI::RelaisCommand::Short);
+    requestRelaisCommand(COI::RelaisCommand::Short, COI::RelaisPriority::Low);
     heaterStatus.mode = Mode::TEMP;
   } else {
-    outputIntent.requestRelaisCommand(COI::RelaisCommand::Short);
+    requestRelaisCommand(COI::RelaisCommand::Short, COI::RelaisPriority::Low);
     heaterStatus.mode = Mode::POWER;
   }
 }
@@ -186,7 +186,7 @@ void SystemController::applyHeatingLogic() {
           (heaterStatus.target_tempC - config::tolerance) &&
       heaterStatus.heatingState == State::OFF) {
 
-    outputIntent.requestRelaisCommand(Command::Long, Priority::Low);
+    requestRelaisCommand(Command::Long, Priority::Low);
     heaterStatus.heatingState = State::ON;
     return;
   }
@@ -194,7 +194,7 @@ void SystemController::applyHeatingLogic() {
           (heaterStatus.target_tempC + config::tolerance) &&
       heaterStatus.heatingState == State::ON) {
 
-    outputIntent.requestRelaisCommand(Command::Long, Priority::Low);
+    requestRelaisCommand(Command::Long, Priority::Low);
     heaterStatus.heatingState = State::OFF;
     return;
   }
@@ -280,6 +280,15 @@ void SystemController::cyclePages() {
       break;
     }
     return;
+  }
+}
+
+void SystemController::requestRelaisCommand(
+    ControllerOutputIntent::RelaisCommand command,
+    ControllerOutputIntent::RelaisPriority priority) {
+  if (priority >= outputIntent.m_currentPriority) {
+    outputIntent.m_relaisCommand = command;
+    outputIntent.m_currentPriority = priority;
   }
 }
 //}}}

@@ -5,9 +5,9 @@ Die ganzen PIN Belegungen aus den Konstruktoren sollten in die Config
 
 =====================================================================
 Switch Warnings im Display Driver
-==================================================================
 
-Aktuell wird im Outputintent mit der Funktion requestRelaisCommand darüber entschieden, welcher Befehl vorrang hat, wenn beide Schalter gleichzeitig gedrückt werden. 
-Das ist mindestens grenzwertig, gehört aber eher in die outputDevices
-
-========================================================================
+===================================================================
+Virtualisierung de LCD Displays erfordert wrapper um library.
+Die Kette vom main muss das lcd object über die outputDevices/LCDDriver 
+weitergegeben werden. 
+Die Weitergabe muss auch noch für das TestDisplay in unit_tests.cpp erfolgen 

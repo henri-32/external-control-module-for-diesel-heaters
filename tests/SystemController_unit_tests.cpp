@@ -3,11 +3,11 @@
 #include "types.h"
 #include <gtest/gtest.h>
 
-ControllerInputData inputData; 
-ControllerOutputIntent outputData; 
+ControllerInputData inputData;
+ControllerOutputIntent outputData;
 
-TestInputDevices inputDevices{inputData}; 
-TestOutputDevices outputDevices{outputData}; 
+TestInputDevices inputDevices{inputData};
+TestOutputDevices outputDevices{outputData};
 
 class SystemControllerTest : public ::testing::Test {
 protected:
@@ -300,8 +300,7 @@ TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
   c.heaterStatus.target_tempC = 10;
 
   c.applyEncoderInput();
-  EXPECT_EQ(output.lcd_cycleDirection,
-            LCDDirection::right);
+  EXPECT_EQ(output.lcd_cycleDirection, LCDDirection::right);
   EXPECT_EQ(c.heaterStatus.target_tempC, 10);
 
   output.lcd_cycleDirection = LCDDirection::none;
@@ -541,33 +540,36 @@ TEST_F(SystemControllerTest,
 //}}}
 //}}}
 
+//HELPER
 // applyHeatingLogic
 //{{{
 TEST_F(SystemControllerTest, applyHeatingLogic_too_cold_and_state_off) {
-//{{{
+  //{{{
   using State = HeaterStatus::HeatingState;
-  State& m_state = c.heaterStatus.heatingState;
+  State &m_state = c.heaterStatus.heatingState;
 
   input.sensor_tempC = 10;
   c.heaterStatus.target_tempC = input.sensor_tempC + config::tolerance + 0.1;
-  m_state =State::OFF;
+  m_state = State::OFF;
 
   c.applyHeatingLogic();
 
   EXPECT_EQ(m_state, State::ON);
-  EXPECT_EQ(c.outputIntent.m_relaisCommand, ControllerOutputIntent::RelaisCommand::Long);
-  EXPECT_EQ(c.outputIntent.m_currentPriority, ControllerOutputIntent::RelaisPriority::Low);
+  EXPECT_EQ(c.outputIntent.m_relaisCommand,
+            ControllerOutputIntent::RelaisCommand::Long);
+  EXPECT_EQ(c.outputIntent.m_currentPriority,
+            ControllerOutputIntent::RelaisPriority::Low);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyHeatingLogic_too_cold_and_state_on) {
-//{{{
+  //{{{
   using State = HeaterStatus::HeatingState;
-  State& m_state = c.heaterStatus.heatingState;
+  State &m_state = c.heaterStatus.heatingState;
 
   input.sensor_tempC = 10;
   c.heaterStatus.target_tempC = input.sensor_tempC + config::tolerance + 0.1;
-  m_state =State::ON;
+  m_state = State::ON;
 
   c.applyHeatingLogic();
 
@@ -576,30 +578,32 @@ TEST_F(SystemControllerTest, applyHeatingLogic_too_cold_and_state_on) {
 //}}}
 
 TEST_F(SystemControllerTest, applyHeatingLogic_too_warm_and_state_on) {
-//{{{
+  //{{{
   using State = HeaterStatus::HeatingState;
-  State& m_state = c.heaterStatus.heatingState;
+  State &m_state = c.heaterStatus.heatingState;
 
   input.sensor_tempC = 10;
   c.heaterStatus.target_tempC = input.sensor_tempC - config::tolerance - 0.1;
-  m_state =State::ON;
+  m_state = State::ON;
 
   c.applyHeatingLogic();
 
   EXPECT_EQ(m_state, State::OFF);
-  EXPECT_EQ(c.outputIntent.m_relaisCommand, ControllerOutputIntent::RelaisCommand::Long);
-  EXPECT_EQ(c.outputIntent.m_currentPriority, ControllerOutputIntent::RelaisPriority::Low);
+  EXPECT_EQ(c.outputIntent.m_relaisCommand,
+            ControllerOutputIntent::RelaisCommand::Long);
+  EXPECT_EQ(c.outputIntent.m_currentPriority,
+            ControllerOutputIntent::RelaisPriority::Low);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyHeatingLogic_too_warm_and_state_off) {
-//{{{
+  //{{{
   using State = HeaterStatus::HeatingState;
-  State& m_state = c.heaterStatus.heatingState;
+  State &m_state = c.heaterStatus.heatingState;
 
   input.sensor_tempC = 10;
   c.heaterStatus.target_tempC = input.sensor_tempC - config::tolerance - 0.1;
-  m_state =State::OFF;
+  m_state = State::OFF;
 
   c.applyHeatingLogic();
 
@@ -608,22 +612,76 @@ TEST_F(SystemControllerTest, applyHeatingLogic_too_warm_and_state_off) {
 //}}}
 
 TEST_F(SystemControllerTest, applyHeatingLogic_early_return_by_wrong_mode) {
-//{{{
+  //{{{
   using State = HeaterStatus::HeatingState;
-  State& m_state = c.heaterStatus.heatingState;
+  State &m_state = c.heaterStatus.heatingState;
   c.heaterStatus.mode = HeaterStatus::Mode::POWER;
   input.sensor_tempC = 10;
   c.heaterStatus.target_tempC = input.sensor_tempC - config::tolerance - 0.1;
-  m_state =State::ON;
+  m_state = State::ON;
 
   c.applyHeatingLogic();
 
   EXPECT_EQ(m_state, State::ON);
-  EXPECT_EQ(c.outputIntent.m_relaisCommand, ControllerOutputIntent::RelaisCommand::None);
-  EXPECT_EQ(c.outputIntent.m_currentPriority, ControllerOutputIntent::RelaisPriority::Low);
+  EXPECT_EQ(c.outputIntent.m_relaisCommand,
+            ControllerOutputIntent::RelaisCommand::None);
+  EXPECT_EQ(c.outputIntent.m_currentPriority,
+            ControllerOutputIntent::RelaisPriority::Low);
 }
 //}}}
 //}}}
+
+// cyclePages
+//{{{
+TEST_F(SystemControllerTest, cyclePages_Intent_reacts_to_cycling_right) {
+  //{{{
+  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
+  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  LCDIntent &lcdIntent = c.outputIntent.lcd_stateIntent;
+  LCDDirection &lcdDirection = c.outputIntent.lcd_cycleDirection;
+
+  lcdIntent = LCDIntent::Page1;
+  lcdDirection = LCDDirection::right;
+
+  c.cyclePages();
+
+  EXPECT_EQ(lcdIntent, LCDIntent::Page2);
+
+  c.cyclePages();
+
+  EXPECT_EQ(lcdIntent, LCDIntent::Page3);
+
+  c.cyclePages();
+
+  EXPECT_EQ(lcdIntent, LCDIntent::Page4);
+}
+//}}}
+
+TEST_F(SystemControllerTest, cyclePages_Intent_reacts_to_cycling_left) {
+  //{{{
+  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
+  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  LCDIntent &lcdIntent = c.outputIntent.lcd_stateIntent;
+  LCDDirection &lcdDirection = c.outputIntent.lcd_cycleDirection;
+
+  lcdIntent = LCDIntent::Page4;
+  lcdDirection = LCDDirection::left;
+
+  c.cyclePages();
+
+  EXPECT_EQ(lcdIntent, LCDIntent::Page3);
+
+  c.cyclePages();
+
+  EXPECT_EQ(lcdIntent, LCDIntent::Page2);
+
+  c.cyclePages();
+
+  EXPECT_EQ(lcdIntent, LCDIntent::Page1);
+}
+//}}}
+//}}}
+
 //====================================
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

@@ -1,12 +1,28 @@
 #pragma once
+#include "interfaces.h"
 #include "types.h"
-#include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 
 class DisplayDriver {
+public:
+  DisplayDriver(IDisplay& display, ControllerOutputIntent::DisplayContent &dc,
+                ControllerOutputIntent::LCD_StateIntent &ds);
+
+  void init();
+  void update();
+
+private:
+  void renderLines();
+  void writeDisplay(char lines[4][21]);
+
+  void formatTempFloatsForDisplay();
+  void createStateStringsForDisplay(
+      const ControllerOutputIntent::DisplayContent &content);
+  void clearLine(uint8_t line);
+
   // Config
   // Lib benutzt, keine Pin Zuweisung nötig, da I2C automatisch erkannt
-  LiquidCrystal_I2C lcdLibObject{0x27, 20, 4};
+  IDisplay& display;
   static constexpr uint8_t Rows = 4;
   static constexpr uint8_t Cols = 21;
   char m_lineBuffer[Rows][Cols] = {};
@@ -25,21 +41,4 @@ class DisplayDriver {
   // Timing
   unsigned long last_update_ms = 0;
   const uint8_t min_update_interval_ms = 100;
-
-public:
-  DisplayDriver(ControllerOutputIntent::DisplayContent &dc,
-                ControllerOutputIntent::LCD_StateIntent &ds);
-
-  void init();
-  void update();
-
-
-private:
-  void renderLines();
-  void writeDisplay(char lines[4][21]);
-
-  void formatTempFloatsForDisplay(); 
-  void createStateStringsForDisplay(
-      const ControllerOutputIntent::DisplayContent &content); 
-  void clearLine(uint8_t line); 
 };

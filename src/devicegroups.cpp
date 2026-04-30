@@ -19,9 +19,9 @@ void RealInputDevices::updateInputData() {
   m_devices_data.sensor_tempC = m_tempSensor.pollTemp();
 }
 
-RealOutputDevices::RealOutputDevices(ControllerOutputIntent& oi)
+RealOutputDevices::RealOutputDevices(ControllerOutputIntent& oi, IDisplay& display)
     : m_devices_intent(oi), m_lcdDisplay(m_devices_intent.displayContent,
-                                         m_devices_intent.lcd_stateIntent) {}
+                                         m_devices_intent.lcd_stateIntent, display) {}
 
 void RealOutputDevices::init() {
   m_lcdDisplay.init();

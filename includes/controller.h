@@ -6,7 +6,7 @@
 #endif
 
 #ifdef TEST_BUILD
-#include "../tests/test_devices.h"
+#include "test_devices.h"
 #else
 #include "devicegroups.h"
 #endif
@@ -14,7 +14,7 @@
 
 class SystemController {
 public:
-  SystemController(IInputDevices& i, IOutputDevices& o);
+  SystemController(IInputDevices &i, IOutputDevices &o);
   void operator()();
   void init();
 
@@ -36,16 +36,17 @@ private:
   void writeOutputIntent();
   void updateMemory();
 
-  //Helper
-  void clampTargetTempC(float& target);
+  // Helper
+  void clampTargetTempC(float &target);
   void cyclePages();
+  void requestRelaisCommand(ControllerOutputIntent::RelaisCommand command,
+                            ControllerOutputIntent::RelaisPriority priority);
 
   ControllerInputData inputData;
   HeaterStatus heaterStatus;
   ControllerOutputIntent outputIntent;
-  IInputDevices& inputDevices;
-  IOutputDevices& outputDevices;
-
+  IInputDevices &inputDevices;
+  IOutputDevices &outputDevices;
 
 #ifdef MEMORY_FUNCTIONS
   SystemStatistics systemStatistic;
