@@ -20,6 +20,8 @@ enum PinMode { OUTPUT, INPUT };
 extern void digitalWrite(int pin, PinState state);
 extern void pinMode(int pin, PinMode mode);
 extern unsigned long millis();
+extern void setMillis(unsigned long now_ms);
+extern void advanceMillis(unsigned long delta_ms);
 
 namespace ArduinoStub::Spies {
 

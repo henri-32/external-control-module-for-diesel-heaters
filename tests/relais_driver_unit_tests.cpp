@@ -1,5 +1,5 @@
-#include "relaisdriver.h"
 #include "ArduinoStubs.h"
+#include "relaisdriver.h"
 #include <gtest/gtest.h>
 
 class RelaisDriverTest : public ::testing::Test {
@@ -8,10 +8,13 @@ protected:
   RelaisDriver driver{kPin};
 
   void SetUp() override {
-    ArduinoStub::Spies::pinWritten_state = -1; // Sentinel: kein digitalWrite-Aufruf
+    ArduinoStub::Spies::pinWritten_state =
+        -1; // Sentinel: kein digitalWrite-Aufruf
     ArduinoStub::Spies::writtenState = LOW;
     ArduinoStub::Spies::pinWritten_mode = -1; // Sentinel: kein pinMode-Aufruf
     ArduinoStub::Spies::writtenMode = INPUT;
+    setMillis(1000);
+    driver.m_relais_state = RelaisDriver::RelaisState::OFF;
   }
 };
 
@@ -27,15 +30,18 @@ TEST_F(RelaisDriverTest, init_configures_output_and_deactivates_relais) {
 TEST_F(RelaisDriverTest, update_with_none_does_nothing_when_off) {
   driver.update(ControllerOutputIntent::RelaisCommand::None);
 
+  EXPECT_EQ(ArduinoStub::Spies::writtenState, LOW);
   EXPECT_EQ(ArduinoStub::Spies::pinWritten_state, -1);
 }
 
-TEST_F(RelaisDriverTest, short_command_activates_then_deactivates_on_next_update) {
+TEST_F(RelaisDriverTest,
+       short_command_activates_then_deactivates_on_next_update) {
   driver.update(ControllerOutputIntent::RelaisCommand::Short);
 
   EXPECT_EQ(ArduinoStub::Spies::pinWritten_state, kPin);
   EXPECT_EQ(ArduinoStub::Spies::writtenState, HIGH);
 
+  advanceMillis(250);
   driver.update(ControllerOutputIntent::RelaisCommand::None);
 
   EXPECT_EQ(ArduinoStub::Spies::pinWritten_state, kPin);
@@ -47,9 +53,11 @@ TEST_F(RelaisDriverTest, long_command_stays_on_for_one_check_then_turns_off) {
 
   EXPECT_EQ(ArduinoStub::Spies::writtenState, HIGH);
 
+  advanceMillis(1000);
   driver.update(ControllerOutputIntent::RelaisCommand::None);
   EXPECT_EQ(ArduinoStub::Spies::writtenState, HIGH);
 
+  advanceMillis(600);
   driver.update(ControllerOutputIntent::RelaisCommand::None);
   EXPECT_EQ(ArduinoStub::Spies::writtenState, LOW);
 }

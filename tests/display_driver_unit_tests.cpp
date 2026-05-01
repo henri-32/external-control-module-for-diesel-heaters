@@ -1,5 +1,6 @@
 #include "displaydriver.h"
 #include "test_devices.h"
+#include "ArduinoStubs.h"
 #include <gtest/gtest.h>
 
 class DisplayDriverTest : public ::testing::Test {
@@ -8,6 +9,10 @@ protected:
   TestDisplay display;
 
   DisplayDriver driver{display, COI.displayContent, COI.lcd_stateIntent};
+
+  void SetUp() override {
+  setMillis(1000); 
+}
 };
 
 TEST_F(DisplayDriverTest, init_gets_called) {

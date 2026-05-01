@@ -11,3 +11,73 @@ Virtualisierung de LCD Displays erfordert wrapper um library.
 Die Kette vom main muss das lcd object über die outputDevices/LCDDriver 
 weitergegeben werden. 
 Die Weitergabe muss auch noch für das TestDisplay in unit_tests.cpp erfolgen 
+
+===================================================================
+RelaisDriver Tests auf reine Blackbox-Strategie umstellen (ohne public internals)
+
+Ziel:
+- Keine privaten Zustandsvariablen mehr für Tests freigeben.
+- Tests sollen nur über öffentliches Verhalten prüfen, nicht über Implementierungsdetails.
+- Stabilität gegen Refactoring erhöhen.
+
+Warum:
+- `#ifdef TEST_BUILD public` für interne Felder/Methoden erhöht Kopplung von Tests an die interne Struktur.
+- Bei Refactors (z. B. Aufteilung in turnOn/turnOff) brechen tests sonst schnell, obwohl Verhalten identisch ist.
+- Blackbox-Tests verifizieren, was fachlich zählt: welche Arduino-IO-Aufrufe wann passieren.
+
+Schritt 1: Encapsulation wiederherstellen
+- In includes/relaisdriver.h `#ifdef TEST_BUILD public` wieder entfernen.
+- Interne Methoden (`turnOn`, `turnOff`, `applyPulseLengthFromIntent`) und State (`m_relais_state`, `m_pulse_ms`, `m_pulse_start_ms`) auf `private` belassen.
+- Unit-Tests dürfen nur `init()` und `update(...)` verwenden.
+
+Schritt 2: Zeit-Stubs als Test-Seam nutzen
+- In Arduino-Stubs kontrollierbare Zeit beibehalten:
+  - `setMillis(unsigned long)`
+  - `advanceMillis(unsigned long)`
+  - `millis()` gibt nur den gesetzten Wert zurück (keine Auto-Inkremente pro Aufruf).
+- In jedem Test-`SetUp()` konsistente Startzeit setzen (z. B. `setMillis(1000)`).
+
+Schritt 3: Test-SetUp standardisieren
+- Vor jedem Test Spy-Zustand auf Sentinel zurücksetzen:
+  - `pinWritten_state = -1`
+  - `writtenState = LOW` (nur Startwert, nicht als Ereignis interpretieren)
+  - `pinWritten_mode = -1`
+  - `writtenMode = INPUT`
+- Kein direkter Zugriff auf Relais-Interna im SetUp.
+
+Schritt 4: Verhaltensszenarien als Tests definieren
+- OFF + None:
+  - `update(None)` führt zu keinem `digitalWrite` (pin bleibt Sentinel).
+- init():
+  - `pinMode(pin, OUTPUT)` und `digitalWrite(pin, LOW)` genau wie erwartet.
+- OFF + Short:
+  - erster `update(Short)` schreibt `HIGH`.
+- ON + None vor Pulsende:
+  - nach `advanceMillis(<200)` bleibt letzter Write `HIGH`.
+- ON + None nach Pulsende:
+  - nach `advanceMillis(>=200)` wird `LOW` geschrieben.
+- OFF + Long:
+  - erster `update(Long)` schreibt `HIGH`.
+- ON + None bei Long vor Pulsende:
+  - nach `advanceMillis(<1500)` bleibt `HIGH`.
+- ON + None bei Long nach Pulsende:
+  - nach zusätzlichem `advanceMillis(...)` bis `>=1500` wird `LOW` geschrieben.
+
+Schritt 5: Randfälle explizit testen
+- Mehrfache `update(None)` im OFF-Zustand erzeugen keine Writes.
+- Wenn gewünscht: Verhalten bei erneutem `Short/Long` während ON klar definieren und testen
+  (Ignorieren vs. Neu-Trigger), damit implizite Annahmen dokumentiert sind.
+
+Schritt 6: Lesbarkeit der Tests verbessern
+- Kleine Helper in der Testdatei ergänzen:
+  - `expectNoWrite()`
+  - `expectLastWrite(pin, state)`
+  - optional `advanceAndUpdate(ms, cmd)`
+- Ziel: Weniger wiederholte Spy-Assertions, besser lesbare Szenario-Tests.
+
+Schritt 7: Regression absichern
+- Nach Umstellung gesamten Unit-Test-Satz laufen lassen:
+  - mindestens Relais-, Display- und Controller-Tests.
+- Falls gewünscht zusätzlich ein gezielter Test:
+  - mehrere `update()`-Aufrufe bei gleicher Zeit (`advanceMillis(0)`), um sicherzustellen,
+    dass die Logik nicht von der Anzahl der `millis()`-Aufrufe abhängt.
