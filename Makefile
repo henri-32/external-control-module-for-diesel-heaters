@@ -113,7 +113,8 @@ TEST_CPP_SRCS := \
 	tests/test_devices.cpp \
 	tests/ArduinoStubs.cpp \
 	src/controller.cpp \
-	src/displaydriver.cpp
+	src/displaydriver.cpp \
+	src/relaisdriver.cpp
 
 
 GTEST_LIB :=$(TEST_BUILD_DIR)/libtest.a

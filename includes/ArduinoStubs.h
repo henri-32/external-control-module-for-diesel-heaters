@@ -7,6 +7,9 @@
 // liegen getrennt im Namespace und werden ausschließlich von Unit-Tests zur
 // Verifikation von Arduino-Aufrufen ausgewertet.
 
+
+// DESHALB MÜSSEN BEI UNIT TESTS SETUPS() MIT PASSENDEN INITIALWERTEN GENUTZT WERDEN 
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -20,11 +23,11 @@ extern unsigned long millis();
 
 namespace ArduinoStub::Spies {
 
-extern int pin_set_to;
-extern PinState state_set_to;
+extern int pinWritten_state;
+extern PinState writtenState;
 
-extern int mode_of_pin_set;
-extern PinMode mode_set_to;
+extern int pinWritten_mode;
+extern PinMode writtenMode;
 };
 
 #pragma GCC diagnostic pop

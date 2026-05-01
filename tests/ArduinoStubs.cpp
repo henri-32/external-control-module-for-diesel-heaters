@@ -1,19 +1,19 @@
 #include "ArduinoStubs.h"
 using namespace ArduinoStub::Spies;
 
-int ArduinoStub::Spies::pin_set_to;
-PinState ArduinoStub::Spies::state_set_to;
-int ArduinoStub::Spies::mode_of_pin_set;
-PinMode ArduinoStub::Spies::mode_set_to;
+int ArduinoStub::Spies::pinWritten_state;
+PinState ArduinoStub::Spies::writtenState;
+int ArduinoStub::Spies::pinWritten_mode;
+PinMode ArduinoStub::Spies::writtenMode;
 
 void digitalWrite(int pin, PinState state) {
-  pin_set_to = pin;
-  state_set_to = state;
+  pinWritten_state = pin;
+  writtenState = state;
 };
 
 void pinMode(int pin, PinMode mode) {
-  mode_of_pin_set = pin;
-  mode_set_to = mode;
+  pinWritten_mode = pin;
+  writtenMode = mode;
 };
 
 unsigned long millis() {
