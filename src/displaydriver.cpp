@@ -1,7 +1,18 @@
 #include "displaydriver.h"
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+
+#ifdef TEST_BUILD
+static unsigned long millis() {
+  static unsigned long now = 1000;
+  now += 1000;
+  return now;
+}
+
+#else
 #include <Arduino.h>
-#include <LiquidCrystal_I2C.h>
-#include <OneWire.h>
+#endif
 
 DisplayDriver::DisplayDriver(IDisplay &display,
                              ControllerOutputIntent::DisplayContent &dc,
@@ -10,7 +21,6 @@ DisplayDriver::DisplayDriver(IDisplay &display,
 
 void DisplayDriver::init() {
   //{{{
-  Wire.begin();
   m_display.init();
   m_display.noBacklight();
   m_display.noDisplay();
@@ -41,14 +51,14 @@ void DisplayDriver::renderLines() {
 
     snprintf(m_lineBuffer[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
     snprintf(m_lineBuffer[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
-    snprintf(m_lineBuffer[2], 21, "Zustand:   %s", string_of_states[0]);
-    snprintf(m_lineBuffer[3], 21, "Mode:      %s", string_of_states[1]);
+    snprintf(m_lineBuffer[2], 21, "Zustand:   %.9s", string_of_states[0]);
+    snprintf(m_lineBuffer[3], 21, "Mode:      %.9s", string_of_states[1]);
     break;
 
   case ControllerOutputIntent::LCD_StateIntent::Page2:
     m_display.backlight();
     m_display.display();
-
+	#ifdef MEMORY_FUNCTIONS
     snprintf(m_lineBuffer[0], 21, "DutyCycle: %u %%",
              m_displaycontent.runtimeDisplayData.dutyCycle);
     snprintf(m_lineBuffer[1], 21, "Cycles:    %u",
@@ -56,33 +66,34 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[2], 21, "Avg Idle:  %lu m",
              m_displaycontent.runtimeDisplayData.avgIdleTime_minutes);
     snprintf(m_lineBuffer[3], 21, "%s", "");
+	#endif
     break;
-
   case ControllerOutputIntent::LCD_StateIntent::Page3:
     formatTempFloatsForDisplay();
     m_display.backlight();
     m_display.display();
-
+	#ifdef MEMORY_FUNCTIONS
     snprintf(m_lineBuffer[0], 21, "Max Idle:  %lu m",
              m_displaycontent.runtimeDisplayData.maxIdleTime_minutes);
     snprintf(m_lineBuffer[1], 21, "Min Idle:  %u m",
              m_displaycontent.runtimeDisplayData.minIdleTime_minutes);
     snprintf(m_lineBuffer[2], 21, "Avg diff:  %d.%d C", diff_int, diff_frac);
     snprintf(m_lineBuffer[3], 21, "%s", "");
+	#endif
     break;
-
   case ControllerOutputIntent::LCD_StateIntent::Page4:
     m_display.backlight();
     m_display.display();
 
+	#ifdef MEMORY_FUNCTIONS
     snprintf(m_lineBuffer[0], 21, "All Time DC %u %%",
              m_displaycontent.EEPROM_Values.dutyCycle);
     snprintf(m_lineBuffer[1], 21, "All Time IT %lu m",
              m_displaycontent.EEPROM_Values.avgIdleTime);
     snprintf(m_lineBuffer[2], 21, "%s", "");
     snprintf(m_lineBuffer[3], 21, "%s", "");
+	#endif
     break;
-
   case ControllerOutputIntent::LCD_StateIntent::OFF:
     m_display.noBacklight();
     m_display.noDisplay();
@@ -115,18 +126,25 @@ void DisplayDriver::formatTempFloatsForDisplay() {
   case ControllerOutputIntent::LCD_StateIntent::Page1:
 
     t_int = int(m_displaycontent.temp_c);
-    t_frac = abs(static_cast<int>(m_displaycontent.temp_c * 10) % 10);
+    t_frac = std::abs(static_cast<int>(m_displaycontent.temp_c * 10) % 10);
     s_int = int(m_displaycontent.target_tempC);
-    s_frac = abs(static_cast<int>(m_displaycontent.target_tempC * 10) % 10);
+    s_frac = std::abs(static_cast<int>(m_displaycontent.target_tempC * 10) % 10);
+    break;
+
+  case ControllerOutputIntent::LCD_StateIntent::Page2:
     break;
 
   case ControllerOutputIntent::LCD_StateIntent::Page3:
     diff_int = int(m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget);
-    diff_frac = abs(
+    diff_frac = std::abs(
         static_cast<int>(
             m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget * 10) %
         10);
     break;
+
+  case ControllerOutputIntent::LCD_StateIntent::Page4:
+    break;
+
   case ControllerOutputIntent::LCD_StateIntent::OFF:
     break;
   }

@@ -15,7 +15,6 @@ public:
   void init() override {}
   void update() override {}
 
-private:
   ControllerOutputIntent &m_outputIntent;
   IDisplay &m_display;
 };
@@ -58,8 +57,10 @@ public:
                         uint8_t *rows) override{}; // alias for createChar()
   void printstr(const char[]) override{};
 
-  void init() override{};
+  void init() override;
   void update() override{};
+
+  bool m_init_called = false;
 };
 //}}}
 #pragma GCC diagnostic pop

@@ -1,4 +1,5 @@
 #include "library_adapter.h"
+#include <Wire.h>
 
 
 //Implementierungen (Weitergabe von API Calls) des LCDAdapter 
@@ -73,7 +74,10 @@ void LCDAdapter::printstr(const char text[]) {
   liquidCristal_I2C.printstr(text);
 }
 
-void LCDAdapter::init() { liquidCristal_I2C.init(); }
+void LCDAdapter::init() {
+  Wire.begin();
+  liquidCristal_I2C.init();
+}
 
 void LCDAdapter::update() {}
 //}}}

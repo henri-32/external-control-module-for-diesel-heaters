@@ -10,7 +10,12 @@ public:
   void init();
   void update();
 
+#ifdef TEST_BUILD
+public: 
+#else
 private:
+#endif
+
   void renderLines();
   void writeDisplay(char lines[4][21]);
 
@@ -19,8 +24,6 @@ private:
       const ControllerOutputIntent::DisplayContent &content);
   void clearLine(uint8_t line);
 
-  // Config
-  // Lib benutzt, keine Pin Zuweisung nötig, da I2C automatisch erkannt
   IDisplay& m_display;
   static constexpr uint8_t Rows = 4;
   static constexpr uint8_t Cols = 21;

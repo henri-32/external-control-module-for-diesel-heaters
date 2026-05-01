@@ -1,19 +1,18 @@
 #include "config.h"
 #include "controller.h"
-#include "types.h"
 #include "test_devices.h"
 #include <gtest/gtest.h>
 
-ControllerInputData inputData;
-ControllerOutputIntent outputData;
-
-TestDisplay testDisplay;
-
-TestInputDevices inputDevices{inputData};
-TestOutputDevices outputDevices{outputData, testDisplay};
-
 class SystemControllerTest : public ::testing::Test {
 protected:
+  ControllerInputData inputData;
+  ControllerOutputIntent outputData;
+
+  TestDisplay testDisplay;
+
+  TestInputDevices inputDevices{inputData};
+  TestOutputDevices outputDevices{outputData, testDisplay};
+
   SystemController c{inputDevices, outputDevices};
   ControllerInputData &input = c.inputData;
   ControllerOutputIntent &output = c.outputIntent;
@@ -543,8 +542,8 @@ TEST_F(SystemControllerTest,
 //}}}
 //}}}
 
-//HELPER
-// applyHeatingLogic
+// HELPER
+//  applyHeatingLogic
 //{{{
 TEST_F(SystemControllerTest, applyHeatingLogic_too_cold_and_state_off) {
   //{{{

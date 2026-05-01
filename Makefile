@@ -107,8 +107,10 @@ DEPS := $(OBJS:.o=.d)
 
 TEST_CPP_SRCS := \
 	tests/SystemController_unit_tests.cpp \
+	tests/display_driver_unit_tests.cpp \
 	tests/test_devices.cpp \
 	src/controller.cpp \
+	src/displaydriver.cpp
 
 
 GTEST_LIB :=$(TEST_BUILD_DIR)/libtest.a
