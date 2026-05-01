@@ -98,6 +98,7 @@ APP_CPP_SRCS := \
 	src/devicegroups.cpp \
 	src/hardwaredrivers.cpp \
 	src/displaydriver.cpp \
+	src/relaisdriver.cpp \
 	src/library_adapter.cpp
 
 C_OBJS := $(addprefix $(BUILD_DIR)/,$(AVR_C_SRCS:.c=.o))
@@ -108,7 +109,9 @@ DEPS := $(OBJS:.o=.d)
 TEST_CPP_SRCS := \
 	tests/SystemController_unit_tests.cpp \
 	tests/display_driver_unit_tests.cpp \
+	tests/relais_driver_unit_tests.cpp \
 	tests/test_devices.cpp \
+	tests/ArduinoStubs.cpp \
 	src/controller.cpp \
 	src/displaydriver.cpp
 

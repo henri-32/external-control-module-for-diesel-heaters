@@ -6,13 +6,8 @@
 using COI = ControllerOutputIntent; 
 using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
 
-//Stubs für Arduino Zugriffe
 #ifdef TEST_BUILD
-static unsigned long millis() {
-  static unsigned long now = 1000;
-  now += 1000;
-  return now;
-}
+#include "ArduinoStubs.h"
 
 #else
 #include <Arduino.h>

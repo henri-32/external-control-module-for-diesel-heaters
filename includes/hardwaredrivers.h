@@ -75,23 +75,3 @@ private:
   static constexpr unsigned long m_conversion_time_ms = 750;
   float m_temp_c;
 };
-
-class RelaisDriver {
-public:
-  explicit RelaisDriver(const uint8_t pin);
-
-  void init() ;
-  void update(ControllerOutputIntent::RelaisCommand intent);
-
-private:
-  void
-  applyPulseLengthFromIntent(ControllerOutputIntent::RelaisCommand intent_copy);
-  void activate() { digitalWrite(m_pin, HIGH); }
-  void deactivate() { digitalWrite(m_pin, LOW); };
-
-  const uint8_t m_pin;
-  enum class RelaisState { ON, OFF };
-  RelaisState m_relais_state = RelaisState::OFF;
-  uint16_t m_pulse_ms = 0;
-  unsigned long m_pulse_start_ms = 0;
-};

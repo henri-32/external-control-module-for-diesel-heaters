@@ -11,6 +11,7 @@ protected:
 };
 
 TEST_F(DisplayDriverTest, init_gets_called) {
+//{{{
   driver.init();
 
   ASSERT_EQ(display.m_init_called, true);
@@ -18,8 +19,10 @@ TEST_F(DisplayDriverTest, init_gets_called) {
   EXPECT_EQ(display.no_display_calls, 1);
   EXPECT_EQ(display.clear_calls, 1);
 }
+//}}}
 
 TEST_F(DisplayDriverTest, update_off_turns_display_off_without_writing) {
+//{{{
   COI.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::OFF;
 
   driver.update();
@@ -28,8 +31,10 @@ TEST_F(DisplayDriverTest, update_off_turns_display_off_without_writing) {
   EXPECT_EQ(display.no_display_calls, 1);
   EXPECT_TRUE(display.printed_lines.empty());
 }
+//}}}
 
 TEST_F(DisplayDriverTest, update_page1_writes_expected_lines) {
+//{{{
   COI.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
   COI.displayContent.temp_c = 21.3F;
   COI.displayContent.target_tempC = 19.8F;
@@ -46,8 +51,10 @@ TEST_F(DisplayDriverTest, update_page1_writes_expected_lines) {
   EXPECT_EQ(display.printed_lines[5], "Zustand:   ON");
   EXPECT_EQ(display.printed_lines[7], "Mode:      POWER");
 }
+//}}}
 
 TEST_F(DisplayDriverTest, update_with_same_content_does_not_rewrite_lines) {
+//{{{
   COI.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
   COI.displayContent.temp_c = 20.0F;
   COI.displayContent.target_tempC = 18.5F;
@@ -61,3 +68,5 @@ TEST_F(DisplayDriverTest, update_with_same_content_does_not_rewrite_lines) {
 
   EXPECT_EQ(display.printed_lines.size(), printed_after_first_update);
 }
+//}}}
+

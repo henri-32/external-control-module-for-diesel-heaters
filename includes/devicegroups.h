@@ -1,6 +1,7 @@
 #pragma once
 #include "config.h"
 #include "displaydriver.h"
+#include "relaisdriver.h"
 #include "hardwaredrivers.h"
 
 #include "types.h"
