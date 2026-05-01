@@ -7,6 +7,10 @@ void RelaisDriver::init() {
   digitalWrite(m_pin, LOW);
 }
 
+void RelaisDriver::checkForTurnOn(){};
+void RelaisDriver::checkForTurnOff(){};
+
+
 void RelaisDriver::update(const ControllerOutputIntent::RelaisCommand& intent) {
   if (m_relais_state == RelaisState::OFF) {
     /*muss hier als positiv Bedinung behandelt werden, damit der zweite Teil

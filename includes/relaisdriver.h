@@ -17,6 +17,8 @@ public:
   void update(const ControllerOutputIntent::RelaisCommand& intent);
 
 private:
+  void checkForTurnOn();
+  void checkForTurnOff();
   void
   applyPulseLengthFromIntent(ControllerOutputIntent::RelaisCommand intent_copy);
   void activate() { digitalWrite(m_pin, HIGH); }
