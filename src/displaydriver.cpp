@@ -3,6 +3,10 @@
 #include <cstring>
 #include <cstdlib>
 
+using COI = ControllerOutputIntent; 
+using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
+
+//Stubs für Arduino Zugriffe
 #ifdef TEST_BUILD
 static unsigned long millis() {
   static unsigned long now = 1000;
@@ -15,8 +19,8 @@ static unsigned long millis() {
 #endif
 
 DisplayDriver::DisplayDriver(IDisplay &display,
-                             ControllerOutputIntent::DisplayContent &dc,
-                             ControllerOutputIntent::LCD_StateIntent &ds)
+                             COI::DisplayContent &dc,
+                             LCDIntent &ds)
     : m_display(display), m_displaycontent(dc), m_displayState(ds) {}
 
 void DisplayDriver::init() {
@@ -30,7 +34,7 @@ void DisplayDriver::init() {
 
 void DisplayDriver::update() {
   //{{{
-  if (m_displayState == ControllerOutputIntent::LCD_StateIntent::OFF) {
+  if (m_displayState == LCDIntent::OFF) {
     m_display.noBacklight();
     m_display.noDisplay();
     return;
@@ -43,7 +47,7 @@ void DisplayDriver::update() {
 void DisplayDriver::renderLines() {
   //{{{
   switch (m_displayState) {
-  case ControllerOutputIntent::LCD_StateIntent::Page1:
+  case LCDIntent::Page1:
     formatTempFloatsForDisplay();
     createStateStringsForDisplay(m_displaycontent);
     m_display.backlight();
@@ -55,7 +59,7 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[3], 21, "Mode:      %.9s", string_of_states[1]);
     break;
 
-  case ControllerOutputIntent::LCD_StateIntent::Page2:
+  case LCDIntent::Page2:
     m_display.backlight();
     m_display.display();
 	#ifdef MEMORY_FUNCTIONS
@@ -68,7 +72,7 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[3], 21, "%s", "");
 	#endif
     break;
-  case ControllerOutputIntent::LCD_StateIntent::Page3:
+  case LCDIntent::Page3:
     formatTempFloatsForDisplay();
     m_display.backlight();
     m_display.display();
@@ -81,7 +85,7 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[3], 21, "%s", "");
 	#endif
     break;
-  case ControllerOutputIntent::LCD_StateIntent::Page4:
+  case LCDIntent::Page4:
     m_display.backlight();
     m_display.display();
 
@@ -94,7 +98,7 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[3], 21, "%s", "");
 	#endif
     break;
-  case ControllerOutputIntent::LCD_StateIntent::OFF:
+  case LCDIntent::OFF:
     m_display.noBacklight();
     m_display.noDisplay();
     break;
@@ -123,7 +127,7 @@ void DisplayDriver::writeDisplay(char lines[4][21]) {
 void DisplayDriver::formatTempFloatsForDisplay() {
   //{{{
   switch (m_displayState) {
-  case ControllerOutputIntent::LCD_StateIntent::Page1:
+  case LCDIntent::Page1:
 
     t_int = int(m_displaycontent.temp_c);
     t_frac = std::abs(static_cast<int>(m_displaycontent.temp_c * 10) % 10);
@@ -131,10 +135,10 @@ void DisplayDriver::formatTempFloatsForDisplay() {
     s_frac = std::abs(static_cast<int>(m_displaycontent.target_tempC * 10) % 10);
     break;
 
-  case ControllerOutputIntent::LCD_StateIntent::Page2:
+  case LCDIntent::Page2:
     break;
 
-  case ControllerOutputIntent::LCD_StateIntent::Page3:
+  case LCDIntent::Page3:
     diff_int = int(m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget);
     diff_frac = std::abs(
         static_cast<int>(
@@ -142,17 +146,17 @@ void DisplayDriver::formatTempFloatsForDisplay() {
         10);
     break;
 
-  case ControllerOutputIntent::LCD_StateIntent::Page4:
+  case LCDIntent::Page4:
     break;
 
-  case ControllerOutputIntent::LCD_StateIntent::OFF:
+  case LCDIntent::OFF:
     break;
   }
 }
 //}}}
 
 void DisplayDriver::createStateStringsForDisplay(
-    const ControllerOutputIntent::DisplayContent &content) {
+    const COI::DisplayContent &content) {
   //{{{
   switch (content.heatingState) {
   case HeaterStatus::HeatingState::ON:

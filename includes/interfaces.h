@@ -8,11 +8,15 @@ public:
   virtual void updateInputData() = 0;
 };
 
+class IOutputDevices {
+public:
+  virtual void init() = 0;
+  virtual void update() = 0;
+};
 
 class IDisplay {
   //{{{
 public:
-
   virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = 0x00) = 0;
   virtual void clear() = 0;
   virtual void homevirtual() = 0;
@@ -39,8 +43,9 @@ public:
   virtual void cursor_off() = 0; // alias for noCursor()
   virtual void
   setBacklight(uint8_t new_val) = 0; // alias for backlight() and nobacklight()
-  virtual void load_custom_character(uint8_t char_num,
-                                     uint8_t *rows) = 0; // alias for createChar()
+  virtual void
+  load_custom_character(uint8_t char_num,
+                        uint8_t *rows) = 0; // alias for createChar()
   virtual void printstr(const char[]) = 0;
 
   virtual void init() = 0;
@@ -48,10 +53,9 @@ public:
 };
 //}}}
 
-
-
-class IOutputDevices {
-public:
-  virtual void init() = 0;
+class IRelais {
+  //{{{
+  virtual void init() = 0; 
   virtual void update() = 0;
 };
+//}}}

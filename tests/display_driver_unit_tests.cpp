@@ -10,6 +10,7 @@ protected:
   DisplayDriver driver{display, COI.displayContent, COI.lcd_stateIntent};
 };
 
+//Sinnloser Test, nur für den Anfang 
 TEST_F(DisplayDriverTest, init_gets_called) {
   driver.init();
 

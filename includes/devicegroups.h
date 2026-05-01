@@ -31,6 +31,5 @@ public:
 
   ControllerOutputIntent &m_devices_intent;
   RelaisDriver m_relais{my_pin_config::relais};
-  //No pin nessecary. Arduino can detect I2C Connection on the standard I2C pins
   DisplayDriver m_lcdDisplay;
 };
