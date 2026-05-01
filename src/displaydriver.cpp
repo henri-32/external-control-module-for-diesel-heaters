@@ -1,7 +1,7 @@
 #include "displaydriver.h"
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 using COI = ControllerOutputIntent; 
 using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
@@ -130,9 +130,9 @@ void DisplayDriver::formatTempFloatsForDisplay() {
   case LCDIntent::Page1:
 
     t_int = int(m_displaycontent.temp_c);
-    t_frac = std::abs(static_cast<int>(m_displaycontent.temp_c * 10) % 10);
+    t_frac = abs(static_cast<int>(m_displaycontent.temp_c * 10) % 10);
     s_int = int(m_displaycontent.target_tempC);
-    s_frac = std::abs(static_cast<int>(m_displaycontent.target_tempC * 10) % 10);
+    s_frac = abs(static_cast<int>(m_displaycontent.target_tempC * 10) % 10);
     break;
 
   case LCDIntent::Page2:
@@ -140,7 +140,7 @@ void DisplayDriver::formatTempFloatsForDisplay() {
 
   case LCDIntent::Page3:
     diff_int = int(m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget);
-    diff_frac = std::abs(
+    diff_frac = abs(
         static_cast<int>(
             m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget * 10) %
         10);

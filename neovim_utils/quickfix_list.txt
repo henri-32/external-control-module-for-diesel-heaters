@@ -1,1 +1,0 @@
-tests/display_driver_unit_tests.cpp:13: tests/display_driver_unit_tests.cpp:16 Expected equality of these values:   display.m_init_called     Which is: true   false 
