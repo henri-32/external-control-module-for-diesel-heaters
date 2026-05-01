@@ -97,7 +97,8 @@ APP_CPP_SRCS := \
 	src/controller.cpp \
 	src/devicegroups.cpp \
 	src/hardwaredrivers.cpp \
-	src/displaydriver.cpp
+	src/displaydriver.cpp \
+	src/library_adapter.cpp
 
 C_OBJS := $(addprefix $(BUILD_DIR)/,$(AVR_C_SRCS:.c=.o))
 CPP_OBJS := $(addprefix $(BUILD_DIR)/,$(AVR_CPP_SRCS:.cpp=.o) $(APP_CPP_SRCS:.cpp=.o))

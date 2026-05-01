@@ -20,8 +20,9 @@ void RealInputDevices::updateInputData() {
 }
 
 RealOutputDevices::RealOutputDevices(ControllerOutputIntent& oi, IDisplay& display)
-    : m_devices_intent(oi), m_lcdDisplay(m_devices_intent.displayContent,
-                                         m_devices_intent.lcd_stateIntent, display) {}
+    : IOutputDevices(oi, display), m_devices_intent(oi),
+      m_lcdDisplay(display, m_devices_intent.displayContent,
+                   m_devices_intent.lcd_stateIntent) {}
 
 void RealOutputDevices::init() {
   m_lcdDisplay.init();

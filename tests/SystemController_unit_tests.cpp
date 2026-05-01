@@ -1,13 +1,16 @@
 #include "config.h"
 #include "controller.h"
 #include "types.h"
+#include "test_devices.h"
 #include <gtest/gtest.h>
 
 ControllerInputData inputData;
 ControllerOutputIntent outputData;
 
+TestDisplay testDisplay;
+
 TestInputDevices inputDevices{inputData};
-TestOutputDevices outputDevices{outputData};
+TestOutputDevices outputDevices{outputData, testDisplay};
 
 class SystemControllerTest : public ::testing::Test {
 protected:

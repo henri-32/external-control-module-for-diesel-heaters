@@ -1,7 +1,6 @@
 #pragma once
 #include "interfaces.h"
 #include "types.h"
-#include <LiquidCrystal_I2C.h>
 
 class DisplayDriver {
 public:
@@ -22,7 +21,7 @@ private:
 
   // Config
   // Lib benutzt, keine Pin Zuweisung nötig, da I2C automatisch erkannt
-  IDisplay& display;
+  IDisplay& m_display;
   static constexpr uint8_t Rows = 4;
   static constexpr uint8_t Cols = 21;
   char m_lineBuffer[Rows][Cols] = {};

@@ -1,36 +1,43 @@
 #include "displaydriver.h"
 #include <Arduino.h>
+#include <LiquidCrystal_I2C.h>
+#include <OneWire.h>
 
 DisplayDriver::DisplayDriver(IDisplay &display,
                              ControllerOutputIntent::DisplayContent &dc,
                              ControllerOutputIntent::LCD_StateIntent &ds)
-    : lcdLibObject(display), m_displaycontent(dc), m_displayState(ds) {}
+    : m_display(display), m_displaycontent(dc), m_displayState(ds) {}
 
 void DisplayDriver::init() {
+  //{{{
   Wire.begin();
-  lcdLibObject.init();
-  lcdLibObject.noBacklight();
-  lcdLibObject.noDisplay();
-  lcdLibObject.clear();
+  m_display.init();
+  m_display.noBacklight();
+  m_display.noDisplay();
+  m_display.clear();
 }
+//}}}
 
 void DisplayDriver::update() {
+  //{{{
   if (m_displayState == ControllerOutputIntent::LCD_StateIntent::OFF) {
-    lcdLibObject.noBacklight();
-    lcdLibObject.noDisplay();
+    m_display.noBacklight();
+    m_display.noDisplay();
     return;
   }
   renderLines();
   writeDisplay(m_lineBuffer);
 }
+//}}}
 
 void DisplayDriver::renderLines() {
+  //{{{
   switch (m_displayState) {
   case ControllerOutputIntent::LCD_StateIntent::Page1:
     formatTempFloatsForDisplay();
     createStateStringsForDisplay(m_displaycontent);
-    lcdLibObject.backlight();
-    lcdLibObject.display();
+    m_display.backlight();
+    m_display.display();
 
     snprintf(m_lineBuffer[0], 21, "Temp.:     %d.%d C", t_int, t_frac);
     snprintf(m_lineBuffer[1], 21, "Solltemp.: %d.%d C", s_int, s_frac);
@@ -39,8 +46,8 @@ void DisplayDriver::renderLines() {
     break;
 
   case ControllerOutputIntent::LCD_StateIntent::Page2:
-    lcdLibObject.backlight();
-    lcdLibObject.display();
+    m_display.backlight();
+    m_display.display();
 
     snprintf(m_lineBuffer[0], 21, "DutyCycle: %u %%",
              m_displaycontent.runtimeDisplayData.dutyCycle);
@@ -53,8 +60,8 @@ void DisplayDriver::renderLines() {
 
   case ControllerOutputIntent::LCD_StateIntent::Page3:
     formatTempFloatsForDisplay();
-    lcdLibObject.backlight();
-    lcdLibObject.display();
+    m_display.backlight();
+    m_display.display();
 
     snprintf(m_lineBuffer[0], 21, "Max Idle:  %lu m",
              m_displaycontent.runtimeDisplayData.maxIdleTime_minutes);
@@ -65,8 +72,8 @@ void DisplayDriver::renderLines() {
     break;
 
   case ControllerOutputIntent::LCD_StateIntent::Page4:
-    lcdLibObject.backlight();
-    lcdLibObject.display();
+    m_display.backlight();
+    m_display.display();
 
     snprintf(m_lineBuffer[0], 21, "All Time DC %u %%",
              m_displaycontent.EEPROM_Values.dutyCycle);
@@ -77,13 +84,15 @@ void DisplayDriver::renderLines() {
     break;
 
   case ControllerOutputIntent::LCD_StateIntent::OFF:
-    lcdLibObject.noBacklight();
-    lcdLibObject.noDisplay();
+    m_display.noBacklight();
+    m_display.noDisplay();
     break;
   }
 }
+//}}}
 
 void DisplayDriver::writeDisplay(char lines[4][21]) {
+  //{{{
   if (millis() - last_update_ms < min_update_interval_ms)
     return;
 
@@ -92,14 +101,16 @@ void DisplayDriver::writeDisplay(char lines[4][21]) {
       continue;
 
     clearLine(i);
-    lcdLibObject.print(lines[i]);
+    m_display.printstr(lines[i]);
     strncpy(lastLine[i], lines[i], 21);
     lastLine[i][20] = '\0';
     last_update_ms = millis();
   }
 }
+//}}}
 
 void DisplayDriver::formatTempFloatsForDisplay() {
+  //{{{
   switch (m_displayState) {
   case ControllerOutputIntent::LCD_StateIntent::Page1:
 
@@ -120,9 +131,11 @@ void DisplayDriver::formatTempFloatsForDisplay() {
     break;
   }
 }
+//}}}
 
 void DisplayDriver::createStateStringsForDisplay(
     const ControllerOutputIntent::DisplayContent &content) {
+  //{{{
   switch (content.heatingState) {
   case HeaterStatus::HeatingState::ON:
     strncpy(string_of_states[0], "ON", 21);
@@ -144,9 +157,12 @@ void DisplayDriver::createStateStringsForDisplay(
     break;
   }
 }
+//}}}
 
 void DisplayDriver::clearLine(uint8_t line) {
-  lcdLibObject.setCursor(0, line);
-  lcdLibObject.print("                    ");
-  lcdLibObject.setCursor(0, line);
+  //{{{
+  m_display.setCursor(0, line);
+  m_display.printstr("                    ");
+  m_display.setCursor(0, line);
 }
+//}}}
