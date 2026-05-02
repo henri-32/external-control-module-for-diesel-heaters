@@ -18,6 +18,9 @@ public:
   void operator()();
   void init();
 
+// Fragwürdig, dass fürs Testen auf Interna zugegriffen werden muss. 
+// Da Umfang des Projekts erstmal begrenzt und die Logik der privaten Funktionen
+// getestet werden soll, für mich akzeptiert. 
 #ifdef TEST_BUILD
 public:
 #else

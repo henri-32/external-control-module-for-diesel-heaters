@@ -2,13 +2,13 @@
 #include "interfaces.h"
 #include "types.h"
 
-class DisplayDriver {
+class DisplayDriver : public IDisplayDriver {
 public:
   DisplayDriver(IDisplay& display, ControllerOutputIntent::DisplayContent &dc,
                 ControllerOutputIntent::LCD_StateIntent &ds);
 
-  void init();
-  void update();
+  void init() override;
+  void update() override;
 
 #ifdef TEST_BUILD
 public: 

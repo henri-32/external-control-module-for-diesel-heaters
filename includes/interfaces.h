@@ -14,6 +14,16 @@ public:
   virtual void update() = 0;
 };
 
+class IDriver {
+public:
+  virtual void init() = 0;
+};
+
+class IDisplayDriver : public IDriver {
+public:
+  virtual void update() = 0;
+};
+
 class IDisplay {
   //{{{
 public:

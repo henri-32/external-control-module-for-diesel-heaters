@@ -10,6 +10,7 @@ void SystemController::operator()() {
   applyHeatingLogic();
   writeOutputIntent();
   outputDevices.update();
+
 #ifdef MEMORY_FUNCTIONS
   systemStatistic.update(inputData, heaterStatus);
   updateMemory();
