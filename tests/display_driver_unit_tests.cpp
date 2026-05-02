@@ -11,7 +11,7 @@ protected:
   DisplayDriver driver{display, COI.displayContent, COI.lcd_stateIntent};
 
   void SetUp() override {
-  setMillis(1000); 
+  ArduinoStubSpies::setMillis(1000); 
 }
 };
 

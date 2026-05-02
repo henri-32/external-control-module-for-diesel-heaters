@@ -60,14 +60,12 @@ void SystemController::applyPowerSwitchInput() {
   //}}}
 
   if (heaterStatus.heatingState == State::ON) {
-    requestRelaisCommand(COI::RelaisCommand::Long,
-                                      COI::RelaisPriority::High);
+    requestRelaisCommand(COI::RelaisCommand::Long, COI::RelaisPriority::High);
     heaterStatus.heatingState = State::OFF;
     heaterStatus.mode = HeaterStatus::Mode::POWER;
 
   } else {
-    requestRelaisCommand(COI::RelaisCommand::Long,
-                                      COI::RelaisPriority::High);
+    requestRelaisCommand(COI::RelaisCommand::Long, COI::RelaisPriority::High);
     heaterStatus.heatingState = State::ON;
     heaterStatus.mode = HeaterStatus::Mode::POWER;
   }

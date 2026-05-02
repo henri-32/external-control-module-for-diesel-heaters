@@ -16,11 +16,7 @@ public:
   void init();
   void update(const ControllerOutputIntent::RelaisCommand &intent);
 
-#ifdef TEST_BUILD
 public:
-#else
-private:
-#endif
 
   void turnOn(const ControllerOutputIntent::RelaisCommand &intent);
   void turnOff();
