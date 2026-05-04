@@ -17,5 +17,7 @@ struct config {
   static constexpr int tempMax = 30; 
   static constexpr int tempMin = 5; 
   static constexpr float tolerance = 1.5;
+  static constexpr int RelaisLongPulse_ms = 1500; 
+  static constexpr int RelaisShortPulse_ms = 200; 
 };
 

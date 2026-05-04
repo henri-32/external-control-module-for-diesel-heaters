@@ -1,4 +1,5 @@
 #include "relaisdriver.h"
+#include "config.h"
 
 RelaisDriver::RelaisDriver(const uint8_t pin) : m_pin(pin) {}
 
@@ -42,11 +43,11 @@ void RelaisDriver::applyPulseLengthFromIntent(
   case cmd::None:
     return;
   case cmd::Long:
-    m_pulse_ms = 1500;
+    m_pulse_ms = config::RelaisLongPulse_ms;
     break;
 
   case cmd::Short:
-    m_pulse_ms = 200;
+    m_pulse_ms = config::RelaisShortPulse_ms;
     break;
   }
 }
