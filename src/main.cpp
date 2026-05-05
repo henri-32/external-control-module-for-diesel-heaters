@@ -1,5 +1,9 @@
 #include "controller.h"
 #include "library_adapter.h"
+#include "config.h"
+#include "devicegroups.h"
+#include "toggle_switches.h"
+#include "pushbuttons.h"
 #include "types.h"
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>

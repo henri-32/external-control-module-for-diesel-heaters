@@ -1,16 +1,11 @@
 #pragma once
+#include "interfaces.h"
+#include "types.h"
 
 #ifdef MEMORY_FUNCTIONS
 #include "memory.h"
 #include "statistics.h"
 #endif
-
-#ifdef TEST_BUILD
-#include "test_devices.h"
-#else
-#include "devicegroups.h"
-#endif
-#include "types.h"
 
 class SystemController {
 public:
