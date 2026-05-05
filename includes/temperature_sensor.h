@@ -1,12 +1,17 @@
-#pragma once
+#pragma once 
 #include "interfaces.h"
 #include "types.h"
-#include <Arduino.h>
 #include <DallasTemperature.h>
 #include <Encoder.h>
 #include <OneWire.h>
 
 
+
+#ifdef TEST_BUILD 
+#include "ArduinoStubs.h"
+#else 
+#include "Arduino.h"
+#endif 
 
 class TemperatureSensorDriver : public IDriver {
 public:

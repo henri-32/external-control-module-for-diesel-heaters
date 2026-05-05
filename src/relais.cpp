@@ -1,14 +1,14 @@
-#include "relaisdriver.h"
+#include "relais.h"
 #include "config.h"
 
-RelaisDriver::RelaisDriver(const uint8_t pin) : m_pin(pin) {}
+Relais::Relais(const uint8_t pin) : m_pin(pin) {}
 
-void RelaisDriver::init() {
+void Relais::init() {
   pinMode(m_pin, OUTPUT);
   digitalWrite(m_pin, LOW);
 }
 
-void RelaisDriver::turnOn(const ControllerOutputIntent::RelaisCommand &intent) {
+void Relais::turnOn(const ControllerOutputIntent::RelaisCommand &intent) {
   if (m_relais_state != RelaisState::OFF ||
       intent == ControllerOutputIntent::RelaisCommand::None) {
     return;
@@ -19,7 +19,7 @@ void RelaisDriver::turnOn(const ControllerOutputIntent::RelaisCommand &intent) {
   m_relais_state = RelaisState::ON;
 };
 
-void RelaisDriver::turnOff() {
+void Relais::turnOff() {
   if (m_relais_state != RelaisState::ON) {
     return;
   }
@@ -30,12 +30,12 @@ void RelaisDriver::turnOff() {
   m_relais_state = RelaisState::OFF;
 };
 
-void RelaisDriver::update(const ControllerOutputIntent::RelaisCommand &intent) {
+void Relais::update(const ControllerOutputIntent::RelaisCommand &intent) {
   turnOn(intent);
   turnOff();
 }
 
-void RelaisDriver::applyPulseLengthFromIntent(
+void Relais::applyPulseLengthFromIntent(
     const ControllerOutputIntent::RelaisCommand &intent) {
   using cmd = ControllerOutputIntent::RelaisCommand;
 

@@ -1,6 +1,10 @@
 #include "devicegroups.h"
 
-RealInputDevices::RealInputDevices(ControllerInputData &id) : m_devices_data(id) {}
+RealInputDevices::RealInputDevices(ControllerInputData &id, ToggleSwitch &ps,
+                                   ToggleSwitch &ms, PushButton &pb,
+                                   IEncoder &encoder)
+    : m_devices_data(id), m_powerSwitch(ps), m_modeSwitch(ms), m_displayButton(pb),
+      m_myEncoder{encoder} {}
 
 void RealInputDevices::init() {
   m_powerSwitch.init();
@@ -19,7 +23,8 @@ void RealInputDevices::updateInputData() {
   m_devices_data.sensor_tempC = m_tempSensor.pollTemp();
 }
 
-RealOutputDevices::RealOutputDevices(ControllerOutputIntent& oi, IDisplay& display)
+RealOutputDevices::RealOutputDevices(ControllerOutputIntent &oi,
+                                     IDisplay &display)
     : m_devices_intent(oi),
       m_lcdDisplay(display, m_devices_intent.displayContent,
                    m_devices_intent.lcd_stateIntent) {}

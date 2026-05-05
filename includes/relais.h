@@ -9,9 +9,9 @@
 #include <Arduino.h>
 #endif
 
-class RelaisDriver {
+class Relais {
 public:
-  explicit RelaisDriver(const uint8_t pin);
+  explicit Relais(const uint8_t pin);
 
   void init();
   void update(const ControllerOutputIntent::RelaisCommand &intent);

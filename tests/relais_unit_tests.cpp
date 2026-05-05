@@ -1,23 +1,23 @@
 #include "ArduinoStubs.h"
-#include "relaisdriver.h"
+#include "relais.h"
 #include <gtest/gtest.h>
 
 using namespace ArduinoStubSpies;
 using COI = ControllerOutputIntent;
 
-class RelaisDriverTest : public ::testing::Test {
+class RelaisTest : public ::testing::Test {
 protected:
 
   static constexpr uint8_t kPin = 7;
-  RelaisDriver driver{kPin};
+  Relais driver{kPin};
 
   void SetUp() override {
-	resetSpies();
+	initSpies();
     setMillis(1000);
   }
 };
 
-TEST_F(RelaisDriverTest, init_configures_output_and_deactivates_relais) {
+TEST_F(RelaisTest, init_configures_output_and_deactivates_relais) {
 //{{{
   driver.init();
 
@@ -28,7 +28,7 @@ TEST_F(RelaisDriverTest, init_configures_output_and_deactivates_relais) {
 }
 //}}}
 
-TEST_F(RelaisDriverTest, update_with_none_does_nothing_when_off) {
+TEST_F(RelaisTest, update_with_none_does_nothing_when_off) {
 //{{{
   driver.update(COI::RelaisCommand::None);
 
@@ -37,7 +37,7 @@ TEST_F(RelaisDriverTest, update_with_none_does_nothing_when_off) {
 }
 //}}}
 
-TEST_F(RelaisDriverTest,
+TEST_F(RelaisTest,
        short_command_activates_then_deactivates_on_next_update) {
 //{{{
   driver.update(COI::RelaisCommand::Short);
@@ -52,7 +52,7 @@ TEST_F(RelaisDriverTest,
   EXPECT_EQ(writtenState, LOW);
 }
 //{{{
-TEST_F(RelaisDriverTest, long_command_stays_on_for_one_check_then_turns_off) {
+TEST_F(RelaisTest, long_command_stays_on_for_one_check_then_turns_off) {
 //{{{
   driver.update(COI::RelaisCommand::Long);
 

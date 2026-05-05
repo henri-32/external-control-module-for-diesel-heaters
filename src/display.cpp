@@ -1,4 +1,4 @@
-#include "displaydriver.h"
+#include "display.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,12 +13,12 @@ using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
 #include <Arduino.h>
 #endif
 
-DisplayDriver::DisplayDriver(IDisplay &display,
+Display::Display(IDisplay &display,
                              COI::DisplayContent &dc,
                              LCDIntent &ds)
     : m_display(display), m_displaycontent(dc), m_displayState(ds) {}
 
-void DisplayDriver::init() {
+void Display::init() {
   //{{{
   m_display.init();
   m_display.noBacklight();
@@ -27,7 +27,7 @@ void DisplayDriver::init() {
 }
 //}}}
 
-void DisplayDriver::update() {
+void Display::update() {
   //{{{
   if (m_displayState == LCDIntent::OFF) {
     m_display.noBacklight();
@@ -39,7 +39,7 @@ void DisplayDriver::update() {
 }
 //}}}
 
-void DisplayDriver::renderLines() {
+void Display::renderLines() {
   //{{{
   switch (m_displayState) {
   case LCDIntent::Page1:
@@ -101,7 +101,7 @@ void DisplayDriver::renderLines() {
 }
 //}}}
 
-void DisplayDriver::writeDisplay(char lines[4][21]) {
+void Display::writeDisplay(char lines[4][21]) {
   //{{{
   if (millis() - last_update_ms < min_update_interval_ms)
     return;
@@ -119,7 +119,7 @@ void DisplayDriver::writeDisplay(char lines[4][21]) {
 }
 //}}}
 
-void DisplayDriver::formatTempFloatsForDisplay() {
+void Display::formatTempFloatsForDisplay() {
   //{{{
   switch (m_displayState) {
   case LCDIntent::Page1:
@@ -150,7 +150,7 @@ void DisplayDriver::formatTempFloatsForDisplay() {
 }
 //}}}
 
-void DisplayDriver::createStateStringsForDisplay(
+void Display::createStateStringsForDisplay(
     const COI::DisplayContent &content) {
   //{{{
   switch (content.heatingState) {
@@ -176,7 +176,7 @@ void DisplayDriver::createStateStringsForDisplay(
 }
 //}}}
 
-void DisplayDriver::clearLine(uint8_t line) {
+void Display::clearLine(uint8_t line) {
   //{{{
   m_display.setCursor(0, line);
   m_display.printstr("                    ");

@@ -96,9 +96,12 @@ APP_CPP_SRCS := \
 	src/main.cpp \
 	src/controller.cpp \
 	src/devicegroups.cpp \
-	src/hardwaredrivers.cpp \
-	src/displaydriver.cpp \
-	src/relaisdriver.cpp \
+	src/display.cpp \
+	src/relais.cpp \
+	src/pushbuttons.cpp \
+	src/toggle_switches.cpp \
+	src/myEncoder.cpp \
+	src/temperature_sensor.cpp \
 	src/library_adapter.cpp
 
 C_OBJS := $(addprefix $(BUILD_DIR)/,$(AVR_C_SRCS:.c=.o))
@@ -108,13 +111,16 @@ DEPS := $(OBJS:.o=.d)
 
 TEST_CPP_SRCS := \
 	tests/SystemController_unit_tests.cpp \
-	tests/display_driver_unit_tests.cpp \
-	tests/relais_driver_unit_tests.cpp \
+	tests/display_unit_tests.cpp \
+	tests/relais_unit_tests.cpp \
 	tests/test_devices.cpp \
 	tests/ArduinoStubs.cpp \
 	src/controller.cpp \
-	src/displaydriver.cpp \
-	src/relaisdriver.cpp
+	src/display.cpp \
+	src/relais.cpp \
+	src/pushbuttons.cpp \
+	src/toggle_switches.cpp \
+	src/myEncoder.cpp
 
 
 GTEST_LIB :=$(TEST_BUILD_DIR)/libtest.a

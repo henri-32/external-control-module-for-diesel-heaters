@@ -1,21 +1,21 @@
-#include "displaydriver.h"
+#include "display.h"
 #include "test_devices.h"
 #include "ArduinoStubs.h"
 #include <gtest/gtest.h>
 
-class DisplayDriverTest : public ::testing::Test {
+class DisplayTest : public ::testing::Test {
 protected:
   ControllerOutputIntent COI;
   TestDisplay display;
 
-  DisplayDriver driver{display, COI.displayContent, COI.lcd_stateIntent};
+  Display driver{display, COI.displayContent, COI.lcd_stateIntent};
 
   void SetUp() override {
   ArduinoStubSpies::setMillis(1000); 
 }
 };
 
-TEST_F(DisplayDriverTest, init_gets_called) {
+TEST_F(DisplayTest, init_gets_called) {
 //{{{
   driver.init();
 
@@ -26,7 +26,7 @@ TEST_F(DisplayDriverTest, init_gets_called) {
 }
 //}}}
 
-TEST_F(DisplayDriverTest, update_off_turns_display_off_without_writing) {
+TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
 //{{{
   COI.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::OFF;
 
@@ -38,7 +38,7 @@ TEST_F(DisplayDriverTest, update_off_turns_display_off_without_writing) {
 }
 //}}}
 
-TEST_F(DisplayDriverTest, update_page1_writes_expected_lines) {
+TEST_F(DisplayTest, update_page1_writes_expected_lines) {
 //{{{
   COI.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
   COI.displayContent.temp_c = 21.3F;
@@ -58,7 +58,7 @@ TEST_F(DisplayDriverTest, update_page1_writes_expected_lines) {
 }
 //}}}
 
-TEST_F(DisplayDriverTest, update_with_same_content_does_not_rewrite_lines) {
+TEST_F(DisplayTest, update_with_same_content_does_not_rewrite_lines) {
 //{{{
   COI.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
   COI.displayContent.temp_c = 20.0F;

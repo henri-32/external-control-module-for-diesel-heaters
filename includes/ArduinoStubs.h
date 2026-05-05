@@ -15,9 +15,10 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 
 enum PinState { HIGH, LOW, NOSTATE };
-enum PinMode { OUTPUT, INPUT, NOMODE };
+enum PinMode { OUTPUT, INPUT, INPUT_PULLUP, NOMODE };
 
 extern void digitalWrite(int pin, PinState state);
+extern PinState digitalRead(int pin);
 extern void pinMode(int pin, PinMode mode);
 extern unsigned long millis();
 
@@ -32,7 +33,8 @@ extern PinMode writtenMode;
 
 extern void setMillis(unsigned long now_ms);
 extern void advanceMillis(unsigned long delta_ms);
-extern void resetSpies();
+extern void initSpies();
+extern PinState testRead; 
 
 };
 
