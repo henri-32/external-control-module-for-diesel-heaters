@@ -13,17 +13,23 @@ ControllerInputData inputData;
 ControllerOutputIntent outputData;
 
 // Hardware Konstruktion
-ToggleSwitch powerSwitch{my_pin_config::powerSwitch};
-ToggleSwitch modeSwitch{my_pin_config::modeSwitch};
-PushButton displayButton{my_pin_config::displayButton};
-EncoderAdapter encoderAdapter{my_pin_config::myEncoder[0],
-                              my_pin_config::myEncoder[1]};
+ToggleSwitch powerSwitch{pinConfig::powerSwitch};
+ToggleSwitch modeSwitch{pinConfig::modeSwitch};
+PushButton displayButton{pinConfig::displayButton};
+EncoderAdapter encoder{pinConfig::myEncoder[0],
+                              pinConfig::myEncoder[1]};
+OneWire one_wire {pinConfig::tempSensor}; 
+TempSensorAdapter sensor {one_wire}; 
+
+
 
 LCDAdapter lcdAdapter{0x27, 20, 4};
+Relais relais{pinConfig::relais}; 
 
-RealInputDevices inputDevices{inputData, powerSwitch, modeSwitch, displayButton,
-                              encoderAdapter};
-RealOutputDevices outputDevices{outputData, lcdAdapter};
+
+InputDevices inputDevices{inputData, powerSwitch, modeSwitch, displayButton,
+                              encoder, sensor};
+OutputDevices outputDevices{outputData, lcdAdapter, relais};
 
 SystemController controller{inputDevices, outputDevices};
 

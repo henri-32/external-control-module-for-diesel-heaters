@@ -1,32 +1,14 @@
 #pragma once
 #include "stdint.h"
+#include "types.h"
 
 class IDriver {
 public:
   virtual void init() = 0;
 
-protected: 
-  ~IDriver() = default; 
-};
-
-class IInputDevices {
-public:
-  virtual void init() = 0;
-  virtual void updateInputData() = 0;
-
 protected:
-  ~IInputDevices() = default;
+  ~IDriver() = default;
 };
-
-class IOutputDevices {
-public:
-  virtual void init() = 0;
-  virtual void update() = 0;
-
-protected:
-  ~IOutputDevices() = default;
-};
-
 class IDisplay {
 public:
   virtual void clear() = 0;
@@ -42,10 +24,45 @@ protected:
   ~IDisplay() = default;
 };
 
+class IRelais : public IDriver {
+public:
+  virtual void update(const ControllerOutputIntent::RelaisCommand &intent) = 0;
+
+protected:
+  ~IRelais() = default;
+};
+
 class IEncoder {
 public:
   virtual int read() = 0;
 
 protected:
   ~IEncoder() = default;
+};
+
+class IToggleSwitch : public IDriver {
+public:
+  virtual bool changed() = 0;
+
+protected:
+  ~IToggleSwitch() = default;
+};
+
+class IPushButton : public IDriver {
+public:
+  virtual bool isDown() const = 0;
+  virtual bool released() = 0;
+
+protected:
+  ~IPushButton() = default;
+};
+
+class ITempSensor {
+public:
+  virtual void begin() = 0;
+  virtual void requestTemperatures() = 0;
+  virtual float getTempCByIndex(uint8_t) = 0;
+
+protected:
+  ~ITempSensor() = default;
 };

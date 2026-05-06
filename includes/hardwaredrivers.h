@@ -8,9 +8,9 @@
 
 
 
-class TemperatureSensorDriver : public IDriver {
+class TemperatureSensor : public IDriver {
 public:
-  explicit TemperatureSensorDriver(uint8_t pin);
+  explicit TemperatureSensor(uint8_t pin);
 
   void init() override;
   float pollTemp();

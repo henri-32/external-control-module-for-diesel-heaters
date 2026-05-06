@@ -1,21 +1,28 @@
 #include "temperature_sensor.h"
-TemperatureSensorDriver::TemperatureSensorDriver(uint8_t pin)
-    : m_one_wire(pin), m_sensors(&m_one_wire) {
-} // Verknüpfung von DallasTemperature & OneWire
 
-void TemperatureSensorDriver::init() {
+#ifdef TEST_BUILD 
+#include "ArduinoStubs.h"
+#else 
+#include "Arduino.h"
+#endif 
+
+TemperatureSensor::TemperatureSensor(ITempSensor& sensor)
+    :m_sensors (sensor) {
+}
+
+void TemperatureSensor::init() {
   m_sensors.begin();
   m_sensors.requestTemperatures();
   m_temp_c = m_sensors.getTempCByIndex(0);
 }
 
-float TemperatureSensorDriver::pollTemp() {
+float TemperatureSensor::pollTemp() {
   startTemperatureRequest();
   measureTemperature();
   return m_temp_c;
 }
 
-void TemperatureSensorDriver::startTemperatureRequest() {
+void TemperatureSensor::startTemperatureRequest() {
   if (millis() - m_last_temp_request < m_request_intervall_ms)
     return;
   if (m_tempRequestPending)
@@ -25,7 +32,7 @@ void TemperatureSensorDriver::startTemperatureRequest() {
   m_tempRequestPending = true;
 }
 
-void TemperatureSensorDriver::measureTemperature() {
+void TemperatureSensor::measureTemperature() {
   if (!m_tempRequestPending)
     return;
   if (millis() - m_last_temp_request < m_conversion_time_ms)

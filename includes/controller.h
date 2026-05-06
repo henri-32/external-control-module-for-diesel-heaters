@@ -1,5 +1,6 @@
 #pragma once
 #include "interfaces.h"
+#include "devicegroups.h"
 #include "types.h"
 
 #ifdef MEMORY_FUNCTIONS
@@ -9,7 +10,7 @@
 
 class SystemController {
 public:
-  SystemController(IInputDevices &i, IOutputDevices &o);
+  SystemController(InputDevices &i, OutputDevices &o);
   void operator()();
   void init();
 
@@ -43,8 +44,8 @@ private:
   ControllerInputData inputData;
   HeaterStatus heaterStatus;
   ControllerOutputIntent outputIntent;
-  IInputDevices &inputDevices;
-  IOutputDevices &outputDevices;
+  InputDevices &inputDevices;
+  OutputDevices &outputDevices;
 
 #ifdef MEMORY_FUNCTIONS
   SystemStatistics systemStatistic;

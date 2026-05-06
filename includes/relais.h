@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "interfaces.h"
 #include <stdint.h>
 
 #ifdef TEST_BUILD
@@ -9,7 +10,7 @@
 #include <Arduino.h>
 #endif
 
-class Relais {
+class Relais :public IRelais {
 public:
   explicit Relais(const uint8_t pin);
 

@@ -24,4 +24,12 @@ void LCDAdapter::init() {
   liquidCristal_I2C.init();
 }
 
-int EncoderAdapter::read() {return m_encoder.read();} 
+int EncoderAdapter::read() { return libraryObject.read(); }
+
+void TempSensorAdapter::begin() { libraryObject.begin(); }
+
+void TempSensorAdapter::requestTemperatures() {
+  libraryObject.requestTemperatures();
+}
+
+float TempSensorAdapter::getTempCByIndex(uint8_t index) {return libraryObject.getTempCByIndex(index);}

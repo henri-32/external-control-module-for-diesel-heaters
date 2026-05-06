@@ -5,24 +5,6 @@
 #include <utility>
 #include <vector>
 
-class TestInputDevices : public IInputDevices {
-public:
-  TestInputDevices(ControllerInputData &id);
-  void init() override {}
-  void updateInputData() override {}
-};
-
-class TestOutputDevices : public IOutputDevices {
-public:
-  TestOutputDevices(ControllerOutputIntent &oi, IDisplay &display);
-  void init() override {}
-  void update() override {}
-  const ControllerOutputIntent &call();
-
-  ControllerOutputIntent &m_outputIntent;
-  IDisplay &m_display;
-};
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -53,12 +35,41 @@ public:
   std::vector<std::string> printed_lines;
 };
 
+class TestRelais : public IRelais {
+public:
+  void init() override{};
+  void update(const ControllerOutputIntent::RelaisCommand &intent) override{};
+};
+
 class TestEncoder : public IEncoder {
 public:
   int read() override;
 
 private:
   int testRead = 0;
+};
+
+class TestToggleSwitch : public IToggleSwitch {
+public:
+  TestToggleSwitch() = default;
+  void init() override{};
+  bool changed() override { return false; };
+};
+
+class TestPushButton : public IPushButton {
+public:
+  TestPushButton() = default;
+  void init() override{};
+  bool isDown() const override { return false; };
+  bool released() override { return false; };
+};
+
+class TestTemperatureSensor : public ITempSensor {
+public:
+  TestTemperatureSensor() = default;
+  void begin() override{};
+  void requestTemperatures() override{};
+  float getTempCByIndex(uint8_t index) override { return 10.0; };
 };
 
 #pragma GCC diagnostic pop

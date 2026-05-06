@@ -1,19 +1,19 @@
-#pragma once 
+#pragma once
 #include "interfaces.h"
 
 #ifdef TEST_BUILD
 #include "ArduinoStubs.h"
-#else 
+#else
 #include "Arduino.h"
 #endif
 
-class PushButton : public IDriver {
+class PushButton : public IPushButton {
 public:
   explicit PushButton(uint8_t pin);
 
   void init() override;
-  bool isDown() const { return m_stable == LOW; }
-  bool released();
+  bool isDown() const override { return m_stable == LOW; }
+  bool released() override;
 
 private:
   const uint8_t m_pin;
@@ -22,4 +22,3 @@ private:
   unsigned long m_last_debounce_ms = 0;
   static constexpr unsigned long m_debounce_delay_ms = 50;
 };
-

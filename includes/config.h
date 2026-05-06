@@ -1,7 +1,7 @@
 #pragma once
 // #define MEMORY_FUNCTIONS
 
-struct my_pin_config {
+struct pinConfig {
   static constexpr int powerSwitch = 2;
   static constexpr int modeSwitch = 3;
   static constexpr int displayButton = 8;

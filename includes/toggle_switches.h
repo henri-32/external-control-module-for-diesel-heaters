@@ -1,12 +1,12 @@
 #pragma once 
 #include "interfaces.h"
 
-class ToggleSwitch : public IDriver {
+class ToggleSwitch : public IToggleSwitch {
 public:
   explicit ToggleSwitch(uint8_t pin);
 
   void init() override;
-  bool changed();
+  bool changed() override;
 
 private:
   const uint8_t m_pin;

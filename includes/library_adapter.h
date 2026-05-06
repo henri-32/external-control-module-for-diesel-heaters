@@ -4,6 +4,8 @@
 #include "interfaces.h"
 #include <Encoder.h>
 #include <LiquidCrystal_I2C.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 class LCDAdapter : public IDisplay {
 public:
@@ -31,9 +33,21 @@ private:
 class EncoderAdapter : public IEncoder {
 public:
   ~EncoderAdapter() = default;
-  EncoderAdapter(int pin1, int pin2) : m_encoder(pin1, pin2) {}
+  EncoderAdapter(int pin1, int pin2) : libraryObject(pin1, pin2) {}
   int read() override;
 
 private:
-  Encoder m_encoder; // Encoder library genutzt: Dort findet Pin Zuordnung statt
+  Encoder libraryObject; // Encoder library genutzt: Dort findet Pin Zuordnung statt
+};
+
+class TempSensorAdapter : public ITempSensor {
+public: 
+  TempSensorAdapter(OneWire& ow) : libraryObject{&ow} {};
+  
+  void begin() override; 
+  void requestTemperatures() override; 
+  float getTempCByIndex(uint8_t index) override; 
+
+private: 
+  DallasTemperature libraryObject;
 };

@@ -1,5 +1,6 @@
 #include "config.h"
 #include "controller.h"
+#include "devicegroups.h"
 #include "test_devices.h"
 #include <gtest/gtest.h>
 
@@ -9,9 +10,16 @@ protected:
   ControllerOutputIntent outputData;
 
   TestDisplay testDisplay;
+  TestRelais testRelais; 
+  TestToggleSwitch powerSwitch;
+  TestToggleSwitch modeSwitch;
+  TestPushButton displayButton;
+  TestEncoder encoder;
+  TestTemperatureSensor sensor;
 
-  TestInputDevices inputDevices{inputData};
-  TestOutputDevices outputDevices{outputData, testDisplay};
+  InputDevices inputDevices{inputData,     powerSwitch, modeSwitch,
+                                displayButton, encoder,     sensor};
+  OutputDevices outputDevices{outputData, testDisplay, testRelais};
 
   SystemController c{inputDevices, outputDevices};
   ControllerInputData &input = c.inputData;

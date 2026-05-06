@@ -1,12 +1,12 @@
 #include "devicegroups.h"
 
-RealInputDevices::RealInputDevices(ControllerInputData &id, ToggleSwitch &ps,
-                                   ToggleSwitch &ms, PushButton &pb,
-                                   IEncoder &encoder)
+InputDevices::InputDevices(ControllerInputData &id, IToggleSwitch &ps,
+                                   IToggleSwitch &ms, IPushButton &pb,
+                                   IEncoder &encoder, ITempSensor & sensor)
     : m_devices_data(id), m_powerSwitch(ps), m_modeSwitch(ms), m_displayButton(pb),
-      m_myEncoder{encoder} {}
+      m_myEncoder{encoder}, m_tempSensor{sensor} {}
 
-void RealInputDevices::init() {
+void InputDevices::init() {
   m_powerSwitch.init();
   m_modeSwitch.init();
   m_displayButton.init();
@@ -14,7 +14,7 @@ void RealInputDevices::init() {
   m_tempSensor.init();
 }
 
-void RealInputDevices::updateInputData() {
+void InputDevices::updateInputData() {
   m_devices_data.alternatorPressed = m_displayButton.isDown();
   m_devices_data.powerSwitchChanged = m_powerSwitch.changed();
   m_devices_data.modeSwitchChanged = m_modeSwitch.changed();
@@ -23,18 +23,19 @@ void RealInputDevices::updateInputData() {
   m_devices_data.sensor_tempC = m_tempSensor.pollTemp();
 }
 
-RealOutputDevices::RealOutputDevices(ControllerOutputIntent &oi,
-                                     IDisplay &display)
+OutputDevices::OutputDevices(ControllerOutputIntent &oi,
+                                     IDisplay &display, IRelais& relais)
     : m_devices_intent(oi),
+      m_relais(relais),
       m_lcdDisplay(display, m_devices_intent.displayContent,
                    m_devices_intent.lcd_stateIntent) {}
 
-void RealOutputDevices::init() {
+void OutputDevices::init() {
   m_lcdDisplay.init();
   m_relais.init();
 }
 
-void RealOutputDevices::update() {
+void OutputDevices::update() {
   m_relais.update(m_devices_intent.consumeRelaisRequest());
   m_lcdDisplay.update();
 }

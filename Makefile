@@ -116,6 +116,8 @@ TEST_CPP_SRCS := \
 	tests/test_devices.cpp \
 	tests/ArduinoStubs.cpp \
 	src/controller.cpp \
+	src/devicegroups.cpp \
+	src/temperature_sensor.cpp \
 	src/display.cpp \
 	src/relais.cpp \
 	src/pushbuttons.cpp \
