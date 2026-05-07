@@ -41,12 +41,12 @@ public:
   void update(const ControllerOutputIntent::RelaisCommand &intent) override{};
 };
 
-class TestEncoder : public IEncoder {
+class TestEncoderHardware : public IEncoderHardware {
 public:
   int read() override;
 
 private:
-  int testRead = 0;
+  int m_testRead = 0;
 };
 
 class TestToggleSwitch : public IToggleSwitch {
@@ -64,9 +64,9 @@ public:
   bool released() override { return false; };
 };
 
-class TestTemperatureSensor : public ITempSensor {
+class TestTemperatureSensorHardware : public ITempSensorHardware {
 public:
-  TestTemperatureSensor() = default;
+  TestTemperatureSensorHardware() = default;
   void begin() override{};
   void requestTemperatures() override{};
   float getTempCByIndex(uint8_t index) override { return 10.0; };

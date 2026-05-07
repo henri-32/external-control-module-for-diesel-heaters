@@ -1,40 +1,36 @@
 #pragma once
-#include "config.h"
-#include "display.h"
-#include "myEncoder.h"
-#include "pushbuttons.h"
-#include "relais.h"
-#include "temperature_sensor.h"
-#include "toggle_switches.h"
 
 #include "interfaces.h"
 #include "types.h"
 
 class InputDevices {
 public:
-  InputDevices(ControllerInputData &id, IToggleSwitch &ps, IToggleSwitch &ms,
-                   IPushButton &db, IEncoder &encoder, ITempSensor &sensor);
+  InputDevices(ControllerInputData &inputData, IToggleSwitch &ps,
+               IToggleSwitch &ms,
+               IPushButton &db, IEncoderDriver &encoderDriver,
+               ITempSensorDriver &tempSensorDriver);
 
   void init();
   void updateInputData();
 
-  ControllerInputData &m_devices_data;
+  ControllerInputData &m_inputData;
   IToggleSwitch &m_powerSwitch;
   IToggleSwitch &m_modeSwitch;
   IPushButton &m_displayButton;
-  MyEncoder m_myEncoder; // Keine Referenz, da Treiber MyEncoder konstruiert
-                         // wird hier (Siehe Konstruktor InputDevices)
-  TemperatureSensor m_tempSensor;
+  IEncoderDriver &m_encoderDriver;
+  ITempSensorDriver &m_tempSensorDriver;
 };
 
 class OutputDevices {
 public:
-  OutputDevices(ControllerOutputIntent &oi, IDisplay &display, IRelais& relais);
+  OutputDevices(ControllerOutputIntent &outputIntent,
+                IDisplayDriver &displayDriver,
+                IRelais &relais);
 
   void init();
   void update();
 
-  ControllerOutputIntent &m_devices_intent;
-  IRelais& m_relais;
-  Display m_lcdDisplay;
+  ControllerOutputIntent &m_outputIntent;
+  IRelais &m_relais;
+  IDisplayDriver &m_displayDriver;
 };

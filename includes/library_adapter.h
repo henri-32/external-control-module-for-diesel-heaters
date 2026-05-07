@@ -30,7 +30,7 @@ private:
 };
 //}}}
 
-class EncoderAdapter : public IEncoder {
+class EncoderAdapter : public IEncoderHardware {
 public:
   ~EncoderAdapter() = default;
   EncoderAdapter(int pin1, int pin2) : libraryObject(pin1, pin2) {}
@@ -40,7 +40,7 @@ private:
   Encoder libraryObject; // Encoder library genutzt: Dort findet Pin Zuordnung statt
 };
 
-class TempSensorAdapter : public ITempSensor {
+class TempSensorAdapter : public ITempSensorHardware {
 public: 
   TempSensorAdapter(OneWire& ow) : libraryObject{&ow} {};
   

@@ -1,13 +1,12 @@
 #pragma once 
 #include "interfaces.h"
 
-// Name gewählt, da Bibliothek Encoder heißt.
-class MyEncoder : public IDriver {
+class EncoderDriver : public IEncoderDriver {
 public:
-  explicit MyEncoder(IEncoder& encoder);
+  explicit EncoderDriver(IEncoderHardware &encoderHardware);
 
   void init() override { poll(); }
-  int readSteps();
+  int readSteps() override;
 
 private:
   void poll();
@@ -17,6 +16,5 @@ private:
   long m_prev = 0;
   long m_delta = 0;
   unsigned long m_last_change_ms = 0;
-  IEncoder& m_encoder;
+  IEncoderHardware &m_encoderHardware;
 };
-

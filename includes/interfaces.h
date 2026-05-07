@@ -9,6 +9,7 @@ public:
 protected:
   ~IDriver() = default;
 };
+
 class IDisplay {
 public:
   virtual void clear() = 0;
@@ -24,6 +25,14 @@ protected:
   ~IDisplay() = default;
 };
 
+class IDisplayDriver : public IDriver {
+public: 
+  virtual void update() = 0; 
+
+protected: 
+  ~IDisplayDriver() = default; 
+}; 
+
 class IRelais : public IDriver {
 public:
   virtual void update(const ControllerOutputIntent::RelaisCommand &intent) = 0;
@@ -32,13 +41,21 @@ protected:
   ~IRelais() = default;
 };
 
-class IEncoder {
+class IEncoderHardware {
 public:
   virtual int read() = 0;
 
 protected:
-  ~IEncoder() = default;
+  ~IEncoderHardware() = default;
 };
+
+class IEncoderDriver : public IDriver {
+public: 
+  virtual int readSteps() = 0; 
+  
+protected: 
+  ~IEncoderDriver() = default; 
+}; 
 
 class IToggleSwitch : public IDriver {
 public:
@@ -57,12 +74,20 @@ protected:
   ~IPushButton() = default;
 };
 
-class ITempSensor {
+class ITempSensorHardware {
 public:
   virtual void begin() = 0;
   virtual void requestTemperatures() = 0;
   virtual float getTempCByIndex(uint8_t) = 0;
 
 protected:
-  ~ITempSensor() = default;
+  ~ITempSensorHardware() = default;
 };
+
+class ITempSensorDriver : public IDriver {
+public:
+  virtual float pollTemp() = 0; 
+
+protected: 
+  ~ITempSensorDriver() = default; 
+}; 

@@ -3,6 +3,6 @@
 void TestDisplay::init() {
 m_init_called = true;}
 
-int TestEncoder::read() {
-  return testRead; 
+int TestEncoderHardware::read() {
+  return m_testRead; 
 }

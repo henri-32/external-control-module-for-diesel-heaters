@@ -1,4 +1,4 @@
-#include "display.h"
+#include "display_driver.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,12 +13,11 @@ using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
 #include <Arduino.h>
 #endif
 
-Display::Display(IDisplay &display,
-                             COI::DisplayContent &dc,
+DisplayDriver::DisplayDriver(IDisplay &display, COI::DisplayContent &dc,
                              LCDIntent &ds)
-    : m_display(display), m_displaycontent(dc), m_displayState(ds) {}
+    : m_display(display), m_displayContent(dc), m_displayState(ds) {}
 
-void Display::init() {
+void DisplayDriver::init() {
   //{{{
   m_display.init();
   m_display.noBacklight();
@@ -27,7 +26,7 @@ void Display::init() {
 }
 //}}}
 
-void Display::update() {
+void DisplayDriver::update() {
   //{{{
   if (m_displayState == LCDIntent::OFF) {
     m_display.noBacklight();
@@ -39,12 +38,12 @@ void Display::update() {
 }
 //}}}
 
-void Display::renderLines() {
+void DisplayDriver::renderLines() {
   //{{{
   switch (m_displayState) {
   case LCDIntent::Page1:
     formatTempFloatsForDisplay();
-    createStateStringsForDisplay(m_displaycontent);
+    createStateStringsForDisplay(m_displayContent);
     m_display.backlight();
     m_display.display();
 
@@ -59,11 +58,11 @@ void Display::renderLines() {
     m_display.display();
 	#ifdef MEMORY_FUNCTIONS
     snprintf(m_lineBuffer[0], 21, "DutyCycle: %u %%",
-             m_displaycontent.runtimeDisplayData.dutyCycle);
+             m_displayContent.runtimeDisplayData.dutyCycle);
     snprintf(m_lineBuffer[1], 21, "Cycles:    %u",
-             m_displaycontent.runtimeDisplayData.cycleCounter);
+             m_displayContent.runtimeDisplayData.cycleCounter);
     snprintf(m_lineBuffer[2], 21, "Avg Idle:  %lu m",
-             m_displaycontent.runtimeDisplayData.avgIdleTime_minutes);
+             m_displayContent.runtimeDisplayData.avgIdleTime_minutes);
     snprintf(m_lineBuffer[3], 21, "%s", "");
 	#endif
     break;
@@ -73,9 +72,9 @@ void Display::renderLines() {
     m_display.display();
 	#ifdef MEMORY_FUNCTIONS
     snprintf(m_lineBuffer[0], 21, "Max Idle:  %lu m",
-             m_displaycontent.runtimeDisplayData.maxIdleTime_minutes);
+             m_displayContent.runtimeDisplayData.maxIdleTime_minutes);
     snprintf(m_lineBuffer[1], 21, "Min Idle:  %u m",
-             m_displaycontent.runtimeDisplayData.minIdleTime_minutes);
+             m_displayContent.runtimeDisplayData.minIdleTime_minutes);
     snprintf(m_lineBuffer[2], 21, "Avg diff:  %d.%d C", diff_int, diff_frac);
     snprintf(m_lineBuffer[3], 21, "%s", "");
 	#endif
@@ -86,9 +85,9 @@ void Display::renderLines() {
 
 	#ifdef MEMORY_FUNCTIONS
     snprintf(m_lineBuffer[0], 21, "All Time DC %u %%",
-             m_displaycontent.EEPROM_Values.dutyCycle);
+             m_displayContent.EEPROM_Values.dutyCycle);
     snprintf(m_lineBuffer[1], 21, "All Time IT %lu m",
-             m_displaycontent.EEPROM_Values.avgIdleTime);
+             m_displayContent.EEPROM_Values.avgIdleTime);
     snprintf(m_lineBuffer[2], 21, "%s", "");
     snprintf(m_lineBuffer[3], 21, "%s", "");
 	#endif
@@ -101,7 +100,7 @@ void Display::renderLines() {
 }
 //}}}
 
-void Display::writeDisplay(char lines[4][21]) {
+void DisplayDriver::writeDisplay(char lines[4][21]) {
   //{{{
   if (millis() - last_update_ms < min_update_interval_ms)
     return;
@@ -119,25 +118,25 @@ void Display::writeDisplay(char lines[4][21]) {
 }
 //}}}
 
-void Display::formatTempFloatsForDisplay() {
+void DisplayDriver::formatTempFloatsForDisplay() {
   //{{{
   switch (m_displayState) {
   case LCDIntent::Page1:
 
-    t_int = int(m_displaycontent.temp_c);
-    t_frac = abs(static_cast<int>(m_displaycontent.temp_c * 10) % 10);
-    s_int = int(m_displaycontent.target_tempC);
-    s_frac = abs(static_cast<int>(m_displaycontent.target_tempC * 10) % 10);
+    t_int = int(m_displayContent.temp_c);
+    t_frac = abs(static_cast<int>(m_displayContent.temp_c * 10) % 10);
+    s_int = int(m_displayContent.target_tempC);
+    s_frac = abs(static_cast<int>(m_displayContent.target_tempC * 10) % 10);
     break;
 
   case LCDIntent::Page2:
     break;
 
   case LCDIntent::Page3:
-    diff_int = int(m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget);
+    diff_int = int(m_displayContent.runtimeDisplayData.mediumDiffTempToTarget);
     diff_frac = abs(
         static_cast<int>(
-            m_displaycontent.runtimeDisplayData.mediumDiffTempToTarget * 10) %
+            m_displayContent.runtimeDisplayData.mediumDiffTempToTarget * 10) %
         10);
     break;
 
@@ -150,7 +149,7 @@ void Display::formatTempFloatsForDisplay() {
 }
 //}}}
 
-void Display::createStateStringsForDisplay(
+void DisplayDriver::createStateStringsForDisplay(
     const COI::DisplayContent &content) {
   //{{{
   switch (content.heatingState) {
@@ -176,7 +175,7 @@ void Display::createStateStringsForDisplay(
 }
 //}}}
 
-void Display::clearLine(uint8_t line) {
+void DisplayDriver::clearLine(uint8_t line) {
   //{{{
   m_display.setCursor(0, line);
   m_display.printstr("                    ");

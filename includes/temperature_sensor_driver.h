@@ -1,26 +1,18 @@
-#pragma once
+#pragma once 
 #include "interfaces.h"
-#include "types.h"
-#include <Arduino.h>
-#include <DallasTemperature.h>
-#include <Encoder.h>
-#include <OneWire.h>
 
-
-
-class TemperatureSensor : public IDriver {
+class TemperatureSensorDriver : public ITempSensorDriver {
 public:
-  explicit TemperatureSensor(uint8_t pin);
+  explicit TemperatureSensorDriver(ITempSensorHardware &sensorHardware);
 
   void init() override;
-  float pollTemp();
+  float pollTemp() override;
 
 private:
   void startTemperatureRequest();
   void measureTemperature();
 
-  OneWire m_one_wire; //In Library findet Pin Zuweisung statt
-  DallasTemperature m_sensors;
+  ITempSensorHardware &m_sensorHardware;
 
   unsigned long m_last_temp_request = 0;
   bool m_tempRequestPending = false;

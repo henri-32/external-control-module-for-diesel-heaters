@@ -2,13 +2,13 @@
 #include "interfaces.h"
 #include "types.h"
 
-class Display : public IDriver {
+class DisplayDriver : public IDisplayDriver {
 public:
-  Display(IDisplay& display, ControllerOutputIntent::DisplayContent &dc,
+  DisplayDriver(IDisplay &display, ControllerOutputIntent::DisplayContent &dc,
                 ControllerOutputIntent::LCD_StateIntent &ds);
 
   void init() override;
-  void update();
+  void update() override;
 
 #ifdef TEST_BUILD
 public: 
@@ -24,14 +24,14 @@ private:
       const ControllerOutputIntent::DisplayContent &content);
   void clearLine(uint8_t line);
 
-  IDisplay& m_display;
+  IDisplay &m_display;
   static constexpr uint8_t Rows = 4;
   static constexpr uint8_t Cols = 21;
   char m_lineBuffer[Rows][Cols] = {};
   char string_of_states[Rows][Cols] = {};
   char lastLine[4][21] = {"", "", "", ""};
   // States
-  ControllerOutputIntent::DisplayContent &m_displaycontent;
+  ControllerOutputIntent::DisplayContent &m_displayContent;
   ControllerOutputIntent::LCD_StateIntent &m_displayState;
   // Formatting in Helperfunktion
   int t_int;

@@ -13,3 +13,167 @@ weitergegeben werden.
 Die Weitergabe muss auch noch für das TestDisplay in unit_tests.cpp erfolgen 
 
 ===================================================================
+
+Refactor-Vorschlag fuer saubere Konstruktion und Virtualisierung
+
+Zielbild
+
+main
+- baut alle konkreten Objekte zusammen
+
+devicegroups
+- aggregieren nur fertige Geraete
+- kennen keine Library-Adapter und keine konkreten Treiberdetails
+
+controller
+- kennt nur InputDevices und OutputDevices
+
+Neue Schichten
+
+1. Hardware-/Library-Adapter
+- bleiben ungefaehr wie jetzt:
+- EncoderAdapter : IEncoderHardwareRaw
+- TempSensorAdapter : ITempSensorHardwareRaw
+- LCDAdapter : ILcdRaw
+
+Diese Ebene kapselt nur Libraries wie Encoder, DallasTemperature, LiquidCrystal_I2C.
+
+2. Fachliche Treiber
+- bekommen eigene Interfaces:
+- IStepEncoder
+- ITemperatureReader
+- IStatusDisplay
+
+Konkrete Klassen:
+- MyEncoder : IStepEncoder
+- TemperatureSensorDriver : ITemperatureReader
+- Display : IStatusDisplay
+
+Diese Ebene enthaelt die echte Logik:
+- Encoder-Schrittbildung
+- Temperatur-Polling
+- Display-Rendering
+
+3. DeviceGroups
+- bekommen nur noch diese fachlichen Interfaces injiziert
+- speichern nur Referenzen
+- konstruieren intern nichts mehr
+
+Konkret so schneiden
+
+In interfaces.h ergaenzen:
+
+class IStepEncoder : public IDriver {
+public:
+  virtual int readSteps() = 0;
+protected:
+  ~IStepEncoder() = default;
+};
+
+class ITemperatureReader : public IDriver {
+public:
+  virtual float pollTemp() = 0;
+protected:
+  ~ITemperatureReader() = default;
+};
+
+class IStatusDisplay : public IDriver {
+public:
+  virtual void update() = 0;
+protected:
+  ~IStatusDisplay() = default;
+};
+
+Danach:
+- MyEncoder erbt von IStepEncoder statt nur von IDriver
+- TemperatureSensorDriver erbt von ITemperatureReader
+- Display erbt von IStatusDisplay
+
+devicegroups danach
+
+InputDevices ungefaehr so:
+
+class InputDevices {
+public:
+  InputDevices(ControllerInputData& id,
+               IToggleSwitch& ps,
+               IToggleSwitch& ms,
+               IPushButton& pb,
+               IStepEncoder& encoder,
+               ITemperatureReader& sensor);
+
+  void init();
+  void updateInputData();
+
+private:
+  ControllerInputData& m_devices_data;
+  IToggleSwitch& m_powerSwitch;
+  IToggleSwitch& m_modeSwitch;
+  IPushButton& m_displayButton;
+  IStepEncoder& m_encoder;
+  ITemperatureReader& m_tempSensor;
+};
+
+OutputDevices entsprechend:
+
+class OutputDevices {
+public:
+  OutputDevices(ControllerOutputIntent& oi,
+                IStatusDisplay& display,
+                IRelais& relais);
+};
+
+Damit fallen diese konkreten Member weg:
+- MyEncoder m_myEncoder
+- TemperatureSensorDriver m_tempSensor
+- Display m_lcdDisplay
+
+main.cpp danach
+
+Dort waere dann der ganze Aufbau zentral:
+
+ToggleSwitch powerSwitch{...};
+ToggleSwitch modeSwitch{...};
+PushButton displayButton{...};
+
+EncoderAdapter encoderAdapter{...};
+MyEncoder encoder{encoderAdapter};
+
+OneWire oneWire{...};
+TempSensorAdapter tempSensorAdapter{oneWire};
+TemperatureSensorDriver sensor{tempSensorAdapter};
+
+LCDAdapter lcdAdapter{...};
+Display display{lcdAdapter, outputData.displayContent, outputData.lcd_stateIntent};
+
+Relais relais{...};
+
+InputDevices inputDevices{inputData, powerSwitch, modeSwitch, displayButton, encoder, sensor};
+OutputDevices outputDevices{outputData, display, relais};
+SystemController controller{inputDevices, outputDevices};
+
+Das waere architektonisch sauber, weil main der einzige Composition Root ist.
+
+Tests danach
+
+Fuer SystemController-/DeviceGroup-Tests braucht es neue Test-Doubles auf fachlicher Ebene:
+- TestStepEncoder : IStepEncoder
+- TestTemperatureReader : ITemperatureReader
+- TestStatusDisplay : IStatusDisplay
+
+Die bisherigen low-level Doubles wie TestEncoder und TestTemperatureSensorHardware bleiben trotzdem nuetzlich:
+- fuer Tests von MyEncoder
+- fuer Tests von TemperatureSensorDriver
+- fuer Tests von Display
+
+Das ist der eigentliche Gewinn:
+Jede Schicht testet gegen die direkt darunterliegende Abstraktion.
+
+Empfohlene Reihenfolge
+
+1. Neue fachliche Interfaces in interfaces.h einfuehren.
+2. MyEncoder, TemperatureSensorDriver, Display auf diese Interfaces umstellen.
+3. devicegroups.h/.cpp auf Referenzen dieser neuen Interfaces umbauen.
+4. main.cpp zum zentralen Aufbau umstellen.
+5. Tests fuer SystemController auf neue Test-Doubles umstellen.
+6. Alte Kommentare und irrefuehrende Konstruktor-Kommentare in devicegroups.h aufraeumen.

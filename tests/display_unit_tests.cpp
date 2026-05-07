@@ -1,14 +1,15 @@
-#include "display.h"
+#include "display_driver.h"
 #include "test_devices.h"
 #include "ArduinoStubs.h"
 #include <gtest/gtest.h>
 
 class DisplayTest : public ::testing::Test {
 protected:
-  ControllerOutputIntent COI;
+  ControllerOutputIntent outputIntent;
   TestDisplay display;
 
-  Display driver{display, COI.displayContent, COI.lcd_stateIntent};
+  DisplayDriver driver{display, outputIntent.displayContent,
+                       outputIntent.lcd_stateIntent};
 
   void SetUp() override {
   ArduinoStubSpies::setMillis(1000); 
@@ -28,7 +29,7 @@ TEST_F(DisplayTest, init_gets_called) {
 
 TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
 //{{{
-  COI.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::OFF;
+  outputIntent.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::OFF;
 
   driver.update();
 
@@ -40,11 +41,11 @@ TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
 
 TEST_F(DisplayTest, update_page1_writes_expected_lines) {
 //{{{
-  COI.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
-  COI.displayContent.temp_c = 21.3F;
-  COI.displayContent.target_tempC = 19.8F;
-  COI.displayContent.heatingState = HeaterStatus::HeatingState::ON;
-  COI.displayContent.mode = HeaterStatus::Mode::POWER;
+  outputIntent.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
+  outputIntent.displayContent.temp_c = 21.3F;
+  outputIntent.displayContent.target_tempC = 19.8F;
+  outputIntent.displayContent.heatingState = HeaterStatus::HeatingState::ON;
+  outputIntent.displayContent.mode = HeaterStatus::Mode::POWER;
 
   driver.update();
 
@@ -60,11 +61,11 @@ TEST_F(DisplayTest, update_page1_writes_expected_lines) {
 
 TEST_F(DisplayTest, update_with_same_content_does_not_rewrite_lines) {
 //{{{
-  COI.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
-  COI.displayContent.temp_c = 20.0F;
-  COI.displayContent.target_tempC = 18.5F;
-  COI.displayContent.heatingState = HeaterStatus::HeatingState::OFF;
-  COI.displayContent.mode = HeaterStatus::Mode::TEMP;
+  outputIntent.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
+  outputIntent.displayContent.temp_c = 20.0F;
+  outputIntent.displayContent.target_tempC = 18.5F;
+  outputIntent.displayContent.heatingState = HeaterStatus::HeatingState::OFF;
+  outputIntent.displayContent.mode = HeaterStatus::Mode::TEMP;
 
   driver.update();
   const size_t printed_after_first_update = display.printed_lines.size();
@@ -74,4 +75,3 @@ TEST_F(DisplayTest, update_with_same_content_does_not_rewrite_lines) {
   EXPECT_EQ(display.printed_lines.size(), printed_after_first_update);
 }
 //}}}
-

@@ -9,10 +9,10 @@ class SystemStatistics {
 public:
   SystemStatistics() = default;
 
-  void update(ControllerInputData &input, HeaterStatus &status) {
+  void update(ControllerInputData &inputData, HeaterStatus &status) {
     timeStamp = millis();
     m_status = status;
-    m_input = input;
+    m_inputData = inputData;
     calculationData.updateCounter += 1;
     calculateDataValues();
     writeLongTimeStats();
@@ -34,7 +34,7 @@ public:
 private:
   RuntimeData runtimeData;
   LongtimeData longTimeDataBuffer;
-  ControllerInputData m_input;
+  ControllerInputData m_inputData;
   HeaterStatus m_status;
   HeaterStatus::HeatingState m_lastState = HeaterStatus::HeatingState::OFF;
   CalculationData calculationData;
@@ -68,7 +68,7 @@ private:
 
   void calculateDiffTempToTarget() {
     calculationData.TempDiffcontainer +=
-        m_input.sensor_tempC - m_status.target_tempC;
+        m_inputData.sensor_tempC - m_status.target_tempC;
     runtimeData.mediumDiffTempToTarget =
         calculationData.TempDiffcontainer / calculationData.updateCounter;
   }
@@ -144,5 +144,4 @@ public:
     return true;
   }
 };
-
 

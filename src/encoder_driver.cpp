@@ -1,4 +1,4 @@
-#include "myEncoder.h"
+#include "encoder_driver.h"
 
 #ifdef TEST_BUILD 
 #include "ArduinoStubs.h"
@@ -6,15 +6,16 @@
 #include "Arduino.h"
 #endif 
 
-MyEncoder::MyEncoder(IEncoder& encoder) : m_encoder(encoder){}
+EncoderDriver::EncoderDriver(IEncoderHardware &encoderHardware)
+    : m_encoderHardware(encoderHardware) {}
 
-int MyEncoder::readSteps() {
+int EncoderDriver::readSteps() {
   poll();
   return translateStepsToInput();
 }
 
-void MyEncoder::poll() {
-  m_current = m_encoder.read();
+void EncoderDriver::poll() {
+  m_current = m_encoderHardware.read();
   long diff = m_current - m_prev;
   if (diff == 0)
     return;
@@ -23,7 +24,7 @@ void MyEncoder::poll() {
   m_prev = m_current;
 }
 
-int MyEncoder::translateStepsToInput() {
+int EncoderDriver::translateStepsToInput() {
   if (millis() - m_last_change_ms < 100)
     return 0;
   int steps = m_delta / 4; // Wird auf ganze Schritte runtergebrochen und rest
@@ -33,5 +34,4 @@ int MyEncoder::translateStepsToInput() {
                            // der Rest für den nächsten Aufruf erhalten
   return steps;
 };
-
 
