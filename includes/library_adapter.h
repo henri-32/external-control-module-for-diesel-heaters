@@ -1,5 +1,6 @@
 // Die in dieser Datei deklarierten Adapter geben lediglich Aufrufe an Libraries
 // weiter. Sie dienen dem Zweck Sensoren virtualisieren zu können.
+
 #pragma once
 #include "interfaces.h"
 #include <Encoder.h>

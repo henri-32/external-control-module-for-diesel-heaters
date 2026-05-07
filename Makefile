@@ -95,6 +95,7 @@ APP_CPP_SRCS := \
 	src/linker_stubs.cpp \
 	src/main.cpp \
 	src/controller.cpp \
+	src/controller_construction.cpp \
 	src/devicegroups.cpp \
 	src/display_driver.cpp \
 	src/relais.cpp \
