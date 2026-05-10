@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-using COI = ControllerOutputIntent; 
-using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
+using COI = OutputDevicesIntent; 
+using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
 
 #ifdef TEST_BUILD
 #include "ArduinoStubs.h"
@@ -131,15 +131,18 @@ void DisplayDriver::formatTempFloatsForDisplay() {
 
   case LCDIntent::Page2:
     break;
-#ifdef MEMORYFUNCTIONS
+
   case LCDIntent::Page3:
+
+#ifdef MEMORYFUNCTIONS
     diff_int = int(m_displayContent.runtimeDisplayData.mediumDiffTempToTarget);
     diff_frac = abs(
         static_cast<int>(
             m_displayContent.runtimeDisplayData.mediumDiffTempToTarget * 10) %
         10);
-    break;
 #endif
+    break;
+
   case LCDIntent::Page4:
     break;
 

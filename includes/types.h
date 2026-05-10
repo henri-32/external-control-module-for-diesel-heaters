@@ -4,15 +4,24 @@
 #include <stdint.h>
 
 // Werttypen
-struct ControllerInputData {
-  bool powerSwitchChanged = false;
-  bool modeSwitchChanged = false;
+struct InputDevicesDataSet {
+  struct SwitchAction {
+    bool power = false;
+    bool mode = false;
+  };
+  SwitchAction switchAction;
+
   int8_t encoder_val = 0;
   float sensor_tempC = 0;
-  bool alternatorPressed = false;
-  bool alternatorReleased = false;
-  bool alternatorUsed = false;
+
+  struct Alternator {
+    bool pressed = false;
+    bool released = false;
+    bool used = false;
+  };
+  Alternator alternator;
 };
+
 struct HeaterStatus {
   enum class HeatingState { OFF, ON };
   HeatingState heatingState = HeatingState::OFF;
@@ -48,9 +57,10 @@ struct CalculationData {
 };
 #endif
 
-// TODO OutputIntentDisplayContent aufräumen. Heater status als ganzes Struct übergeben. und
-// im Display wieder auslesen. target.. state und mode sind genaut das Struct.
-class ControllerOutputIntent {
+// TODO OutputIntentDisplayContent aufräumen. Heater status als ganzes Struct
+// übergeben. und im Display wieder auslesen. target.. state und mode sind
+// genaut das Struct.
+class OutputDevicesIntent {
 public:
   struct DisplayContent {
     float temp_c;
@@ -65,7 +75,7 @@ public:
   DisplayContent displayContent;
 
   enum class LCD_StateIntent { Page1, Page2, Page3, Page4, OFF };
-  LCD_StateIntent lcd_stateIntent = LCD_StateIntent::OFF;
+  LCD_StateIntent lcd_state = LCD_StateIntent::OFF;
 
   enum class LCD_CycleDirection { none, right, left };
   LCD_CycleDirection lcd_cycleDirection = LCD_CycleDirection::none;

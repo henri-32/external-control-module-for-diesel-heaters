@@ -10,8 +10,8 @@
 class SystemControllerTest : public ::testing::Test {
 protected:
   // Backing storage for device groups
-  ControllerInputData inputDataBuffer;
-  ControllerOutputIntent outputIntentBuffer;
+  InputDevicesDataSet inputDataBuffer;
+  OutputDevicesIntent outputIntentBuffer;
 
   // Hardware fakes
   TestDisplay testDisplay;
@@ -24,7 +24,7 @@ protected:
 
   // Drivers
   DisplayDriver displayDriver{testDisplay, outputIntentBuffer.displayContent,
-                              outputIntentBuffer.lcd_stateIntent};
+                              outputIntentBuffer.lcd_state};
   EncoderDriver encoderDriver{encoderHardware};
   TemperatureSensorDriver tempSensorDriver{tempSensorHardware};
 
@@ -37,8 +37,8 @@ protected:
   SystemController controller{inputDevices, outputDevices};
 
   // Shortcuts to controller-owned state
-  ControllerInputData &inputData = controller.inputData;
-  ControllerOutputIntent &outputIntent = controller.outputIntent;
+  InputDevicesDataSet &inputData = controller.inputDevices.data;
+  OutputDevicesIntent &outputIntent = controller.outputDevices.intent;
 };
 
 // Handling of Power Switch Input
@@ -47,9 +47,9 @@ TEST_F(SystemControllerTest,
        applyPowerSwitchInput_PathWithAlternator_OffToOn_NoRelayAction) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  inputData.powerSwitchChanged = true;
-  inputData.alternatorPressed = true;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.power = true;
+  inputData.alternator.pressed = true;
+  inputData.alternator.used = false;
   controller.heaterStatus.heatingState = State::OFF;
 
   controller.applyPowerSwitchInput();
@@ -57,7 +57,7 @@ TEST_F(SystemControllerTest,
   EXPECT_EQ(controller.heaterStatus.heatingState, State::ON)
       << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
       << " with Alternator";
-  EXPECT_EQ(inputData.alternatorUsed, true) << " with Alternator";
+  EXPECT_EQ(inputData.alternator.used, true) << " with Alternator";
 }
 //}}}
 
@@ -65,9 +65,9 @@ TEST_F(SystemControllerTest,
        applyPowerSwitchInput_PathWithAlternator_OnToOff_NoRelayAction) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  inputData.powerSwitchChanged = true;
-  inputData.alternatorPressed = true;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.power = true;
+  inputData.alternator.pressed = true;
+  inputData.alternator.used = false;
   controller.heaterStatus.heatingState = State::ON;
 
   controller.applyPowerSwitchInput();
@@ -76,7 +76,7 @@ TEST_F(SystemControllerTest,
       << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
       << " with Alternator";
 
-  EXPECT_EQ(inputData.alternatorUsed, true)
+  EXPECT_EQ(inputData.alternator.used, true)
       << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
       << " with Alternator";
 }
@@ -86,15 +86,15 @@ TEST_F(SystemControllerTest,
        applyPowerSwitchInput_PathWithAlternator_UnrelatedInputIgnored) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  inputData.powerSwitchChanged = true;
-  inputData.alternatorPressed = true;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.power = true;
+  inputData.alternator.pressed = true;
+  inputData.alternator.used = false;
   controller.heaterStatus.heatingState = State::OFF;
 
   // unrelated input
-  inputData.modeSwitchChanged = true;
+  inputData.switchAction.mode = true;
   inputData.encoder_val = 10;
-  inputData.alternatorReleased = true;
+  inputData.alternator.released = true;
 
   controller.applyPowerSwitchInput();
 
@@ -102,7 +102,7 @@ TEST_F(SystemControllerTest,
       << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
       << "with Alternator";
 
-  EXPECT_EQ(inputData.alternatorUsed, true) << "with Alternator";
+  EXPECT_EQ(inputData.alternator.used, true) << "with Alternator";
 }
 //}}}
 
@@ -110,15 +110,15 @@ TEST_F(SystemControllerTest,
        applyPowerSwitchInput_PathWithAlternator_UnrelatedInputIgnored_OnToOff) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  inputData.powerSwitchChanged = true;
-  inputData.alternatorPressed = true;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.power = true;
+  inputData.alternator.pressed = true;
+  inputData.alternator.used = false;
   controller.heaterStatus.heatingState = State::ON;
 
   // unrelated input
-  inputData.modeSwitchChanged = true;
+  inputData.switchAction.mode = true;
   inputData.encoder_val = 10;
-  inputData.alternatorReleased = true;
+  inputData.alternator.released = true;
 
   controller.applyPowerSwitchInput();
 
@@ -126,7 +126,7 @@ TEST_F(SystemControllerTest,
       << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
       << "with Alternator";
 
-  EXPECT_EQ(inputData.alternatorUsed, true)
+  EXPECT_EQ(inputData.alternator.used, true)
       << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
       << "with Alternator";
 }
@@ -136,12 +136,12 @@ TEST_F(SystemControllerTest,
        applyPowerSwitchInput_PathWithoutAlternator_OffAndRelayAction) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  using Command = ControllerOutputIntent::RelaisCommand;
-  using Priority = ControllerOutputIntent::RelaisPriority;
+  using Command = OutputDevicesIntent::RelaisCommand;
+  using Priority = OutputDevicesIntent::RelaisPriority;
 
-  inputData.powerSwitchChanged = true;
-  inputData.alternatorPressed = false;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.power = true;
+  inputData.alternator.pressed = false;
+  inputData.alternator.used = false;
   controller.heaterStatus.heatingState = State::ON;
 
   controller.applyPowerSwitchInput();
@@ -150,7 +150,7 @@ TEST_F(SystemControllerTest,
       << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
       << "without Alternator";
 
-  EXPECT_EQ(inputData.alternatorUsed, false)
+  EXPECT_EQ(inputData.alternator.used, false)
       << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
       << "without Alternator";
 
@@ -175,9 +175,9 @@ TEST_F(SystemControllerTest,
 TEST_F(SystemControllerTest,
        applyModeSwitchInput_PathWitchAlternator_POWERToTEMP_NoRelayAction) {
   //{{{
-  inputData.modeSwitchChanged = true;
-  inputData.alternatorPressed = true;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.mode = true;
+  inputData.alternator.pressed = true;
+  inputData.alternator.used = false;
   controller.heaterStatus.mode = HeaterStatus::Mode::POWER;
 
   controller.applyModeSwitchInput();
@@ -190,9 +190,9 @@ TEST_F(SystemControllerTest,
 TEST_F(SystemControllerTest,
        applyModeSwitchInput_PathWithAlternator_TEMPToPOWER_NoRelayAction) {
   //{{{
-  inputData.modeSwitchChanged = true;
-  inputData.alternatorPressed = true;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.mode = true;
+  inputData.alternator.pressed = true;
+  inputData.alternator.used = false;
   controller.heaterStatus.mode = HeaterStatus::Mode::TEMP;
 
   controller.applyModeSwitchInput();
@@ -205,9 +205,9 @@ TEST_F(SystemControllerTest,
 TEST_F(SystemControllerTest,
        applyModeSwitchInput_PathWithoutAlternator_TEMPToPOWER) {
   //{{{
-  inputData.modeSwitchChanged = true;
-  inputData.alternatorPressed = false;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.mode = true;
+  inputData.alternator.pressed = false;
+  inputData.alternator.used = false;
   controller.heaterStatus.mode = HeaterStatus::Mode::TEMP;
 
   controller.applyModeSwitchInput();
@@ -216,7 +216,7 @@ TEST_F(SystemControllerTest,
       << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
 
   EXPECT_EQ(outputIntent.m_relaisCommand,
-            ControllerOutputIntent::RelaisCommand::Short)
+            OutputDevicesIntent::RelaisCommand::Short)
       << "command=" << static_cast<int>(outputIntent.m_relaisCommand)
       << " withoutAlternator";
 }
@@ -225,11 +225,11 @@ TEST_F(SystemControllerTest,
 TEST_F(SystemControllerTest,
        applyModeSwitchInput_PathWithoutAlternator_POWERToTEMP) {
   //{{{
-  inputData.modeSwitchChanged = true;
-  inputData.alternatorPressed = false;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.mode = true;
+  inputData.alternator.pressed = false;
+  inputData.alternator.used = false;
   controller.heaterStatus.mode = HeaterStatus::Mode::POWER;
-  outputIntent.m_currentPriority = ControllerOutputIntent::RelaisPriority::Low;
+  outputIntent.m_currentPriority = OutputDevicesIntent::RelaisPriority::Low;
 
   controller.applyModeSwitchInput();
 
@@ -237,7 +237,7 @@ TEST_F(SystemControllerTest,
       << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
 
   EXPECT_EQ(outputIntent.m_relaisCommand,
-            ControllerOutputIntent::RelaisCommand::Short)
+            OutputDevicesIntent::RelaisCommand::Short)
       << "command=" << static_cast<int>(outputIntent.m_relaisCommand)
       << " withoutAlternator";
 }
@@ -247,17 +247,17 @@ TEST_F(
     SystemControllerTest,
     applyModeSwitchInput_PathWithoutAlternator_POWERToTEMP_UnrelatedInputIgnored) {
   //{{{
-  inputData.modeSwitchChanged = true;
-  inputData.alternatorPressed = false;
-  inputData.alternatorUsed = false;
+  inputData.switchAction.mode = true;
+  inputData.alternator.pressed = false;
+  inputData.alternator.used = false;
   controller.heaterStatus.mode = HeaterStatus::Mode::POWER;
 
   // unrelated Input
-  inputData.powerSwitchChanged = true;
+  inputData.switchAction.power = true;
   inputData.encoder_val = 20;
   // should not make a difference, because get checked in seperate function
-  inputData.alternatorUsed = true;
-  inputData.alternatorReleased = true;
+  inputData.alternator.used = true;
+  inputData.alternator.released = true;
 
   controller.applyModeSwitchInput();
 
@@ -265,7 +265,7 @@ TEST_F(
       << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
 
   EXPECT_EQ(outputIntent.m_relaisCommand,
-            ControllerOutputIntent::RelaisCommand::Short)
+            OutputDevicesIntent::RelaisCommand::Short)
       << "command=" << static_cast<int>(outputIntent.m_relaisCommand)
       << " withoutAlternator";
 }
@@ -278,35 +278,35 @@ TEST_F(
 TEST_F(SystemControllerTest,
        applyDisplayButtonInput_noAction_without_Alternator) {
   //{{{
-  inputData.alternatorReleased = true;
-  inputData.alternatorPressed = true;
-  inputData.alternatorUsed = true;
-  outputIntent.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::OFF;
+  inputData.alternator.released = true;
+  inputData.alternator.pressed = true;
+  inputData.alternator.used = true;
+  outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::OFF;
 
   controller.applyDisplayButtonInput();
 
-  EXPECT_EQ(outputIntent.lcd_stateIntent,
-            ControllerOutputIntent::LCD_StateIntent::OFF);
-  EXPECT_EQ(inputData.alternatorPressed, false);
-  EXPECT_EQ(inputData.alternatorUsed, false);
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LCD_StateIntent::OFF);
+  EXPECT_EQ(inputData.alternator.pressed, false);
+  EXPECT_EQ(inputData.alternator.used, false);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyDisplayButtonInput_outputIntent_sets) {
   //{{{
-  inputData.alternatorPressed = false;
-  inputData.alternatorUsed = false;
-  inputData.alternatorReleased = true;
-  outputIntent.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::OFF;
+  inputData.alternator.pressed = false;
+  inputData.alternator.used = false;
+  inputData.alternator.released = true;
+  outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::OFF;
 
   controller.applyDisplayButtonInput();
 
-  EXPECT_EQ(outputIntent.lcd_stateIntent,
-            ControllerOutputIntent::LCD_StateIntent::Page1);
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LCD_StateIntent::Page1);
 
   controller.applyDisplayButtonInput();
-  EXPECT_EQ(outputIntent.lcd_stateIntent,
-            ControllerOutputIntent::LCD_StateIntent::OFF);
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LCD_StateIntent::OFF);
 }
 //}}}
 
@@ -316,12 +316,12 @@ TEST_F(SystemControllerTest, applyDisplayButtonInput_outputIntent_sets) {
 //{{{
 TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
   //{{{
-  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
+  using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
 
   inputData.encoder_val = 1;
-  inputData.alternatorPressed = true;
-  outputIntent.lcd_stateIntent = LCDIntent::OFF;
+  inputData.alternator.pressed = true;
+  outputIntent.lcd_state = LCDIntent::OFF;
   controller.heaterStatus.target_tempC = 10;
 
   controller.applyEncoderInput();
@@ -329,25 +329,25 @@ TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page1;
+  outputIntent.lcd_state = LCDIntent::Page1;
 
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::right);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page2;
+  outputIntent.lcd_state = LCDIntent::Page2;
 
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::right);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page3;
+  outputIntent.lcd_state = LCDIntent::Page3;
 
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::right);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page4;
+  outputIntent.lcd_state = LCDIntent::Page4;
 
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::right);
@@ -357,12 +357,12 @@ TEST_F(SystemControllerTest, applyEncoderInput_minStep) {
 
 TEST_F(SystemControllerTest, applyEncoderInput_maxStep) {
   //{{{
-  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
+  using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
 
   inputData.encoder_val = config::encoderValCutoff;
-  inputData.alternatorPressed = true;
-  outputIntent.lcd_stateIntent = LCDIntent::OFF;
+  inputData.alternator.pressed = true;
+  outputIntent.lcd_state = LCDIntent::OFF;
   outputIntent.lcd_cycleDirection = LCDDirection::none;
   controller.heaterStatus.target_tempC = 10;
 
@@ -371,26 +371,26 @@ TEST_F(SystemControllerTest, applyEncoderInput_maxStep) {
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page1;
+  outputIntent.lcd_state = LCDIntent::Page1;
 
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::right);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page2;
+  outputIntent.lcd_state = LCDIntent::Page2;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::right);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page3;
+  outputIntent.lcd_state = LCDIntent::Page3;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::right);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page4;
+  outputIntent.lcd_state = LCDIntent::Page4;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::right);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
@@ -399,12 +399,12 @@ TEST_F(SystemControllerTest, applyEncoderInput_maxStep) {
 
 TEST_F(SystemControllerTest, applyEncoderInput_negative_maxStep) {
   //{{{
-  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
+  using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
 
   inputData.encoder_val = -config::encoderValCutoff;
-  inputData.alternatorPressed = true;
-  outputIntent.lcd_stateIntent = LCDIntent::OFF;
+  inputData.alternator.pressed = true;
+  outputIntent.lcd_state = LCDIntent::OFF;
   outputIntent.lcd_cycleDirection = LCDDirection::none;
   controller.heaterStatus.target_tempC = 10;
 
@@ -413,26 +413,26 @@ TEST_F(SystemControllerTest, applyEncoderInput_negative_maxStep) {
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page4;
+  outputIntent.lcd_state = LCDIntent::Page4;
 
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::left);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page3;
+  outputIntent.lcd_state = LCDIntent::Page3;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::left);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page2;
+  outputIntent.lcd_state = LCDIntent::Page2;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::left);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page1;
+  outputIntent.lcd_state = LCDIntent::Page1;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::left);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
@@ -443,12 +443,12 @@ TEST_F(SystemControllerTest, applyEncoderInput_negative_minStep) {
   //{{{
   /*Sollte beim Debuggen hier ein Problem auftauchen
    *siehe Zeile 250 */
-  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
+  using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
+  using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
 
   inputData.encoder_val = -1;
-  inputData.alternatorPressed = true;
-  outputIntent.lcd_stateIntent = LCDIntent::OFF;
+  inputData.alternator.pressed = true;
+  outputIntent.lcd_state = LCDIntent::OFF;
   outputIntent.lcd_cycleDirection = LCDDirection::none;
   controller.heaterStatus.target_tempC = 10;
 
@@ -457,26 +457,26 @@ TEST_F(SystemControllerTest, applyEncoderInput_negative_minStep) {
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page4;
+  outputIntent.lcd_state = LCDIntent::Page4;
 
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::left);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page3;
+  outputIntent.lcd_state = LCDIntent::Page3;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::left);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page2;
+  outputIntent.lcd_state = LCDIntent::Page2;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::left);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::none;
-  outputIntent.lcd_stateIntent = LCDIntent::Page1;
+  outputIntent.lcd_state = LCDIntent::Page1;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::left);
 }
@@ -486,7 +486,7 @@ TEST_F(SystemControllerTest, applyEncoderInput_minStep_without_alternator) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = 1;
-  inputData.alternatorPressed = false;
+  inputData.alternator.pressed = false;
   target = 10.0;
 
   controller.applyEncoderInput();
@@ -499,7 +499,7 @@ TEST_F(SystemControllerTest, applyEncoderInput_maxStep_without_alternator) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = config::encoderValCutoff;
-  inputData.alternatorPressed = false;
+  inputData.alternator.pressed = false;
   target = 10.0;
 
   controller.applyEncoderInput();
@@ -513,7 +513,7 @@ TEST_F(SystemControllerTest,
   //{{{
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = config::encoderValCutoff;
-  inputData.alternatorPressed = false;
+  inputData.alternator.pressed = false;
   target = config::tempMax - 1;
 
   controller.applyEncoderInput();
@@ -527,7 +527,7 @@ TEST_F(SystemControllerTest,
   //{{{
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = -config::encoderValCutoff;
-  inputData.alternatorPressed = false;
+  inputData.alternator.pressed = false;
   target = config::tempMin + 1;
 
   controller.applyEncoderInput();
@@ -541,7 +541,7 @@ TEST_F(SystemControllerTest,
   //{{{
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = -1;
-  inputData.alternatorPressed = false;
+  inputData.alternator.pressed = false;
   target = 10.0;
 
   controller.applyEncoderInput();
@@ -555,7 +555,7 @@ TEST_F(SystemControllerTest,
   //{{{
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = -config::encoderValCutoff;
-  inputData.alternatorPressed = false;
+  inputData.alternator.pressed = false;
   target = 10.0;
 
   controller.applyEncoderInput();
@@ -580,10 +580,10 @@ TEST_F(SystemControllerTest, applyHeatingLogic_too_cold_and_state_off) {
   controller.applyHeatingLogic();
 
   EXPECT_EQ(m_state, State::ON);
-  EXPECT_EQ(controller.outputIntent.m_relaisCommand,
-            ControllerOutputIntent::RelaisCommand::Long);
-  EXPECT_EQ(controller.outputIntent.m_currentPriority,
-            ControllerOutputIntent::RelaisPriority::Low);
+  EXPECT_EQ(controller.outputDevices.intent.m_relaisCommand,
+            OutputDevicesIntent::RelaisCommand::Long);
+  EXPECT_EQ(controller.outputDevices.intent.m_currentPriority,
+            OutputDevicesIntent::RelaisPriority::Low);
 }
 //}}}
 
@@ -614,10 +614,10 @@ TEST_F(SystemControllerTest, applyHeatingLogic_too_warm_and_state_on) {
   controller.applyHeatingLogic();
 
   EXPECT_EQ(m_state, State::OFF);
-  EXPECT_EQ(controller.outputIntent.m_relaisCommand,
-            ControllerOutputIntent::RelaisCommand::Long);
-  EXPECT_EQ(controller.outputIntent.m_currentPriority,
-            ControllerOutputIntent::RelaisPriority::Low);
+  EXPECT_EQ(controller.outputDevices.intent.m_relaisCommand,
+            OutputDevicesIntent::RelaisCommand::Long);
+  EXPECT_EQ(controller.outputDevices.intent.m_currentPriority,
+            OutputDevicesIntent::RelaisPriority::Low);
 }
 //}}}
 
@@ -648,10 +648,10 @@ TEST_F(SystemControllerTest, applyHeatingLogic_early_return_by_wrong_mode) {
   controller.applyHeatingLogic();
 
   EXPECT_EQ(m_state, State::ON);
-  EXPECT_EQ(controller.outputIntent.m_relaisCommand,
-            ControllerOutputIntent::RelaisCommand::None);
-  EXPECT_EQ(controller.outputIntent.m_currentPriority,
-            ControllerOutputIntent::RelaisPriority::Low);
+  EXPECT_EQ(controller.outputDevices.intent.m_relaisCommand,
+            OutputDevicesIntent::RelaisCommand::None);
+  EXPECT_EQ(controller.outputDevices.intent.m_currentPriority,
+            OutputDevicesIntent::RelaisPriority::Low);
 }
 //}}}
 //}}}
@@ -660,10 +660,10 @@ TEST_F(SystemControllerTest, applyHeatingLogic_early_return_by_wrong_mode) {
 //{{{
 TEST_F(SystemControllerTest, cyclePages_Intent_reacts_to_cycling_right) {
   //{{{
-  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
-  LCDIntent &lcdIntent = controller.outputIntent.lcd_stateIntent;
-  LCDDirection &lcdDirection = controller.outputIntent.lcd_cycleDirection;
+  using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
+  using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
+  LCDIntent &lcdIntent = controller.outputDevices.intent.lcd_state;
+  LCDDirection &lcdDirection = controller.outputDevices.intent.lcd_cycleDirection;
 
   lcdIntent = LCDIntent::Page1;
   lcdDirection = LCDDirection::right;
@@ -684,10 +684,10 @@ TEST_F(SystemControllerTest, cyclePages_Intent_reacts_to_cycling_right) {
 
 TEST_F(SystemControllerTest, cyclePages_Intent_reacts_to_cycling_left) {
   //{{{
-  using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
-  using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
-  LCDIntent &lcdIntent = controller.outputIntent.lcd_stateIntent;
-  LCDDirection &lcdDirection = controller.outputIntent.lcd_cycleDirection;
+  using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
+  using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
+  LCDIntent &lcdIntent = controller.outputDevices.intent.lcd_state;
+  LCDDirection &lcdDirection = controller.outputDevices.intent.lcd_cycleDirection;
 
   lcdIntent = LCDIntent::Page4;
   lcdDirection = LCDDirection::left;

@@ -5,15 +5,16 @@
 
 class InputDevices {
 public:
-  InputDevices(ControllerInputData &inputData, IToggleSwitch &ps,
+  InputDevices(InputDevicesDataSet &inputData, IToggleSwitch &ps,
                IToggleSwitch &ms,
                IPushButton &db, IEncoderDriver &encoderDriver,
                ITempSensorDriver &tempSensorDriver);
 
   void init();
-  void updateInputData();
+  void update();
 
-  ControllerInputData &m_inputData;
+  InputDevicesDataSet &data;
+
 private:
   IToggleSwitch &m_powerSwitch;
   IToggleSwitch &m_modeSwitch;
@@ -24,14 +25,15 @@ private:
 
 class OutputDevices {
 public:
-  OutputDevices(ControllerOutputIntent &outputIntent,
+  OutputDevices(OutputDevicesIntent &outputIntent,
                 IDisplayDriver &displayDriver,
                 IRelais &relais);
 
   void init();
   void update();
 
-  ControllerOutputIntent &m_outputIntent;
+  OutputDevicesIntent &intent;
+
 private:
   IRelais &m_relais;
   IDisplayDriver &m_displayDriver;

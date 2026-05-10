@@ -15,14 +15,14 @@ public:
   explicit Relais(const uint8_t pin);
 
   void init();
-  void update(const ControllerOutputIntent::RelaisCommand &intent);
+  void update(const OutputDevicesIntent::RelaisCommand &intent);
 
 public:
 
-  void turnOn(const ControllerOutputIntent::RelaisCommand &intent);
+  void turnOn(const OutputDevicesIntent::RelaisCommand &intent);
   void turnOff();
   void applyPulseLengthFromIntent(
-      const ControllerOutputIntent::RelaisCommand &intent_copy);
+      const OutputDevicesIntent::RelaisCommand &intent_copy);
   void activate() { digitalWrite(m_pin, HIGH); }
   void deactivate() { digitalWrite(m_pin, LOW); };
 

@@ -4,8 +4,8 @@
 
 class DisplayDriver : public IDisplayDriver {
 public:
-  DisplayDriver(IDisplay &display, ControllerOutputIntent::DisplayContent &dc,
-                ControllerOutputIntent::LCD_StateIntent &ds);
+  DisplayDriver(IDisplay &display, OutputDevicesIntent::DisplayContent &dc,
+                OutputDevicesIntent::LCD_StateIntent &ds);
 
   void init() override;
   void update() override;
@@ -21,7 +21,7 @@ private:
 
   void formatTempFloatsForDisplay();
   void createStateStringsForDisplay(
-      const ControllerOutputIntent::DisplayContent &content);
+      const OutputDevicesIntent::DisplayContent &content);
   void clearLine(uint8_t line);
 
   IDisplay &m_display;
@@ -31,8 +31,8 @@ private:
   char string_of_states[Rows][Cols] = {};
   char lastLine[4][21] = {"", "", "", ""};
   // States
-  ControllerOutputIntent::DisplayContent &m_displayContent;
-  ControllerOutputIntent::LCD_StateIntent &m_displayState;
+  OutputDevicesIntent::DisplayContent &m_displayContent;
+  OutputDevicesIntent::LCD_StateIntent &m_displayState;
   // Formatting in Helperfunktion
   int t_int;
   int t_frac;

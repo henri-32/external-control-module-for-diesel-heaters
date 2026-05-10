@@ -11,8 +11,8 @@
 #include "types.h"
 
 // Structs für die Schnittstelle des Controllers nach außen
-ControllerInputData inputData;
-ControllerOutputIntent outputIntent;
+InputDevicesDataSet inputData;
+OutputDevicesIntent outputIntent;
 
 // Hardware Konstruktion
 ToggleSwitch powerSwitch{pinConfig::powerSwitch};
@@ -27,7 +27,7 @@ TemperatureSensorDriver tempSensorDriver{tempSensorHardware};
 
 LCDAdapter lcdAdapter{0x27, 20, 4};
 DisplayDriver displayDriver{lcdAdapter, outputIntent.displayContent,
-                            outputIntent.lcd_stateIntent};
+                            outputIntent.lcd_state};
 
 Relais relais{pinConfig::relais};
 

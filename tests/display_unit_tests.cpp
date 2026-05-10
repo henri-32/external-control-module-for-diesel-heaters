@@ -5,11 +5,11 @@
 
 class DisplayTest : public ::testing::Test {
 protected:
-  ControllerOutputIntent outputIntent;
+  OutputDevicesIntent outputIntent;
   TestDisplay display;
 
   DisplayDriver driver{display, outputIntent.displayContent,
-                       outputIntent.lcd_stateIntent};
+                       outputIntent.lcd_state};
 
   void SetUp() override {
   ArduinoStubSpies::setMillis(1000); 
@@ -29,7 +29,7 @@ TEST_F(DisplayTest, init_gets_called) {
 
 TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
 //{{{
-  outputIntent.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::OFF;
+  outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::OFF;
 
   driver.update();
 
@@ -41,7 +41,7 @@ TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
 
 TEST_F(DisplayTest, update_page1_writes_expected_lines) {
 //{{{
-  outputIntent.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
+  outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::Page1;
   outputIntent.displayContent.temp_c = 21.3F;
   outputIntent.displayContent.target_tempC = 19.8F;
   outputIntent.displayContent.heatingState = HeaterStatus::HeatingState::ON;
@@ -61,7 +61,7 @@ TEST_F(DisplayTest, update_page1_writes_expected_lines) {
 
 TEST_F(DisplayTest, update_with_same_content_does_not_rewrite_lines) {
 //{{{
-  outputIntent.lcd_stateIntent = ControllerOutputIntent::LCD_StateIntent::Page1;
+  outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::Page1;
   outputIntent.displayContent.temp_c = 20.0F;
   outputIntent.displayContent.target_tempC = 18.5F;
   outputIntent.displayContent.heatingState = HeaterStatus::HeatingState::OFF;

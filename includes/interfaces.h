@@ -35,7 +35,7 @@ protected:
 
 class IRelais : public IDriver {
 public:
-  virtual void update(const ControllerOutputIntent::RelaisCommand &intent) = 0;
+  virtual void update(const OutputDevicesIntent::RelaisCommand &intent) = 0;
 
 protected:
   ~IRelais() = default;

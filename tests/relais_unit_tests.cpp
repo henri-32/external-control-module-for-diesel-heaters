@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 using namespace ArduinoStubSpies;
-using COI = ControllerOutputIntent;
+using COI = OutputDevicesIntent;
 
 class RelaisTest : public ::testing::Test {
 protected:

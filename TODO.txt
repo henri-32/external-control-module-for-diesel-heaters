@@ -85,7 +85,7 @@ InputDevices ungefaehr so:
 
 class InputDevices {
 public:
-  InputDevices(ControllerInputData& id,
+  InputDevices(InputDevicesDataSet& id,
                IToggleSwitch& ps,
                IToggleSwitch& ms,
                IPushButton& pb,
@@ -93,10 +93,10 @@ public:
                ITemperatureReader& sensor);
 
   void init();
-  void updateInputData();
+  void update();
 
 private:
-  ControllerInputData& m_devices_data;
+  InputDevicesDataSet& m_devices_data;
   IToggleSwitch& m_powerSwitch;
   IToggleSwitch& m_modeSwitch;
   IPushButton& m_displayButton;
@@ -108,7 +108,7 @@ OutputDevices entsprechend:
 
 class OutputDevices {
 public:
-  OutputDevices(ControllerOutputIntent& oi,
+  OutputDevices(OutputDevicesIntent& oi,
                 IStatusDisplay& display,
                 IRelais& relais);
 };
@@ -134,7 +134,7 @@ TempSensorAdapter tempSensorAdapter{oneWire};
 TemperatureSensorDriver sensor{tempSensorAdapter};
 
 LCDAdapter lcdAdapter{...};
-Display display{lcdAdapter, outputData.displayContent, outputData.lcd_stateIntent};
+Display display{lcdAdapter, outputData.displayContent, outputData.lcd_state};
 
 Relais relais{...};
 
