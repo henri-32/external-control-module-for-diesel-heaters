@@ -1,6 +1,7 @@
 #pragma once
-#include <stdint.h>
+#include "config.h"
 #include <limits.h>
+#include <stdint.h>
 
 // Werttypen
 struct ControllerInputData {
@@ -12,7 +13,17 @@ struct ControllerInputData {
   bool alternatorReleased = false;
   bool alternatorUsed = false;
 };
+struct HeaterStatus {
+  enum class HeatingState { OFF, ON };
+  HeatingState heatingState = HeatingState::OFF;
 
+  enum class Mode { TEMP, POWER };
+  Mode mode = Mode::TEMP;
+
+  float target_tempC = config::defaultTemp;
+};
+
+#ifdef MEMORY_FUNCTIONS
 struct LongtimeData {
   int dutyCycle = 0;
   int avgIdleTime = 0;
@@ -35,17 +46,10 @@ struct CalculationData {
   unsigned long accumulatedTimeON = 0;
   unsigned long lastOFFperiodeLength = 0;
 };
+#endif
 
-struct HeaterStatus {
-  enum class HeatingState {OFF , ON };
-  HeatingState heatingState = HeatingState::OFF;
-
-  enum class Mode { TEMP, POWER };
-  Mode mode = Mode::TEMP;
-
-  float target_tempC = 17;
-};
-
+// TODO OutputIntentDisplayContent aufräumen. Heater status als ganzes Struct übergeben. und
+// im Display wieder auslesen. target.. state und mode sind genaut das Struct.
 class ControllerOutputIntent {
 public:
   struct DisplayContent {
@@ -53,8 +57,10 @@ public:
     float target_tempC;
     HeaterStatus::HeatingState heatingState;
     HeaterStatus::Mode mode;
+#ifdef MEMORYFUNCTIONS
     RuntimeData runtimeDisplayData;
     LongtimeData EEPROM_Values;
+#endif
   };
   DisplayContent displayContent;
 
@@ -65,12 +71,11 @@ public:
   LCD_CycleDirection lcd_cycleDirection = LCD_CycleDirection::none;
 
   enum class RelaisCommand { Long, Short, None };
+  RelaisCommand m_relaisCommand = RelaisCommand::None;
 
   enum RelaisPriority { Low, High };
 
   RelaisPriority m_currentPriority = Low;
-  RelaisCommand m_relaisCommand = RelaisCommand::None;
-
 
   RelaisCommand consumeRelaisRequest() {
     RelaisCommand command = m_relaisCommand;

@@ -15,8 +15,8 @@ public:
   void init();
 
 // Fragwürdig, dass fürs Testen auf Interna zugegriffen werden muss. 
-// Da Umfang des Projekts erstmal begrenzt und die Logik der privaten Funktionen
-// getestet werden soll, für mich akzeptiert. 
+// Da der Umfang des Projekts erstmal begrenzt ist und die Logik der privaten Funktionen
+// getestet werden soll, aktuell für mich akzeptiert. 
 #ifdef TEST_BUILD
 public:
 #else
@@ -30,7 +30,7 @@ private:
   void applyDisplayButtonInput();
   void applyHeatingLogic();
 
-  // Nur implementiert ifdef MEMORY_FUNCTIONS
+  // Nur implementiert bei ifdef MEMORY_FUNCTIONS
   //  Für stabile API immer deklariert.
   void writeOutputIntent();
   void updateMemory();
@@ -41,10 +41,8 @@ private:
   void requestRelaisCommand(ControllerOutputIntent::RelaisCommand command,
                             ControllerOutputIntent::RelaisPriority priority);
 
-  ControllerInputData inputData;
-  HeaterStatus heaterStatus;
-  ControllerOutputIntent outputIntent;
   InputDevices &inputDevices;
+  HeaterStatus heaterStatus;
   OutputDevices &outputDevices;
 
 #ifdef MEMORY_FUNCTIONS

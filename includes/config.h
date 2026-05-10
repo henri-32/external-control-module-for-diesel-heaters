@@ -12,6 +12,7 @@ struct pinConfig {
 
 
 struct config {
+  static constexpr float defaultTemp = 15; 
   static constexpr int encoderValCutoff = 6;
   static constexpr float tempStep = 0.5; 
   static constexpr int tempMax = 30; 

@@ -12,7 +12,7 @@ void SystemController::operator()() {
   outputDevices.update();
 
 #ifdef MEMORY_FUNCTIONS
-  systemStatistic.update(inputData, heaterStatus);
+  systemStatistic.update(inputDevices.m_inputData, heaterStatus);
   updateMemory();
 #endif
 }
@@ -42,12 +42,12 @@ void SystemController::applyPowerSwitchInput() {
   using State = HeaterStatus::HeatingState;
   using COI = ControllerOutputIntent;
 
-  if (!inputData.powerSwitchChanged) {
+  if (!inputDevices.m_inputData.powerSwitchChanged) {
     return;
   };
 
   // Alternator Path switches only State, without relay action
-  if (inputData.alternatorPressed) {
+  if (inputDevices.m_inputData.alternatorPressed) {
     //{{{
     if (heaterStatus.heatingState == State::OFF) {
       heaterStatus.heatingState = State::ON;
@@ -55,7 +55,7 @@ void SystemController::applyPowerSwitchInput() {
       heaterStatus.heatingState = State::OFF;
     }
 
-    inputData.alternatorUsed = true;
+    inputDevices.m_inputData.alternatorUsed = true;
     return;
   }
   //}}}
@@ -78,11 +78,11 @@ void SystemController::applyModeSwitchInput() {
   using Mode = HeaterStatus::Mode;
   using COI = ControllerOutputIntent;
 
-  if (!inputData.modeSwitchChanged) {
+  if (!inputDevices.m_inputData.modeSwitchChanged) {
     return;
   }
   // Alternator Path only switches Mode without Relay Action
-  if (inputData.alternatorPressed) {
+  if (inputDevices.m_inputData.alternatorPressed) {
     //{{{
     if (heaterStatus.mode == Mode::POWER) {
       heaterStatus.mode = Mode::TEMP;
@@ -90,7 +90,7 @@ void SystemController::applyModeSwitchInput() {
       heaterStatus.mode = Mode::POWER;
     }
 
-    inputData.alternatorUsed = true;
+    inputDevices.m_inputData.alternatorUsed = true;
     return;
   }
   //}}}
@@ -109,35 +109,35 @@ void SystemController::applyDisplayButtonInput() {
   //{{{
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
 
-  if (!inputData.alternatorReleased) {
+  if (!inputDevices.m_inputData.alternatorReleased) {
     return;
   }
   // Path where alternator was used in combination with other Inputs.
   // No toggling of display expected
-  if (inputData.alternatorUsed) {
-    inputData.alternatorPressed = false;
-    inputData.alternatorUsed = false;
+  if (inputDevices.m_inputData.alternatorUsed) {
+    inputDevices.m_inputData.alternatorPressed = false;
+    inputDevices.m_inputData.alternatorUsed = false;
     return;
 
     // Path without alternator for toggling display. Action happens  on
     // release of the button
 
   } else {
-    switch (outputIntent.lcd_stateIntent) {
+    switch (outputDevices.m_outputIntent.lcd_stateIntent) {
     case LCDIntent::OFF:
-      outputIntent.lcd_stateIntent = LCDIntent::Page1;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::Page1;
       break;
     case LCDIntent::Page1:
-      outputIntent.lcd_stateIntent = LCDIntent::OFF;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::OFF;
       break;
     case LCDIntent::Page2:
-      outputIntent.lcd_stateIntent = LCDIntent::OFF;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::OFF;
       break;
     case LCDIntent::Page3:
-      outputIntent.lcd_stateIntent = LCDIntent::OFF;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::OFF;
       break;
     case LCDIntent::Page4:
-      outputIntent.lcd_stateIntent = LCDIntent::OFF;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::OFF;
     }
   }
 }
@@ -146,22 +146,22 @@ void SystemController::applyDisplayButtonInput() {
 void SystemController::applyEncoderInput() {
   //{{{
   using LCDDirection = ControllerOutputIntent::LCD_CycleDirection;
-  const int val = inputData.encoder_val;
+  const int val = inputDevices.m_inputData.encoder_val;
 
   if (val == 0)
     return;
 
-  if (inputData.alternatorPressed) {
+  if (inputDevices.m_inputData.alternatorPressed) {
     if (val >= 1 && val <= config::encoderValCutoff) {
-      outputIntent.lcd_cycleDirection = LCDDirection::right;
+      outputDevices.m_outputIntent.lcd_cycleDirection = LCDDirection::right;
       cyclePages();
-      inputData.alternatorUsed = true;
+      inputDevices.m_inputData.alternatorUsed = true;
       return;
     }
     if (val <= -1 && val >= -config::encoderValCutoff) {
-      outputIntent.lcd_cycleDirection = LCDDirection::left;
+      outputDevices.m_outputIntent.lcd_cycleDirection = LCDDirection::left;
       cyclePages();
-      inputData.alternatorUsed = true;
+      inputDevices.m_inputData.alternatorUsed = true;
       return;
     }
   }
@@ -181,7 +181,7 @@ void SystemController::applyHeatingLogic() {
   if (heaterStatus.mode != HeaterStatus::Mode::TEMP)
     return;
 
-  if (inputData.sensor_tempC <=
+  if (inputDevices.m_inputData.sensor_tempC <=
           (heaterStatus.target_tempC - config::tolerance) &&
       heaterStatus.heatingState == State::OFF) {
 
@@ -189,7 +189,7 @@ void SystemController::applyHeatingLogic() {
     heaterStatus.heatingState = State::ON;
     return;
   }
-  if (inputData.sensor_tempC >=
+  if (inputDevices.m_inputData.sensor_tempC >=
           (heaterStatus.target_tempC + config::tolerance) &&
       heaterStatus.heatingState == State::ON) {
 
@@ -202,14 +202,14 @@ void SystemController::applyHeatingLogic() {
 
 void SystemController::writeOutputIntent() {
   //{{{
-  outputIntent.displayContent.temp_c = inputData.sensor_tempC;
-  outputIntent.displayContent.target_tempC = heaterStatus.target_tempC;
-  outputIntent.displayContent.heatingState = heaterStatus.heatingState;
-  outputIntent.displayContent.mode = heaterStatus.mode;
+  outputDevices.m_outputIntent.displayContent.temp_c = inputDevices.m_inputData.sensor_tempC;
+  outputDevices.m_outputIntent.displayContent.target_tempC = heaterStatus.target_tempC;
+  outputDevices.m_outputIntent.displayContent.heatingState = heaterStatus.heatingState;
+  outputDevices.m_outputIntent.displayContent.mode = heaterStatus.mode;
 #ifdef MEMORY_FUNCTIONS
-  outputIntent.displayContent.runtimeDisplayData =
+  outputDevices.m_outputIntent.displayContent.runtimeDisplayData =
       systemStatistic.getRuntimeDate();
-  outputIntent.displayContent.EEPROM_Values =
+  outputDevices.m_outputIntent.displayContent.EEPROM_Values =
       memoryController.getFinalAverages();
 #endif
 }
@@ -240,42 +240,42 @@ void SystemController::cyclePages() {
   //{{{
   using LCDIntent = ControllerOutputIntent::LCD_StateIntent;
 
-  if (outputIntent.lcd_cycleDirection ==
+  if (outputDevices.m_outputIntent.lcd_cycleDirection ==
       ControllerOutputIntent::LCD_CycleDirection::right) {
-    switch (outputIntent.lcd_stateIntent) {
+    switch (outputDevices.m_outputIntent.lcd_stateIntent) {
     case LCDIntent::OFF:
       return;
     case LCDIntent::Page1:
-      outputIntent.lcd_stateIntent = LCDIntent::Page2;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::Page2;
       break;
     case LCDIntent::Page2:
-      outputIntent.lcd_stateIntent = LCDIntent::Page3;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::Page3;
       break;
     case LCDIntent::Page3:
-      outputIntent.lcd_stateIntent = LCDIntent::Page4;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::Page4;
       break;
     case LCDIntent::Page4:
-      outputIntent.lcd_stateIntent = LCDIntent::Page1;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::Page1;
       break;
     }
     return;
   }
-  if (outputIntent.lcd_cycleDirection ==
+  if (outputDevices.m_outputIntent.lcd_cycleDirection ==
       ControllerOutputIntent::LCD_CycleDirection::left) {
-    switch (outputIntent.lcd_stateIntent) {
+    switch (outputDevices.m_outputIntent.lcd_stateIntent) {
     case LCDIntent::OFF:
       return;
     case LCDIntent::Page1:
-      outputIntent.lcd_stateIntent = LCDIntent::Page3;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::Page3;
       break;
     case LCDIntent::Page2:
-      outputIntent.lcd_stateIntent = LCDIntent::Page1;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::Page1;
       break;
     case LCDIntent::Page3:
-      outputIntent.lcd_stateIntent = LCDIntent::Page2;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::Page2;
       break;
     case LCDIntent::Page4:
-      outputIntent.lcd_stateIntent = LCDIntent::Page3;
+      outputDevices.m_outputIntent.lcd_stateIntent = LCDIntent::Page3;
       break;
     }
     return;
@@ -285,9 +285,9 @@ void SystemController::cyclePages() {
 void SystemController::requestRelaisCommand(
     ControllerOutputIntent::RelaisCommand command,
     ControllerOutputIntent::RelaisPriority priority) {
-  if (priority >= outputIntent.m_currentPriority) {
-    outputIntent.m_relaisCommand = command;
-    outputIntent.m_currentPriority = priority;
+  if (priority >= outputDevices.m_outputIntent.m_currentPriority) {
+    outputDevices.m_outputIntent.m_relaisCommand = command;
+    outputDevices.m_outputIntent.m_currentPriority = priority;
   }
 }
 //}}}

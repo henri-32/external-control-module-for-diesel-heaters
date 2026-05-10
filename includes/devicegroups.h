@@ -14,6 +14,7 @@ public:
   void updateInputData();
 
   ControllerInputData &m_inputData;
+private:
   IToggleSwitch &m_powerSwitch;
   IToggleSwitch &m_modeSwitch;
   IPushButton &m_displayButton;
@@ -31,6 +32,7 @@ public:
   void update();
 
   ControllerOutputIntent &m_outputIntent;
+private:
   IRelais &m_relais;
   IDisplayDriver &m_displayDriver;
 };

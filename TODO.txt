@@ -2,17 +2,7 @@ Für die IO Devices lässt sich auf jeden Fall ein gemeinsames Interface für In
 
 =====================================================================
 Die ganzen PIN Belegungen aus den Konstruktoren sollten in die Config
-
 =====================================================================
-Switch Warnings im Display Driver
-
-===================================================================
-Virtualisierung de LCD Displays erfordert wrapper um library.
-Die Kette vom main muss das lcd object über die outputDevices/LCDDriver 
-weitergegeben werden. 
-Die Weitergabe muss auch noch für das TestDisplay in unit_tests.cpp erfolgen 
-
-===================================================================
 
 Refactor-Vorschlag fuer saubere Konstruktion und Virtualisierung
 

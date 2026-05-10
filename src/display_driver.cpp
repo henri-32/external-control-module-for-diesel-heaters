@@ -131,7 +131,7 @@ void DisplayDriver::formatTempFloatsForDisplay() {
 
   case LCDIntent::Page2:
     break;
-
+#ifdef MEMORYFUNCTIONS
   case LCDIntent::Page3:
     diff_int = int(m_displayContent.runtimeDisplayData.mediumDiffTempToTarget);
     diff_frac = abs(
@@ -139,7 +139,7 @@ void DisplayDriver::formatTempFloatsForDisplay() {
             m_displayContent.runtimeDisplayData.mediumDiffTempToTarget * 10) %
         10);
     break;
-
+#endif
   case LCDIntent::Page4:
     break;
 
