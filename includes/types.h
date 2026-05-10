@@ -24,7 +24,7 @@ struct InputDevicesDataSet {
 
 struct HeaterStatus {
   enum class HeatingState { OFF, ON };
-  HeatingState heatingState = HeatingState::OFF;
+  HeatingState state = HeatingState::OFF;
 
   enum class Mode { TEMP, POWER };
   Mode mode = Mode::TEMP;
@@ -64,9 +64,7 @@ class OutputDevicesIntent {
 public:
   struct DisplayContent {
     float temp_c;
-    float target_tempC;
-    HeaterStatus::HeatingState heatingState;
-    HeaterStatus::Mode mode;
+    HeaterStatus status;
 #ifdef MEMORYFUNCTIONS
     RuntimeData runtimeDisplayData;
     LongtimeData EEPROM_Values;
@@ -81,16 +79,5 @@ public:
   LCD_CycleDirection lcd_cycleDirection = LCD_CycleDirection::none;
 
   enum class RelaisCommand { Long, Short, None };
-  RelaisCommand m_relaisCommand = RelaisCommand::None;
-
-  enum RelaisPriority { Low, High };
-
-  RelaisPriority m_currentPriority = Low;
-
-  RelaisCommand consumeRelaisRequest() {
-    RelaisCommand command = m_relaisCommand;
-    m_relaisCommand = RelaisCommand::None;
-    m_currentPriority = Low;
-    return command;
-  };
+  RelaisCommand relaisCommand = RelaisCommand::None;
 };

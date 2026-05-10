@@ -38,7 +38,7 @@ public:
 class TestRelais : public IRelais {
 public:
   void init() override{};
-  void update(const OutputDevicesIntent::RelaisCommand &intent) override{};
+  void update(OutputDevicesIntent::RelaisCommand intent) override{};
 };
 
 class TestEncoderHardware : public IEncoderHardware {

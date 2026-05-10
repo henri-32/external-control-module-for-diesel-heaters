@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-using COI = OutputDevicesIntent; 
+using ODI = OutputDevicesIntent; 
 using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
 
 #ifdef TEST_BUILD
@@ -13,7 +13,7 @@ using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
 #include <Arduino.h>
 #endif
 
-DisplayDriver::DisplayDriver(IDisplay &display, COI::DisplayContent &dc,
+DisplayDriver::DisplayDriver(IDisplay &display, ODI::DisplayContent &dc,
                              LCDIntent &ds)
     : m_display(display), m_displayContent(dc), m_displayState(ds) {}
 
@@ -125,8 +125,8 @@ void DisplayDriver::formatTempFloatsForDisplay() {
 
     t_int = int(m_displayContent.temp_c);
     t_frac = abs(static_cast<int>(m_displayContent.temp_c * 10) % 10);
-    s_int = int(m_displayContent.target_tempC);
-    s_frac = abs(static_cast<int>(m_displayContent.target_tempC * 10) % 10);
+    s_int = int(m_displayContent.status.target_tempC);
+    s_frac = abs(static_cast<int>(m_displayContent.status.target_tempC * 10) % 10);
     break;
 
   case LCDIntent::Page2:
@@ -153,9 +153,9 @@ void DisplayDriver::formatTempFloatsForDisplay() {
 //}}}
 
 void DisplayDriver::createStateStringsForDisplay(
-    const COI::DisplayContent &content) {
+    const ODI::DisplayContent &content) {
   //{{{
-  switch (content.heatingState) {
+  switch (content.status.state) {
   case HeaterStatus::HeatingState::ON:
     strncpy(string_of_states[0], "ON", 21);
     string_of_states[0][20] = '\0';
@@ -165,7 +165,7 @@ void DisplayDriver::createStateStringsForDisplay(
     string_of_states[0][20] = '\0';
     break;
   }
-  switch (content.mode) {
+  switch (content.status.mode) {
   case HeaterStatus::Mode::TEMP:
     strncpy(string_of_states[1], "TEMP", 21);
     string_of_states[1][20] = '\0';

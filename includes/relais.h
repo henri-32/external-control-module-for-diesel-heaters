@@ -1,7 +1,7 @@
 #pragma once
 
-#include "types.h"
 #include "interfaces.h"
+#include "types.h"
 #include <stdint.h>
 
 #ifdef TEST_BUILD
@@ -10,15 +10,14 @@
 #include <Arduino.h>
 #endif
 
-class Relais :public IRelais {
+class Relais : public IRelais {
 public:
   explicit Relais(const uint8_t pin);
 
   void init();
-  void update(const OutputDevicesIntent::RelaisCommand &intent);
+  void update(OutputDevicesIntent::RelaisCommand intent) override;
 
-public:
-
+private:
   void turnOn(const OutputDevicesIntent::RelaisCommand &intent);
   void turnOff();
   void applyPulseLengthFromIntent(

@@ -40,7 +40,7 @@ void SystemController::applyPowerSwitchInput() {
   nötig, damit ich beim Verlassen des Bootes, die Heizung aus machen kann und
   sie korrekt herunterfährt, bevor ich den Strom wegnehme*/
   using State = HeaterStatus::HeatingState;
-  using COI = OutputDevicesIntent;
+  using ODI = OutputDevicesIntent;
 
   if (!inputDevices.data.switchAction.power) {
     return;
@@ -49,10 +49,10 @@ void SystemController::applyPowerSwitchInput() {
   // Alternator Path switches only State, without relay action
   if (inputDevices.data.alternator.pressed) {
     //{{{
-    if (heaterStatus.heatingState == State::OFF) {
-      heaterStatus.heatingState = State::ON;
+    if (heaterStatus.state == State::OFF) {
+      heaterStatus.state = State::ON;
     } else {
-      heaterStatus.heatingState = State::OFF;
+      heaterStatus.state = State::OFF;
     }
 
     inputDevices.data.alternator.used = true;
@@ -60,14 +60,14 @@ void SystemController::applyPowerSwitchInput() {
   }
   //}}}
 
-  if (heaterStatus.heatingState == State::ON) {
-    requestRelaisCommand(COI::RelaisCommand::Long, COI::RelaisPriority::High);
-    heaterStatus.heatingState = State::OFF;
+  if (heaterStatus.state == State::ON) {
+    requestRelaisCommand(ODI::RelaisCommand::Long);
+    heaterStatus.state = State::OFF;
     heaterStatus.mode = HeaterStatus::Mode::POWER;
 
   } else {
-    requestRelaisCommand(COI::RelaisCommand::Long, COI::RelaisPriority::High);
-    heaterStatus.heatingState = State::ON;
+    requestRelaisCommand(ODI::RelaisCommand::Long);
+    heaterStatus.state = State::ON;
     heaterStatus.mode = HeaterStatus::Mode::POWER;
   }
 }
@@ -76,7 +76,7 @@ void SystemController::applyPowerSwitchInput() {
 void SystemController::applyModeSwitchInput() {
   //{{{
   using Mode = HeaterStatus::Mode;
-  using COI = OutputDevicesIntent;
+  using ODI = OutputDevicesIntent;
 
   if (!inputDevices.data.switchAction.mode) {
     return;
@@ -96,10 +96,10 @@ void SystemController::applyModeSwitchInput() {
   //}}}
 
   if (heaterStatus.mode == Mode::POWER) {
-    requestRelaisCommand(COI::RelaisCommand::Short, COI::RelaisPriority::Low);
+    requestRelaisCommand(ODI::RelaisCommand::Short);
     heaterStatus.mode = Mode::TEMP;
   } else {
-    requestRelaisCommand(COI::RelaisCommand::Short, COI::RelaisPriority::Low);
+    requestRelaisCommand(ODI::RelaisCommand::Short);
     heaterStatus.mode = Mode::POWER;
   }
 }
@@ -176,25 +176,24 @@ void SystemController::applyHeatingLogic() {
   //{{{
   using State = HeaterStatus::HeatingState;
   using Command = OutputDevicesIntent::RelaisCommand;
-  using Priority = OutputDevicesIntent::RelaisPriority;
 
   if (heaterStatus.mode != HeaterStatus::Mode::TEMP)
     return;
 
   if (inputDevices.data.sensor_tempC <=
           (heaterStatus.target_tempC - config::tolerance) &&
-      heaterStatus.heatingState == State::OFF) {
+      heaterStatus.state == State::OFF) {
 
-    requestRelaisCommand(Command::Long, Priority::Low);
-    heaterStatus.heatingState = State::ON;
+    requestRelaisCommand(Command::Long);
+    heaterStatus.state = State::ON;
     return;
   }
   if (inputDevices.data.sensor_tempC >=
           (heaterStatus.target_tempC + config::tolerance) &&
-      heaterStatus.heatingState == State::ON) {
+      heaterStatus.state == State::ON) {
 
-    requestRelaisCommand(Command::Long, Priority::Low);
-    heaterStatus.heatingState = State::OFF;
+    requestRelaisCommand(Command::Long);
+    heaterStatus.state = State::OFF;
     return;
   }
 }
@@ -203,9 +202,10 @@ void SystemController::applyHeatingLogic() {
 void SystemController::writeOutputIntent() {
   //{{{
   outputDevices.intent.displayContent.temp_c = inputDevices.data.sensor_tempC;
-  outputDevices.intent.displayContent.target_tempC = heaterStatus.target_tempC;
-  outputDevices.intent.displayContent.heatingState = heaterStatus.heatingState;
-  outputDevices.intent.displayContent.mode = heaterStatus.mode;
+  outputDevices.intent.displayContent.status.target_tempC =
+      heaterStatus.target_tempC;
+  outputDevices.intent.displayContent.status.state = heaterStatus.state;
+  outputDevices.intent.displayContent.status.mode = heaterStatus.mode;
 #ifdef MEMORY_FUNCTIONS
   outputDevices.intent.displayContent.runtimeDisplayData =
       systemStatistic.getRuntimeDate();
@@ -283,11 +283,7 @@ void SystemController::cyclePages() {
 }
 
 void SystemController::requestRelaisCommand(
-    OutputDevicesIntent::RelaisCommand command,
-    OutputDevicesIntent::RelaisPriority priority) {
-  if (priority >= outputDevices.intent.m_currentPriority) {
-    outputDevices.intent.m_relaisCommand = command;
-    outputDevices.intent.m_currentPriority = priority;
-  }
+    OutputDevicesIntent::RelaisCommand command) {
+  outputDevices.intent.relaisCommand = command;
 }
 //}}}

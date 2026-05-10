@@ -8,12 +8,12 @@ void Relais::init() {
   digitalWrite(m_pin, LOW);
 }
 
-void Relais::turnOn(const OutputDevicesIntent::RelaisCommand &intent) {
+void Relais::turnOn(const OutputDevicesIntent::RelaisCommand &command) {
   if (m_relais_state != RelaisState::OFF ||
-      intent == OutputDevicesIntent::RelaisCommand::None) {
+      command == OutputDevicesIntent::RelaisCommand::None) {
     return;
   }
-  applyPulseLengthFromIntent(intent);
+  applyPulseLengthFromIntent(command);
   activate();
   m_pulse_start_ms = millis();
   m_relais_state = RelaisState::ON;
@@ -28,18 +28,18 @@ void Relais::turnOff() {
   }
   deactivate();
   m_relais_state = RelaisState::OFF;
-};
+}
 
-void Relais::update(const OutputDevicesIntent::RelaisCommand &intent) {
-  turnOn(intent);
+void Relais::update(OutputDevicesIntent::RelaisCommand command) {
+  turnOn(command);
   turnOff();
 }
 
 void Relais::applyPulseLengthFromIntent(
-    const OutputDevicesIntent::RelaisCommand &intent) {
+    const OutputDevicesIntent::RelaisCommand &command) {
   using cmd = OutputDevicesIntent::RelaisCommand;
 
-  switch (intent) {
+  switch (command) {
   case cmd::None:
     return;
   case cmd::Long:

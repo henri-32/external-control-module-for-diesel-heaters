@@ -38,8 +38,7 @@ private:
   // Helper
   void clampTargetTempC(float &target);
   void cyclePages();
-  void requestRelaisCommand(OutputDevicesIntent::RelaisCommand command,
-                            OutputDevicesIntent::RelaisPriority priority);
+  void requestRelaisCommand(OutputDevicesIntent::RelaisCommand command);
 
   InputDevices &inputDevices;
   HeaterStatus heaterStatus;

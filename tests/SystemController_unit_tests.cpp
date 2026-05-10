@@ -50,12 +50,12 @@ TEST_F(SystemControllerTest,
   inputData.switchAction.power = true;
   inputData.alternator.pressed = true;
   inputData.alternator.used = false;
-  controller.heaterStatus.heatingState = State::OFF;
+  controller.heaterStatus.state = State::OFF;
 
   controller.applyPowerSwitchInput();
 
-  EXPECT_EQ(controller.heaterStatus.heatingState, State::ON)
-      << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
+  EXPECT_EQ(controller.heaterStatus.state, State::ON)
+      << "state=" << static_cast<int>(controller.heaterStatus.state)
       << " with Alternator";
   EXPECT_EQ(inputData.alternator.used, true) << " with Alternator";
 }
@@ -68,16 +68,16 @@ TEST_F(SystemControllerTest,
   inputData.switchAction.power = true;
   inputData.alternator.pressed = true;
   inputData.alternator.used = false;
-  controller.heaterStatus.heatingState = State::ON;
+  controller.heaterStatus.state = State::ON;
 
   controller.applyPowerSwitchInput();
 
-  EXPECT_EQ(controller.heaterStatus.heatingState, State::OFF)
-      << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
+  EXPECT_EQ(controller.heaterStatus.state, State::OFF)
+      << "state=" << static_cast<int>(controller.heaterStatus.state)
       << " with Alternator";
 
   EXPECT_EQ(inputData.alternator.used, true)
-      << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
+      << "state=" << static_cast<int>(controller.heaterStatus.state)
       << " with Alternator";
 }
 //}}}
@@ -89,7 +89,7 @@ TEST_F(SystemControllerTest,
   inputData.switchAction.power = true;
   inputData.alternator.pressed = true;
   inputData.alternator.used = false;
-  controller.heaterStatus.heatingState = State::OFF;
+  controller.heaterStatus.state = State::OFF;
 
   // unrelated input
   inputData.switchAction.mode = true;
@@ -98,8 +98,8 @@ TEST_F(SystemControllerTest,
 
   controller.applyPowerSwitchInput();
 
-  EXPECT_EQ(controller.heaterStatus.heatingState, State::ON)
-      << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
+  EXPECT_EQ(controller.heaterStatus.state, State::ON)
+      << "state=" << static_cast<int>(controller.heaterStatus.state)
       << "with Alternator";
 
   EXPECT_EQ(inputData.alternator.used, true) << "with Alternator";
@@ -113,7 +113,7 @@ TEST_F(SystemControllerTest,
   inputData.switchAction.power = true;
   inputData.alternator.pressed = true;
   inputData.alternator.used = false;
-  controller.heaterStatus.heatingState = State::ON;
+  controller.heaterStatus.state = State::ON;
 
   // unrelated input
   inputData.switchAction.mode = true;
@@ -122,12 +122,12 @@ TEST_F(SystemControllerTest,
 
   controller.applyPowerSwitchInput();
 
-  EXPECT_EQ(controller.heaterStatus.heatingState, State::OFF)
-      << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
+  EXPECT_EQ(controller.heaterStatus.state, State::OFF)
+      << "state=" << static_cast<int>(controller.heaterStatus.state)
       << "with Alternator";
 
   EXPECT_EQ(inputData.alternator.used, true)
-      << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
+      << "state=" << static_cast<int>(controller.heaterStatus.state)
       << "with Alternator";
 }
 //}}}
@@ -137,33 +137,28 @@ TEST_F(SystemControllerTest,
   //{{{
   using State = HeaterStatus::HeatingState;
   using Command = OutputDevicesIntent::RelaisCommand;
-  using Priority = OutputDevicesIntent::RelaisPriority;
 
   inputData.switchAction.power = true;
   inputData.alternator.pressed = false;
   inputData.alternator.used = false;
-  controller.heaterStatus.heatingState = State::ON;
+  controller.heaterStatus.state = State::ON;
 
   controller.applyPowerSwitchInput();
 
-  EXPECT_EQ(controller.heaterStatus.heatingState, State::OFF)
-      << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
+  EXPECT_EQ(controller.heaterStatus.state, State::OFF)
+      << "state=" << static_cast<int>(controller.heaterStatus.state)
       << "without Alternator";
 
   EXPECT_EQ(inputData.alternator.used, false)
-      << "state=" << static_cast<int>(controller.heaterStatus.heatingState)
+      << "state=" << static_cast<int>(controller.heaterStatus.state)
       << "without Alternator";
 
   EXPECT_EQ(controller.heaterStatus.mode, HeaterStatus::Mode::POWER)
       << "state=" << static_cast<int>(controller.heaterStatus.mode)
       << "without Alternator";
 
-  EXPECT_EQ(outputIntent.m_relaisCommand, Command::Long)
-      << "state=" << static_cast<int>(outputIntent.m_relaisCommand)
-      << "without Alternator";
-
-  EXPECT_EQ(outputIntent.m_currentPriority, Priority::High)
-      << "state=" << static_cast<int>(outputIntent.m_relaisCommand)
+  EXPECT_EQ(outputIntent.relaisCommand, Command::Long)
+      << "state=" << static_cast<int>(outputIntent.relaisCommand)
       << "without Alternator";
 }
 //}}}
@@ -215,9 +210,9 @@ TEST_F(SystemControllerTest,
   EXPECT_EQ(controller.heaterStatus.mode, HeaterStatus::Mode::POWER)
       << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
 
-  EXPECT_EQ(outputIntent.m_relaisCommand,
+  EXPECT_EQ(outputIntent.relaisCommand,
             OutputDevicesIntent::RelaisCommand::Short)
-      << "command=" << static_cast<int>(outputIntent.m_relaisCommand)
+      << "command=" << static_cast<int>(outputIntent.relaisCommand)
       << " withoutAlternator";
 }
 //}}}
@@ -229,16 +224,15 @@ TEST_F(SystemControllerTest,
   inputData.alternator.pressed = false;
   inputData.alternator.used = false;
   controller.heaterStatus.mode = HeaterStatus::Mode::POWER;
-  outputIntent.m_currentPriority = OutputDevicesIntent::RelaisPriority::Low;
 
   controller.applyModeSwitchInput();
 
   EXPECT_EQ(controller.heaterStatus.mode, HeaterStatus::Mode::TEMP)
       << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
 
-  EXPECT_EQ(outputIntent.m_relaisCommand,
+  EXPECT_EQ(outputIntent.relaisCommand,
             OutputDevicesIntent::RelaisCommand::Short)
-      << "command=" << static_cast<int>(outputIntent.m_relaisCommand)
+      << "command=" << static_cast<int>(outputIntent.relaisCommand)
       << " withoutAlternator";
 }
 //}}}
@@ -264,9 +258,9 @@ TEST_F(
   EXPECT_EQ(controller.heaterStatus.mode, HeaterStatus::Mode::TEMP)
       << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
 
-  EXPECT_EQ(outputIntent.m_relaisCommand,
+  EXPECT_EQ(outputIntent.relaisCommand,
             OutputDevicesIntent::RelaisCommand::Short)
-      << "command=" << static_cast<int>(outputIntent.m_relaisCommand)
+      << "command=" << static_cast<int>(outputIntent.relaisCommand)
       << " withoutAlternator";
 }
 
@@ -571,7 +565,7 @@ TEST_F(SystemControllerTest,
 TEST_F(SystemControllerTest, applyHeatingLogic_too_cold_and_state_off) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  State &m_state = controller.heaterStatus.heatingState;
+  State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
   controller.heaterStatus.target_tempC = inputData.sensor_tempC + config::tolerance + 0.1;
@@ -580,17 +574,15 @@ TEST_F(SystemControllerTest, applyHeatingLogic_too_cold_and_state_off) {
   controller.applyHeatingLogic();
 
   EXPECT_EQ(m_state, State::ON);
-  EXPECT_EQ(controller.outputDevices.intent.m_relaisCommand,
+  EXPECT_EQ(controller.outputDevices.intent.relaisCommand,
             OutputDevicesIntent::RelaisCommand::Long);
-  EXPECT_EQ(controller.outputDevices.intent.m_currentPriority,
-            OutputDevicesIntent::RelaisPriority::Low);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyHeatingLogic_too_cold_and_state_on) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  State &m_state = controller.heaterStatus.heatingState;
+  State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
   controller.heaterStatus.target_tempC = inputData.sensor_tempC + config::tolerance + 0.1;
@@ -605,7 +597,7 @@ TEST_F(SystemControllerTest, applyHeatingLogic_too_cold_and_state_on) {
 TEST_F(SystemControllerTest, applyHeatingLogic_too_warm_and_state_on) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  State &m_state = controller.heaterStatus.heatingState;
+  State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
   controller.heaterStatus.target_tempC = inputData.sensor_tempC - config::tolerance - 0.1;
@@ -614,17 +606,15 @@ TEST_F(SystemControllerTest, applyHeatingLogic_too_warm_and_state_on) {
   controller.applyHeatingLogic();
 
   EXPECT_EQ(m_state, State::OFF);
-  EXPECT_EQ(controller.outputDevices.intent.m_relaisCommand,
+  EXPECT_EQ(controller.outputDevices.intent.relaisCommand,
             OutputDevicesIntent::RelaisCommand::Long);
-  EXPECT_EQ(controller.outputDevices.intent.m_currentPriority,
-            OutputDevicesIntent::RelaisPriority::Low);
 }
 //}}}
 
 TEST_F(SystemControllerTest, applyHeatingLogic_too_warm_and_state_off) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  State &m_state = controller.heaterStatus.heatingState;
+  State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
   controller.heaterStatus.target_tempC = inputData.sensor_tempC - config::tolerance - 0.1;
@@ -639,7 +629,7 @@ TEST_F(SystemControllerTest, applyHeatingLogic_too_warm_and_state_off) {
 TEST_F(SystemControllerTest, applyHeatingLogic_early_return_by_wrong_mode) {
   //{{{
   using State = HeaterStatus::HeatingState;
-  State &m_state = controller.heaterStatus.heatingState;
+  State &m_state = controller.heaterStatus.state;
   controller.heaterStatus.mode = HeaterStatus::Mode::POWER;
   inputData.sensor_tempC = 10;
   controller.heaterStatus.target_tempC = inputData.sensor_tempC - config::tolerance - 0.1;
@@ -648,10 +638,8 @@ TEST_F(SystemControllerTest, applyHeatingLogic_early_return_by_wrong_mode) {
   controller.applyHeatingLogic();
 
   EXPECT_EQ(m_state, State::ON);
-  EXPECT_EQ(controller.outputDevices.intent.m_relaisCommand,
+  EXPECT_EQ(controller.outputDevices.intent.relaisCommand,
             OutputDevicesIntent::RelaisCommand::None);
-  EXPECT_EQ(controller.outputDevices.intent.m_currentPriority,
-            OutputDevicesIntent::RelaisPriority::Low);
 }
 //}}}
 //}}}
