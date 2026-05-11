@@ -57,9 +57,6 @@ struct CalculationData {
 };
 #endif
 
-// TODO OutputIntentDisplayContent aufräumen. Heater status als ganzes Struct
-// übergeben. und im Display wieder auslesen. target.. state und mode sind
-// genaut das Struct.
 class OutputDevicesIntent {
 public:
   struct DisplayContent {

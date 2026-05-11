@@ -8,11 +8,13 @@ binary = project_root / "build_test" / "unit_tests"
 log_file = project_root / ".logs" / "unit_tests.log"
 xml_file = project_root / ".logs" / "unit_tests_report.xml"
 ql_file = project_root / "neovim_utils" / "quickfix_list.txt" 
+nvim_server = Path("/tmp/nvim-main.sock")
 
 
 with open (log_file, "w") as f: 
     process = subprocess.Popen(
         [str(binary), "--gtest_output=xml:{}".format(xml_file)],
+        stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE, 
         stderr=subprocess.STDOUT,
         text=True
@@ -52,8 +54,20 @@ with open(ql_file, "w") as f:
 
 # ============== Return Code der Tests ======================
 if return_code != 0: 
+    if nvim_server.exists():
+        subprocess.Popen([
+            "nvim",
+            "--server", 
+            str(nvim_server),
+            "--remote-send", 
+            "<C-\><C-N>:cgetfile /{}<CR>:copen<CR>".format(ql_file), 
+        ],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+        close_fds=True)
+
     raise RuntimeError("Gtest Run failed with code {}".format(return_code))
 else: 
     print("All tests green")
-
-

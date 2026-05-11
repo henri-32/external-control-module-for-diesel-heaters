@@ -1,4 +1,5 @@
 #include "encoder_driver.h"
+#
 
 #ifdef TEST_BUILD 
 #include "ArduinoStubs.h"
@@ -25,7 +26,7 @@ void EncoderDriver::poll() {
 }
 
 int EncoderDriver::translateStepsToInput() {
-  if (millis() - m_last_change_ms < 100)
+  if (millis() - m_last_change_ms < debounceConfig::encoder)
     return 0;
   int steps = m_delta / 4; // Wird auf ganze Schritte runtergebrochen und rest
                            // vernichtet bei Ganzzahldivision

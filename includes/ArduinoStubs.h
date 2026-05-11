@@ -14,6 +14,9 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-function"
 
+// Diese globalen Enums ermöglichen Kompatibilität zu den Arduino Core Calls 
+// NOSTATE und NOMODE ermöglichen beim Testen das Überprüfen der korrekten 
+// Statebehandlung
 enum PinState { HIGH, LOW, NOSTATE };
 enum PinMode { OUTPUT, INPUT, INPUT_PULLUP, NOMODE };
 

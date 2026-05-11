@@ -10,6 +10,9 @@ struct pinConfig {
   static constexpr int relais = 4;
 };
 
+struct debounceConfig {
+  static constexpr int encoder = 100; 
+}; 
 
 struct config {
   static constexpr float defaultTemp = 15; 
