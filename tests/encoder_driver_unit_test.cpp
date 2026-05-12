@@ -25,6 +25,7 @@ protected:
   void SetUp() override {
     setMillis(0);
     testEncoder.position = 0;
+    driver.readSteps();
   };
 };
 
@@ -83,7 +84,8 @@ TEST_F(EncoderDriverTest, carriesRemainderStepsIntoLaterReads) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, changeResetsDebounce_evenWhenPreviousDebounceWouldHaveElapsed) {
+TEST_F(EncoderDriverTest,
+       changeResetsDebounce_evenWhenPreviousDebounceWouldHaveElapsed) {
   //{{{
   testEncoder.position = 4;
   advanceMillis(debounceConfig::encoder);
@@ -94,19 +96,17 @@ TEST_F(EncoderDriverTest, changeResetsDebounce_evenWhenPreviousDebounceWouldHave
   EXPECT_EQ(driver.readSteps(), 1);
 
   // Debounce seit letzter Positionsänderung ist noch nicht vorbei.
-  testEncoder.position = 8; 
-  EXPECT_EQ(driver.readSteps(), 0); 
+  testEncoder.position = 8;
+  EXPECT_EQ(driver.readSteps(), 0);
 
   advanceMillis(debounceConfig::encoder / 2);
-  EXPECT_EQ(driver.readSteps(), 0); 
+  EXPECT_EQ(driver.readSteps(), 0);
 
   // Die Änderung auf Position 8 setzt den Debounce-Timer neu.
-  advanceMillis(debounceConfig::encoder / 2); 
-  EXPECT_EQ(driver.readSteps(), 1); 
-  
+  advanceMillis(debounceConfig::encoder / 2);
+  EXPECT_EQ(driver.readSteps(), 1);
 };
 //}}}
-
 
 TEST_F(EncoderDriverTest, repeatedReadsStillWaitUntilDebounceAfterChange) {
   //{{{
@@ -119,16 +119,16 @@ TEST_F(EncoderDriverTest, repeatedReadsStillWaitUntilDebounceAfterChange) {
   EXPECT_EQ(driver.readSteps(), 1);
 
   // Debounce seit letzter Positionsänderung ist noch nicht vorbei.
-  testEncoder.position = 8; 
+  testEncoder.position = 8;
   advanceMillis(debounceConfig::encoder / 2);
-  EXPECT_EQ(driver.readSteps(), 0); 
+  EXPECT_EQ(driver.readSteps(), 0);
 
   // Auch wenn die frühere Ruhephase (bei Position 4) abgelaufen wäre:
   // Die neue Änderung auf Position 8 hat den Debounce neu gestartet.
-  advanceMillis(debounceConfig::encoder / 2); 
-  EXPECT_EQ(driver.readSteps(), 0); 
+  advanceMillis(debounceConfig::encoder / 2);
+  EXPECT_EQ(driver.readSteps(), 0);
 
-  advanceMillis(debounceConfig::encoder / 2); 
+  advanceMillis(debounceConfig::encoder / 2);
   EXPECT_EQ(driver.readSteps(), 1);
 };
 //}}}
@@ -150,9 +150,8 @@ TEST_F(EncoderDriverTest, returnsStepExactlyAtDebounceBoundary) {
 TEST_F(EncoderDriverTest, accumulatesMultipleFullStepsAfterQuietPeriod) {
   //{{{
   testEncoder.position = 12;
-  driver.readSteps();
+  EXPECT_EQ(driver.readSteps(), 0);
 
-  testEncoder.position = 12;
   advanceMillis(debounceConfig::encoder);
   EXPECT_EQ(driver.readSteps(), 3);
 };
@@ -161,14 +160,13 @@ TEST_F(EncoderDriverTest, accumulatesMultipleFullStepsAfterQuietPeriod) {
 TEST_F(EncoderDriverTest, handlesNegativeStepsAndRemainder) {
   //{{{
   testEncoder.position = -6;
-  driver.readSteps();
+  EXPECT_EQ(driver.readSteps(), 0);
 
-  testEncoder.position = -6;
   advanceMillis(debounceConfig::encoder);
   EXPECT_EQ(driver.readSteps(), -1);
 
   testEncoder.position = -8;
-  driver.readSteps();
+  EXPECT_EQ(driver.readSteps(), 0);
   advanceMillis(debounceConfig::encoder);
   EXPECT_EQ(driver.readSteps(), -1);
 };
@@ -177,13 +175,12 @@ TEST_F(EncoderDriverTest, handlesNegativeStepsAndRemainder) {
 TEST_F(EncoderDriverTest, noOutputWhenNoNewMovementEvenAfterManyReads) {
   //{{{
   testEncoder.position = 4;
-  driver.readSteps();
+  EXPECT_EQ(driver.readSteps(), 0);
 
-  testEncoder.position = 4;
   advanceMillis(debounceConfig::encoder);
   EXPECT_EQ(driver.readSteps(), 1);
 
-  for (int i = 0; i < 5; ++i) {
+  for (int i = 0; i < 20; ++i) {
     advanceMillis(debounceConfig::encoder);
     EXPECT_EQ(driver.readSteps(), 0);
   }
@@ -192,37 +189,34 @@ TEST_F(EncoderDriverTest, noOutputWhenNoNewMovementEvenAfterManyReads) {
 
 TEST_F(EncoderDriverTest, debounceResetsOnEveryIntermediateMovement) {
   //{{{
-  testEncoder.position = 1;
-  driver.readSteps();
-
-  advanceMillis(debounceConfig::encoder / 3);
-  testEncoder.position = 2;
+  testEncoder.position = 4;
   EXPECT_EQ(driver.readSteps(), 0);
 
   advanceMillis(debounceConfig::encoder / 3);
-  testEncoder.position = 3;
+  testEncoder.position = 5;
+  EXPECT_EQ(driver.readSteps(), 0);
+
+  advanceMillis(debounceConfig::encoder / 3);
+  testEncoder.position = 8;
   EXPECT_EQ(driver.readSteps(), 0);
 
   advanceMillis(debounceConfig::encoder / 3);
   EXPECT_EQ(driver.readSteps(), 0);
 
   advanceMillis(debounceConfig::encoder);
-  EXPECT_EQ(driver.readSteps(), 0);
+  EXPECT_EQ(driver.readSteps(), 2);
 
   testEncoder.position = 4;
-  driver.readSteps();
-  testEncoder.position = 4;
   advanceMillis(debounceConfig::encoder);
-  EXPECT_EQ(driver.readSteps(), 1);
+  EXPECT_EQ(driver.readSteps(), 0);
 };
 //}}}
 
-TEST_F(EncoderDriverTest, initCapturesInitialDeltaAndReturnsItAfterDebounce) {
+TEST_F(EncoderDriverTest, initCapturesInitialDelta) {
   //{{{
   testEncoder.position = 100;
   driver.init();
 
-  testEncoder.position = 100;
   advanceMillis(debounceConfig::encoder);
   EXPECT_EQ(driver.readSteps(), 0);
 };
@@ -233,7 +227,6 @@ TEST_F(EncoderDriverTest, largeJumpTranslatesToExpectedStepCount) {
   testEncoder.position = 400;
   driver.readSteps();
 
-  testEncoder.position = 400;
   advanceMillis(debounceConfig::encoder);
   EXPECT_EQ(driver.readSteps(), 100);
 };
@@ -241,7 +234,7 @@ TEST_F(EncoderDriverTest, largeJumpTranslatesToExpectedStepCount) {
 
 TEST_F(EncoderDriverTest, backAndForthMovementCancelsDelta) {
   //{{{
-  testEncoder.position = 2;
+  testEncoder.position = 4;
   driver.readSteps();
 
   testEncoder.position = 0;
