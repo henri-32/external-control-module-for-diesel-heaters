@@ -2,4 +2,4 @@
 
 void TestDisplay::init() { m_init_called = true; }
 
-int TestEncoderHardware::read() { return position }
+int TestEncoderHardware::read() { return position; }
