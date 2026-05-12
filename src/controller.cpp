@@ -1,7 +1,7 @@
 #include "controller.h"
 #include "config.h"
 
-SystemController::SystemController(InputDevices &i, OutputDevices &o)
+SystemController::SystemController(IInputDevices &i, IOutputDevices &o)
     : inputDevices(i), outputDevices(o) {}
 
 void SystemController::operator()() {

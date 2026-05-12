@@ -4,7 +4,7 @@ InputDevices::InputDevices(InputDevicesDataSet &inputData, IToggleSwitch &ps,
                            IToggleSwitch &ms, IPushButton &pb,
                            IEncoderDriver &encoderDriver,
                            ITempSensorDriver &tempSensorDriver)
-    : data(inputData), m_powerSwitch(ps), m_modeSwitch(ms),
+    : IInputDevices(inputData), m_powerSwitch(ps), m_modeSwitch(ms),
       m_displayButton(pb), m_encoderDriver(encoderDriver),
       m_tempSensorDriver(tempSensorDriver) {}
 
@@ -27,7 +27,7 @@ void InputDevices::update() {
 
 OutputDevices::OutputDevices(OutputDevicesIntent &outputIntent,
                              IDisplayDriver &displayDriver, IRelais &relais)
-    : intent(outputIntent), m_relais(relais),
+    :IOutputDevices(outputIntent), m_relais(relais),
       m_displayDriver(displayDriver) {}
 
 void OutputDevices::init() {

@@ -10,7 +10,7 @@
 
 class SystemController {
 public:
-  SystemController(InputDevices &i, OutputDevices &o);
+  SystemController(IInputDevices &i, IOutputDevices &o);
   void operator()();
   void init();
 
@@ -40,9 +40,9 @@ private:
   void cyclePages();
   void requestRelaisCommand(OutputDevicesIntent::RelaisCommand command);
 
-  InputDevices &inputDevices;
+  IInputDevices &inputDevices;
   HeaterStatus heaterStatus;
-  OutputDevices &outputDevices;
+  IOutputDevices &outputDevices;
 
 #ifdef MEMORY_FUNCTIONS
   SystemStatistics systemStatistic;

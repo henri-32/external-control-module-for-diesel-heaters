@@ -3,17 +3,15 @@
 #include "interfaces.h"
 #include "types.h"
 
-class InputDevices {
+class InputDevices : public IInputDevices {
 public:
-  InputDevices(InputDevicesDataSet &inputData, IToggleSwitch &ps,
-               IToggleSwitch &ms,
-               IPushButton &db, IEncoderDriver &encoderDriver,
-               ITempSensorDriver &tempSensorDriver);
+  explicit InputDevices(InputDevicesDataSet &inputData, IToggleSwitch &ps,
+                        IToggleSwitch &ms, IPushButton &db,
+                        IEncoderDriver &encoderDriver,
+                        ITempSensorDriver &tempSensorDriver);
 
-  void init();
-  void update();
-
-  InputDevicesDataSet &data;
+  void init() override;
+  void update() override;
 
 private:
   IToggleSwitch &m_powerSwitch;
@@ -23,16 +21,13 @@ private:
   ITempSensorDriver &m_tempSensorDriver;
 };
 
-class OutputDevices {
+class OutputDevices : public IOutputDevices {
 public:
   OutputDevices(OutputDevicesIntent &outputIntent,
-                IDisplayDriver &displayDriver,
-                IRelais &relais);
+                IDisplayDriver &displayDriver, IRelais &relais);
 
-  void init();
-  void update();
-
-  OutputDevicesIntent &intent;
+  void init() override;
+  void update() override;
 
 private:
   IRelais &m_relais;
