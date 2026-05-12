@@ -4,5 +4,5 @@ void TestDisplay::init() {
 m_init_called = true;}
 
 int TestEncoderHardware::read() {
-  return nextTestRead; 
+  return position; 
 }

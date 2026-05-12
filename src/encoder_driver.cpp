@@ -10,9 +10,16 @@
 EncoderDriver::EncoderDriver(IEncoderHardware &encoderHardware)
     : m_encoderHardware(encoderHardware) {}
 
+void EncoderDriver::init() {
+  m_prev = m_encoderHardware.read(); 
+  m_current = m_prev; 
+  m_delta = 0; 
+  m_last_change_ms = millis();  
+};
+
 int EncoderDriver::readSteps() {
   poll();
-  return translateStepsToInput();
+  return translatePositionToInput();
 }
 
 void EncoderDriver::poll() {
@@ -25,7 +32,7 @@ void EncoderDriver::poll() {
   m_prev = m_current;
 }
 
-int EncoderDriver::translateStepsToInput() {
+int EncoderDriver::translatePositionToInput() {
   if (millis() - m_last_change_ms < debounceConfig::encoder)
     return 0;
   int steps = m_delta / 4; // Wird auf ganze Schritte runtergebrochen und rest

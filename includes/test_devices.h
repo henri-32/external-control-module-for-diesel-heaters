@@ -45,7 +45,7 @@ class TestEncoderHardware : public IEncoderHardware {
 public:
   int read() override;
 
-  int nextTestRead = 0;
+  int position = 0;
 };
 
 class TestToggleSwitch : public IToggleSwitch {

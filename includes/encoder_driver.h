@@ -5,12 +5,12 @@ class EncoderDriver : public IEncoderDriver {
 public:
   explicit EncoderDriver(IEncoderHardware &encoderHardware);
 
-  void init() override { poll(); }
+  void init() override; 
   int readSteps() override;
 
 private:
   void poll();
-  int translateStepsToInput();
+  int translatePositionToInput();
 
   long m_current = 0;
   long m_prev = 0;

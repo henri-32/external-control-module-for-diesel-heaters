@@ -69,5 +69,6 @@ if return_code != 0:
         close_fds=True)
 
     raise RuntimeError("Gtest Run failed with code {}".format(return_code))
+
 else: 
     print("All tests green")
