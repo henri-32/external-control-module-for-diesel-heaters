@@ -29,14 +29,14 @@ protected:
   };
 };
 
-TEST_F(EncoderDriverTest, returnsZero_whenHardwarePositionIsZero) {
+TEST_F(EncoderDriverTest, returns_zero_when_hardware_position_is_zero) {
   //{{{
   testEncoder.position = 0;
   EXPECT_EQ(driver.readSteps(), 0);
 };
 //}}}
 
-TEST_F(EncoderDriverTest, returnsZero_withinDebounceInterval) {
+TEST_F(EncoderDriverTest, returns_zero_within_debounce_interval) {
   //{{{
   // Innerhalb Debounce
   testEncoder.position = 4;
@@ -49,7 +49,7 @@ TEST_F(EncoderDriverTest, returnsZero_withinDebounceInterval) {
 }
 //}}}
 
-TEST_F(EncoderDriverTest, returnsOneStep_afterDebounceWithStablePosition) {
+TEST_F(EncoderDriverTest, returns_one_step_after_debounce_with_stable_position) {
   //{{{
   // Erstes Polling erkennt 0 -> 4, speichert Delta und startet Debounce.
   // Daher hier noch keine Schritt-Ausgabe.
@@ -64,7 +64,7 @@ TEST_F(EncoderDriverTest, returnsOneStep_afterDebounceWithStablePosition) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, carriesRemainderStepsIntoLaterReads) {
+TEST_F(EncoderDriverTest, carries_remainder_steps_into_later_reads) {
   //{{{
 
   testEncoder.position = 6;
@@ -85,7 +85,7 @@ TEST_F(EncoderDriverTest, carriesRemainderStepsIntoLaterReads) {
 //}}}
 
 TEST_F(EncoderDriverTest,
-       changeResetsDebounce_evenWhenPreviousDebounceWouldHaveElapsed) {
+       change_resets_debounce_even_when_previous_debounce_would_have_elapsed) {
   //{{{
   testEncoder.position = 4;
   advanceMillis(debounceConfig::encoder);
@@ -108,7 +108,7 @@ TEST_F(EncoderDriverTest,
 };
 //}}}
 
-TEST_F(EncoderDriverTest, repeatedReadsStillWaitUntilDebounceAfterChange) {
+TEST_F(EncoderDriverTest, repeated_reads_still_wait_until_debounce_after_change) {
   //{{{
   testEncoder.position = 4;
   advanceMillis(debounceConfig::encoder);
@@ -133,7 +133,7 @@ TEST_F(EncoderDriverTest, repeatedReadsStillWaitUntilDebounceAfterChange) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, returnsStepExactlyAtDebounceBoundary) {
+TEST_F(EncoderDriverTest, returns_step_exactly_at_debounce_boundary) {
   //{{{
   testEncoder.position = 4;
   driver.readSteps();
@@ -147,7 +147,7 @@ TEST_F(EncoderDriverTest, returnsStepExactlyAtDebounceBoundary) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, accumulatesMultipleFullStepsAfterQuietPeriod) {
+TEST_F(EncoderDriverTest, accumulates_multiple_full_steps_after_quiet_period) {
   //{{{
   testEncoder.position = 12;
   EXPECT_EQ(driver.readSteps(), 0);
@@ -157,7 +157,7 @@ TEST_F(EncoderDriverTest, accumulatesMultipleFullStepsAfterQuietPeriod) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, handlesNegativeStepsAndRemainder) {
+TEST_F(EncoderDriverTest, handles_negative_steps_and_remainder) {
   //{{{
   testEncoder.position = -6;
   EXPECT_EQ(driver.readSteps(), 0);
@@ -172,7 +172,7 @@ TEST_F(EncoderDriverTest, handlesNegativeStepsAndRemainder) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, noOutputWhenNoNewMovementEvenAfterManyReads) {
+TEST_F(EncoderDriverTest, no_output_when_no_new_movement_even_after_many_reads) {
   //{{{
   testEncoder.position = 4;
   EXPECT_EQ(driver.readSteps(), 0);
@@ -187,7 +187,7 @@ TEST_F(EncoderDriverTest, noOutputWhenNoNewMovementEvenAfterManyReads) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, debounceResetsOnEveryIntermediateMovement) {
+TEST_F(EncoderDriverTest, debounce_resets_on_every_intermediate_movement) {
   //{{{
   testEncoder.position = 4;
   EXPECT_EQ(driver.readSteps(), 0);
@@ -212,7 +212,7 @@ TEST_F(EncoderDriverTest, debounceResetsOnEveryIntermediateMovement) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, initCapturesInitialDelta) {
+TEST_F(EncoderDriverTest, init_captures_initial_delta) {
   //{{{
   testEncoder.position = 100;
   driver.init();
@@ -222,7 +222,7 @@ TEST_F(EncoderDriverTest, initCapturesInitialDelta) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, largeJumpTranslatesToExpectedStepCount) {
+TEST_F(EncoderDriverTest, large_jump_translates_to_expected_step_count) {
   //{{{
   testEncoder.position = 400;
   driver.readSteps();
@@ -232,7 +232,7 @@ TEST_F(EncoderDriverTest, largeJumpTranslatesToExpectedStepCount) {
 };
 //}}}
 
-TEST_F(EncoderDriverTest, backAndForthMovementCancelsDelta) {
+TEST_F(EncoderDriverTest, back_and_forth_movement_cancels_delta) {
   //{{{
   testEncoder.position = 4;
   driver.readSteps();

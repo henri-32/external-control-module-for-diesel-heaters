@@ -92,9 +92,13 @@ class TestTemperatureSensorHardware : public ITempSensorHardware {
 public:
   TestTemperatureSensorHardware() = default;
   void begin() override{};
-  void requestTemperatures() override{};
+  void requestTemperatures() override;
   float getTempCByIndex(uint8_t index = 0) override;
   void setTempReturn(float temp);
+  void resetTestCounter();
+
+  uint8_t requestTemperaturesCount = 0;
+  uint8_t getTempCByIndexCount = 0;
 
 private:
   float m_tempReturn = 0;
