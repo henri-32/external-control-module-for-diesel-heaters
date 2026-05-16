@@ -10,21 +10,21 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 class TestInputDevices : public IInputDevices {
-//{{{
-  void init() override; 
-  void update() override; 
-}; 
+  //{{{
+  void init() override;
+  void update() override;
+};
 //}}}
 
 class TestOutputDevices : public IOutputDevices {
-//{{{
-  void init() override; 
-  void update() override; 
+  //{{{
+  void init() override;
+  void update() override;
 };
 //}}}
 
 class TestDisplay : public IDisplay {
-//{{{
+  //{{{
 public:
   void clear() override { ++clear_calls; };
   void noDisplay() override { ++no_display_calls; };
@@ -52,7 +52,7 @@ public:
 //}}}
 
 class TestRelais : public IRelais {
-//{{{
+  //{{{
 public:
   void init() override{};
   void update(OutputDevicesIntent::RelaisCommand intent) override{};
@@ -60,7 +60,7 @@ public:
 //}}}
 
 class TestEncoderHardware : public IEncoderHardware {
-//{{{
+  //{{{
 public:
   int read() override;
 
@@ -69,7 +69,7 @@ public:
 //}}}
 
 class TestToggleSwitch : public IToggleSwitch {
-//{{{
+  //{{{
 public:
   TestToggleSwitch() = default;
   void init() override{};
@@ -78,7 +78,7 @@ public:
 //}}}
 
 class TestPushButton : public IPushButton {
-//{{{
+  //{{{
 public:
   TestPushButton() = default;
   void init() override{};
@@ -88,12 +88,16 @@ public:
 //}}}
 
 class TestTemperatureSensorHardware : public ITempSensorHardware {
-//{{{
+  //{{{
 public:
   TestTemperatureSensorHardware() = default;
   void begin() override{};
   void requestTemperatures() override{};
-  float getTempCByIndex(uint8_t index) override { return 10.0; };
+  float getTempCByIndex(uint8_t index) override;
+  void setTempReturn(float temp);
+
+private:
+  float m_tempReturn = 0;
 };
 //}}}
 

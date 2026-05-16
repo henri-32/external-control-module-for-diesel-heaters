@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 #include "interfaces.h"
 
 class TemperatureSensorDriver : public ITempSensorDriver {
@@ -16,7 +16,11 @@ private:
 
   unsigned long m_last_temp_request = 0;
   bool m_tempRequestPending = false;
-  static constexpr unsigned long m_request_intervall_ms = 2000;
+  static constexpr unsigned long m_request_intervall_ms =
+      config::temperatureRequestInterval;
+
+  // Hardcoded, because it's no config value, but a DS18B20 Hardware
+  // related timespan
   static constexpr unsigned long m_conversion_time_ms = 750;
-  float m_temp_c;
+  float m_temp_c = config::defaultTemp;
 };

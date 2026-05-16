@@ -115,6 +115,7 @@ TEST_CPP_SRCS := \
 	tests/display_unit_tests.cpp \
 	tests/relais_unit_tests.cpp \
 	tests/encoder_driver_unit_test.cpp \
+	tests/temperature_sensor_unit_test.cpp \
 	tests/test_devices.cpp \
 	tests/ArduinoStubs.cpp \
 	src/controller.cpp \
