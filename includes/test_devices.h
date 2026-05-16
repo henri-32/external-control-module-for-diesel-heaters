@@ -93,7 +93,7 @@ public:
   TestTemperatureSensorHardware() = default;
   void begin() override{};
   void requestTemperatures() override{};
-  float getTempCByIndex(uint8_t index) override;
+  float getTempCByIndex(uint8_t index = 0) override;
   void setTempReturn(float temp);
 
 private:

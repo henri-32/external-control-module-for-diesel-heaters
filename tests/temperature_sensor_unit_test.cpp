@@ -18,10 +18,11 @@ protected:
 
 TEST_F(TemperatureDriverTest, request_of_hardware_returns_correctly) {
   testSensor.setTempReturn(10.0);
-  EXPECT_EQ(testSensor.getTempCByIndex(0), 10.0);
+  EXPECT_EQ(testSensor.getTempCByIndex(), 10.0);
   
-  driver.pollTemp();  
-  advanceMillis(2000); 
+  advanceMillis(config::temperatureRequestInterval); 
+  driver.pollTemp(); 
+  advanceMillis(config::temperatureRequestInterval); 
 
   EXPECT_EQ(driver.pollTemp(), 10.0);
 }
