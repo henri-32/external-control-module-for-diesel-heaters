@@ -13,10 +13,13 @@ protected:
   void SetUp() override {
     setMillis(config::temperatureRequestInterval);
     initSpies();
+    testSensor.setTempReturn(10.0);
   }
 };
 
-TEST_F(TemperatureDriverTest, returns_hardware_request_value_when_interval_elapsed) {
+TEST_F(TemperatureDriverTest,
+       returns_hardware_request_value_when_interval_elapsed) {
+  //{{{
   testSensor.setTempReturn(10.0);
   EXPECT_EQ(testSensor.getTempCByIndex(), 10.0);
 
@@ -25,23 +28,68 @@ TEST_F(TemperatureDriverTest, returns_hardware_request_value_when_interval_elaps
 
   EXPECT_EQ(driver.pollTemp(), 10.0);
 }
+//}}}
 
-TEST_F(TemperatureDriverTest, returns_previous_value_when_guard_interval_active) {
+TEST_F(TemperatureDriverTest,
+       returns_previous_value_when_guard_interval_active) {
+  //{{{
   testSensor.setTempReturn(10.0);
   driver.pollTemp();
   advanceMillis(config::temperatureRequestInterval);
   driver.pollTemp();
+  advanceMillis(config::temperatureRequestInterval - 1);
 
   testSensor.setTempReturn(20.0);
   EXPECT_EQ(driver.pollTemp(), 10.0);
 }
+//}}}
+
+TEST_F(TemperatureDriverTest,
+       returns_correct_value_when_guard_interval_passed_exactly) {
+  //{{{
+  testSensor.setTempReturn(10.0);
+  driver.pollTemp();
+  advanceMillis(config::temperatureRequestInterval);
+  EXPECT_EQ(driver.pollTemp(), 10.0);
+
+  advanceMillis(config::temperatureRequestInterval);
+  testSensor.setTempReturn(20.0);
+  driver.pollTemp();
+  advanceMillis(config::temperatureRequestInterval);
+  EXPECT_EQ(driver.pollTemp(), 20.0);
+}
+//}}}
 
 TEST_F(TemperatureDriverTest,
        calls_request_but_not_read_when_conversion_time_not_elapsed) {
+  //{{{
   driver.pollTemp();
-  advanceMillis(700);
+  advanceMillis(749);
   driver.pollTemp();
 
   EXPECT_EQ(testSensor.requestTemperaturesCount, 1);
   EXPECT_EQ(testSensor.getTempCByIndexCount, 0);
 }
+//}}}
+
+TEST_F(TemperatureDriverTest, correct_read_on_conversion_time) {
+  //{{{
+  driver.pollTemp();
+  advanceMillis(750);
+  driver.pollTemp();
+
+  EXPECT_EQ(testSensor.requestTemperaturesCount, 1);
+  EXPECT_EQ(testSensor.getTempCByIndexCount, 1);
+}
+//}}}
+
+TEST_F(TemperatureDriverTest, no_double_requests_while_request_pending) {
+  //{{{
+  driver.pollTemp();
+  advanceMillis(config::temperatureRequestInterval);
+  driver.pollTemp();
+  advanceMillis(10);
+  driver.pollTemp();
+  EXPECT_EQ(testSensor.requestTemperaturesCount, 2);
+}
+//}}}
