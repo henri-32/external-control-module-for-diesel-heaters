@@ -5,6 +5,10 @@ Steuerungssoftware bleibt unangetastet, nur der vorhandene An/Aus-Eingang wird
 über ein Relais betätigt. Damit wird temperaturabhängiges vollständiges
 Ein-/Ausschalten ermöglicht.
 
+<p align="center"> 
+  <img src=images/assembledController.jpeg" width="500"
+</p>
+
 ## Projekt
 
 ### Anforderungsbeschreibung
