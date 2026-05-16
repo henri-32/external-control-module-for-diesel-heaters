@@ -6,7 +6,7 @@ Steuerungssoftware bleibt unangetastet, nur der vorhandene An/Aus-Eingang wird
 Ein-/Ausschalten ermöglicht.
 
 <p align="center"> 
-  <img src="images/assembledController.jpeg" width="500" height="1000">
+  <img src="images/assembledController.jpeg" width="300" height="600">
 </p>
 
 ## Projekt
