@@ -7,7 +7,7 @@
 #include "temperature_sensor_driver.h"
 #include <gtest/gtest.h>
 
-class SystemControllerTest : public ::testing::Test {
+class SystemControllerUnitTest : public ::testing::Test {
 protected:
   // Backing storage for device groups
   InputDevicesDataSet inputDataBuffer;
@@ -43,7 +43,7 @@ protected:
 
 // Handling of Power Switch Input
 //{{{
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_with_alternator_off_to_on_no_relay_action) {
   //{{{
   using State = HeaterStatus::HeatingState;
@@ -61,7 +61,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_with_alternator_on_to_off_no_relay_action) {
   //{{{
   using State = HeaterStatus::HeatingState;
@@ -82,7 +82,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_with_alternator_unrelated_input_ignored) {
   //{{{
   using State = HeaterStatus::HeatingState;
@@ -106,7 +106,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_with_alternator_unrelated_input_ignored_on_to_off) {
   //{{{
   using State = HeaterStatus::HeatingState;
@@ -132,7 +132,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_without_alternator_off_and_relay_action) {
   //{{{
   using State = HeaterStatus::HeatingState;
@@ -167,7 +167,7 @@ TEST_F(SystemControllerTest,
 
 // Handling of Mode Switch Input
 //{{{
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_mode_switch_input_path_witch_alternator_power_to_temp_no_relay_action) {
   //{{{
   inputData.switchAction.mode = true;
@@ -182,7 +182,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_mode_switch_input_path_with_alternator_temp_to_power_no_relay_action) {
   //{{{
   inputData.switchAction.mode = true;
@@ -197,7 +197,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_mode_switch_input_path_without_alternator_temp_to_power) {
   //{{{
   inputData.switchAction.mode = true;
@@ -217,7 +217,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_mode_switch_input_path_without_alternator_power_to_temp) {
   //{{{
   inputData.switchAction.mode = true;
@@ -238,7 +238,7 @@ TEST_F(SystemControllerTest,
 //}}}
 
 TEST_F(
-    SystemControllerTest,
+    SystemControllerUnitTest,
     apply_mode_switch_input_path_without_alternator_power_to_temp_unrelated_input_ignored) {
   //{{{
   inputData.switchAction.mode = true;
@@ -269,7 +269,7 @@ TEST_F(
 
 // Handling of Display Button
 //{{{
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_display_button_input_no_action_without_alternator) {
   //{{{
   inputData.alternator.released = true;
@@ -286,7 +286,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_display_button_input_output_intent_sets) {
+TEST_F(SystemControllerUnitTest, apply_display_button_input_output_intent_sets) {
   //{{{
   inputData.alternator.pressed = false;
   inputData.alternator.used = false;
@@ -308,7 +308,7 @@ TEST_F(SystemControllerTest, apply_display_button_input_output_intent_sets) {
 
 // Handling of Encoder Input
 //{{{
-TEST_F(SystemControllerTest, apply_encoder_input_min_step) {
+TEST_F(SystemControllerUnitTest, apply_encoder_input_min_step) {
   //{{{
   using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
   using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
@@ -349,7 +349,7 @@ TEST_F(SystemControllerTest, apply_encoder_input_min_step) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_encoder_input_max_step) {
+TEST_F(SystemControllerUnitTest, apply_encoder_input_max_step) {
   //{{{
   using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
   using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
@@ -391,7 +391,7 @@ TEST_F(SystemControllerTest, apply_encoder_input_max_step) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_encoder_input_negative_max_step) {
+TEST_F(SystemControllerUnitTest, apply_encoder_input_negative_max_step) {
   //{{{
   using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
   using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
@@ -433,7 +433,7 @@ TEST_F(SystemControllerTest, apply_encoder_input_negative_max_step) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_encoder_input_negative_min_step) {
+TEST_F(SystemControllerUnitTest, apply_encoder_input_negative_min_step) {
   //{{{
   /*Sollte beim Debuggen hier ein Problem auftauchen
    *siehe Zeile 250 */
@@ -476,7 +476,7 @@ TEST_F(SystemControllerTest, apply_encoder_input_negative_min_step) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_encoder_input_min_step_without_alternator) {
+TEST_F(SystemControllerUnitTest, apply_encoder_input_min_step_without_alternator) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = 1;
@@ -489,7 +489,7 @@ TEST_F(SystemControllerTest, apply_encoder_input_min_step_without_alternator) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_encoder_input_max_step_without_alternator) {
+TEST_F(SystemControllerUnitTest, apply_encoder_input_max_step_without_alternator) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = config::encoderValCutoff;
@@ -502,7 +502,7 @@ TEST_F(SystemControllerTest, apply_encoder_input_max_step_without_alternator) {
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_encoder_input_max_step_without_alternator_over_guard) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
@@ -516,7 +516,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_encoder_input_negative_max_step_without_alternator_below_guard) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
@@ -530,7 +530,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_encoder_input_negative_min_step_without_alternator) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
@@ -544,7 +544,7 @@ TEST_F(SystemControllerTest,
 }
 //}}}
 
-TEST_F(SystemControllerTest,
+TEST_F(SystemControllerUnitTest,
        apply_encoder_input_negative_max_step_without_alternator) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
@@ -562,7 +562,7 @@ TEST_F(SystemControllerTest,
 // HELPER
 //  applyHeatingLogic
 //{{{
-TEST_F(SystemControllerTest, apply_heating_logic_too_cold_and_state_off) {
+TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_off) {
   //{{{
   using State = HeaterStatus::HeatingState;
   State &m_state = controller.heaterStatus.state;
@@ -579,7 +579,7 @@ TEST_F(SystemControllerTest, apply_heating_logic_too_cold_and_state_off) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_heating_logic_too_cold_and_state_on) {
+TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_on) {
   //{{{
   using State = HeaterStatus::HeatingState;
   State &m_state = controller.heaterStatus.state;
@@ -594,7 +594,7 @@ TEST_F(SystemControllerTest, apply_heating_logic_too_cold_and_state_on) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_heating_logic_too_warm_and_state_on) {
+TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_on) {
   //{{{
   using State = HeaterStatus::HeatingState;
   State &m_state = controller.heaterStatus.state;
@@ -611,7 +611,7 @@ TEST_F(SystemControllerTest, apply_heating_logic_too_warm_and_state_on) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_heating_logic_too_warm_and_state_off) {
+TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_off) {
   //{{{
   using State = HeaterStatus::HeatingState;
   State &m_state = controller.heaterStatus.state;
@@ -626,7 +626,7 @@ TEST_F(SystemControllerTest, apply_heating_logic_too_warm_and_state_off) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, apply_heating_logic_early_return_by_wrong_mode) {
+TEST_F(SystemControllerUnitTest, apply_heating_logic_early_return_by_wrong_mode) {
   //{{{
   using State = HeaterStatus::HeatingState;
   State &m_state = controller.heaterStatus.state;
@@ -646,7 +646,7 @@ TEST_F(SystemControllerTest, apply_heating_logic_early_return_by_wrong_mode) {
 
 // cyclePages
 //{{{
-TEST_F(SystemControllerTest, cycle_pages_intent_reacts_to_cycling_right) {
+TEST_F(SystemControllerUnitTest, cycle_pages_intent_reacts_to_cycling_right) {
   //{{{
   using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
   using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
@@ -670,7 +670,7 @@ TEST_F(SystemControllerTest, cycle_pages_intent_reacts_to_cycling_right) {
 }
 //}}}
 
-TEST_F(SystemControllerTest, cycle_pages_intent_reacts_to_cycling_left) {
+TEST_F(SystemControllerUnitTest, cycle_pages_intent_reacts_to_cycling_left) {
   //{{{
   using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
   using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;

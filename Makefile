@@ -66,7 +66,9 @@ TEST_INCLUDES := \
 	-Iincludes
 
 TEST_CPPFLAGS := -DTEST_BUILD
-TEST_CXXFLAGS := -std=c++20 -Wall -Wextra -pthread -g -MMD -MP
+TEST_CXXFLAGS := -std=c++20 -Wall -Wextra -pthread -g -MMD -MP -fsanitize=address,undefined -g
+
+
 
 AVR_C_SRCS := \
 	$(LIBRARIES)/ArduinoCore-avr/cores/arduino/wiring.c \
@@ -117,6 +119,7 @@ TEST_CPP_SRCS := \
 	tests/encoder_driver_unit_test.cpp \
 	tests/temperature_sensor_unit_test.cpp \
 	tests/test_devices.cpp \
+	tests/systemcontroller_integration_test.cpp \
 	tests/ArduinoStubs.cpp \
 	src/controller.cpp \
 	src/devicegroups.cpp \

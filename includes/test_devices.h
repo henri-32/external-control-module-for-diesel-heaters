@@ -10,16 +10,21 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 class TestInputDevices : public IInputDevices {
+public:
+  TestInputDevices(InputDevicesDataSet &inputData) : IInputDevices(inputData) {}
   //{{{
-  void init() override;
-  void update() override;
+  void init() override{};
+  void update() override{};
 };
 //}}}
 
 class TestOutputDevices : public IOutputDevices {
   //{{{
-  void init() override;
-  void update() override;
+public:
+  TestOutputDevices(OutputDevicesIntent &outputIntent)
+      : IOutputDevices(outputIntent) {}
+  void init() override{};
+  void update() override{};
 };
 //}}}
 
