@@ -72,7 +72,7 @@ public:
   void init() override{};
   void update(OutputDevicesIntent::RelaisCommand intent) override;
 
-  OutputDevicesIntent::RelaisCommand returnLastRecievedCommand();
+  OutputDevicesIntent::RelaisCommand recievedCommand();
 
 private:
   OutputDevicesIntent::RelaisCommand lastCommand;

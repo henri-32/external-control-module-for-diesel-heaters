@@ -18,8 +18,8 @@ void SystemController::operator()() {
 }
 
 void SystemController::init() {
-  outputDevices.init();
   inputDevices.init();
+  outputDevices.init();
 }
 
 void SystemController::applyInputdata() {
