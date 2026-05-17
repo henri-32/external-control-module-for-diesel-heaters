@@ -102,7 +102,7 @@ class TestPushButton : public IPushButton {
 public:
   TestPushButton() = default;
   void init() override{};
-  bool isDown() const override { return false; };
+  bool pressed() const override { return false; };
   bool released() override { return false; };
 };
 //}}}

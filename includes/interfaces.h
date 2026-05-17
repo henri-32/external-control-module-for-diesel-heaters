@@ -110,7 +110,7 @@ protected:
 class IPushButton : public IDriver {
   //{{{
 public:
-  virtual bool isDown() const = 0;
+  virtual bool pressed() const = 0;
   virtual bool released() = 0;
 
 protected:

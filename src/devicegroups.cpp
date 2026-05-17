@@ -17,7 +17,7 @@ void InputDevices::init() {
 }
 
 void InputDevices::update() {
-  data.alternator.pressed = m_displayButton.isDown();
+  data.alternator.pressed = m_displayButton.pressed();
   data.switchAction.power = m_powerSwitch.changed();
   data.switchAction.mode = m_modeSwitch.changed();
   data.alternator.released = m_displayButton.released();

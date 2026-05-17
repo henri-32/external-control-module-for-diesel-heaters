@@ -12,7 +12,7 @@ public:
   explicit PushButton(uint8_t pin);
 
   void init() override;
-  bool isDown() const override { return m_stable == LOW; }
+  bool pressed() const override { return m_stable == LOW; }
   bool released() override;
 
 private:

@@ -13,14 +13,15 @@
 // this way is prefered over loosing the encapsulation
 // of the controller state.
 
-//Because the switchActions do'nt get consumed in the tick, but instead
-//are constantly read from the hardware they need to be set explixit for
-//these isolatet tests. 
+// Because the switchActions do'nt get consumed in the tick, but instead
+// are constantly read from the hardware they need to be set explixit for
+// these isolatet tests.
 
 using namespace ArduinoStubSpies;
 using RelaisCmd = OutputDevicesIntent::RelaisCommand;
 
 TEST(InitTests, controllerinit) {
+  //{{{
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;
   TestRelais relais;
@@ -40,8 +41,10 @@ TEST(InitTests, controllerinit) {
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
             Config::defaultTemp);
 }
+//}}}
 
 class SystemControllerBlackBox : public ::testing::Test {
+  //{{{
 protected:
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;
@@ -69,6 +72,7 @@ protected:
     controller();
   };
 };
+//}}}
 
 TEST_F(
     SystemControllerBlackBox,
@@ -106,17 +110,110 @@ TEST_F(
   //{{{
   EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::TEMP);
   inputData.switchAction.mode = true;
-  
-  controller(); 
+
+  controller();
 
   EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
   EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Short);
 
-  inputData.switchAction.mode = true; 
-  
-  controller(); 
+  inputData.switchAction.mode = true;
 
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::TEMP); 
+  controller();
+
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::TEMP);
   EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Short);
+}
+//}}}
+
+TEST_F(
+    SystemControllerBlackBox,
+    power_switch_changes_mode_from_temp_to_power_but_not_from_power_to_temp) {
+  //{{{
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::TEMP);
+  inputData.switchAction.power = true;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
+  inputData.switchAction.power = true;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
+}
+//}}}
+
+TEST_F(SystemControllerBlackBox, encoder_steps_change_target_temp) {
+  //{{{
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
+            Config::defaultTemp);
+
+  inputData.encoder_val = 1;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
+            Config::defaultTemp + Config::tempStep);
+}
+//}}}
+
+TEST_F(SystemControllerBlackBox, encoder_negative_steps_change_target_temp) {
+  //{{{
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
+            Config::defaultTemp);
+
+  inputData.encoder_val = -1;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
+            Config::defaultTemp - Config::tempStep);
+}
+//}}}
+
+TEST_F(SystemControllerBlackBox, display_button_turns_display_on_and_off) {
+  //{{{
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LCD_StateIntent::OFF);
+
+  inputData.alternator.used = false;
+  inputData.alternator.released = true;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LCD_StateIntent::Page1);
+
+  inputData.alternator.used = false;
+  inputData.alternator.released = true;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LCD_StateIntent::OFF);
+}
+//}}}
+
+TEST_F(SystemControllerBlackBox, encoder_and_alternator_cycle_pages_what_consumes_alternator) {
+  //{{{
+
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LCD_StateIntent::OFF);
+
+  inputData.alternator.used = false;
+  inputData.alternator.released = true;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LCD_StateIntent::Page1);
+
+  inputData.alternator.released = false;
+  inputData.alternator.pressed = true;
+  inputData.alternator.used = false;
+  inputData.encoder_val = 1;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LCD_StateIntent::Page2);
+  EXPECT_EQ(inputData.alternator.used, true);
 }
 //}}}
