@@ -354,7 +354,7 @@ TEST_F(SystemControllerUnitTest, apply_encoder_input_max_step) {
   using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
   using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
 
-  inputData.encoder_val = config::encoderValCutoff;
+  inputData.encoder_val = Config::encoderValCutoff;
   inputData.alternator.pressed = true;
   outputIntent.lcd_state = LCDIntent::OFF;
   outputIntent.lcd_cycleDirection = LCDDirection::none;
@@ -396,7 +396,7 @@ TEST_F(SystemControllerUnitTest, apply_encoder_input_negative_max_step) {
   using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
   using LCDDirection = OutputDevicesIntent::LCD_CycleDirection;
 
-  inputData.encoder_val = -config::encoderValCutoff;
+  inputData.encoder_val = -Config::encoderValCutoff;
   inputData.alternator.pressed = true;
   outputIntent.lcd_state = LCDIntent::OFF;
   outputIntent.lcd_cycleDirection = LCDDirection::none;
@@ -492,13 +492,13 @@ TEST_F(SystemControllerUnitTest, apply_encoder_input_min_step_without_alternator
 TEST_F(SystemControllerUnitTest, apply_encoder_input_max_step_without_alternator) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
-  inputData.encoder_val = config::encoderValCutoff;
+  inputData.encoder_val = Config::encoderValCutoff;
   inputData.alternator.pressed = false;
   target = 10.0;
 
   controller.applyEncoderInput();
 
-  EXPECT_EQ(target, 10 + config::encoderValCutoff * config::tempStep);
+  EXPECT_EQ(target, 10 + Config::encoderValCutoff * Config::tempStep);
 }
 //}}}
 
@@ -506,13 +506,13 @@ TEST_F(SystemControllerUnitTest,
        apply_encoder_input_max_step_without_alternator_over_guard) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
-  inputData.encoder_val = config::encoderValCutoff;
+  inputData.encoder_val = Config::encoderValCutoff;
   inputData.alternator.pressed = false;
-  target = config::tempMax - 1;
+  target = Config::tempMax - 1;
 
   controller.applyEncoderInput();
 
-  EXPECT_EQ(target, config::tempMax);
+  EXPECT_EQ(target, Config::tempMax);
 }
 //}}}
 
@@ -520,13 +520,13 @@ TEST_F(SystemControllerUnitTest,
        apply_encoder_input_negative_max_step_without_alternator_below_guard) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
-  inputData.encoder_val = -config::encoderValCutoff;
+  inputData.encoder_val = -Config::encoderValCutoff;
   inputData.alternator.pressed = false;
-  target = config::tempMin + 1;
+  target = Config::tempMin + 1;
 
   controller.applyEncoderInput();
 
-  EXPECT_EQ(target, config::tempMin);
+  EXPECT_EQ(target, Config::tempMin);
 }
 //}}}
 
@@ -548,13 +548,13 @@ TEST_F(SystemControllerUnitTest,
        apply_encoder_input_negative_max_step_without_alternator) {
   //{{{
   float &target = controller.heaterStatus.target_tempC;
-  inputData.encoder_val = -config::encoderValCutoff;
+  inputData.encoder_val = -Config::encoderValCutoff;
   inputData.alternator.pressed = false;
   target = 10.0;
 
   controller.applyEncoderInput();
 
-  EXPECT_EQ(target, 10 - config::encoderValCutoff * config::tempStep);
+  EXPECT_EQ(target, 10 - Config::encoderValCutoff * Config::tempStep);
 }
 //}}}
 //}}}
@@ -568,7 +568,7 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_off) {
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC + config::tolerance + 0.1;
+  controller.heaterStatus.target_tempC = inputData.sensor_tempC + Config::tolerance + 0.1;
   m_state = State::OFF;
 
   controller.applyHeatingLogic();
@@ -585,7 +585,7 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_on) {
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC + config::tolerance + 0.1;
+  controller.heaterStatus.target_tempC = inputData.sensor_tempC + Config::tolerance + 0.1;
   m_state = State::ON;
 
   controller.applyHeatingLogic();
@@ -600,7 +600,7 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_on) {
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC - config::tolerance - 0.1;
+  controller.heaterStatus.target_tempC = inputData.sensor_tempC - Config::tolerance - 0.1;
   m_state = State::ON;
 
   controller.applyHeatingLogic();
@@ -617,7 +617,7 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_off) {
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC - config::tolerance - 0.1;
+  controller.heaterStatus.target_tempC = inputData.sensor_tempC - Config::tolerance - 0.1;
   m_state = State::OFF;
 
   controller.applyHeatingLogic();
@@ -632,7 +632,7 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_early_return_by_wrong_mode)
   State &m_state = controller.heaterStatus.state;
   controller.heaterStatus.mode = HeaterStatus::Mode::POWER;
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC - config::tolerance - 0.1;
+  controller.heaterStatus.target_tempC = inputData.sensor_tempC - Config::tolerance - 0.1;
   m_state = State::ON;
 
   controller.applyHeatingLogic();

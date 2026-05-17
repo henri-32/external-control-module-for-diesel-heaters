@@ -152,22 +152,22 @@ void SystemController::applyEncoderInput() {
     return;
 
   if (inputDevices.data.alternator.pressed) {
-    if (val >= 1 && val <= config::encoderValCutoff) {
+    if (val >= 1 && val <= Config::encoderValCutoff) {
       outputDevices.intent.lcd_cycleDirection = LCDDirection::right;
       cyclePages();
       inputDevices.data.alternator.used = true;
       return;
     }
-    if (val <= -1 && val >= -config::encoderValCutoff) {
+    if (val <= -1 && val >= -Config::encoderValCutoff) {
       outputDevices.intent.lcd_cycleDirection = LCDDirection::left;
       cyclePages();
       inputDevices.data.alternator.used = true;
       return;
     }
   }
-  heaterStatus.target_tempC += val * config::tempStep; // encoderVal ist signed
+  heaterStatus.target_tempC += val * Config::tempStep; // encoderVal ist signed
 
-  // Limits to config.h struct limits
+  // Limits to Config.h struct limits
   clampTargetTempC(heaterStatus.target_tempC);
 }
 //}}}
@@ -181,7 +181,7 @@ void SystemController::applyHeatingLogic() {
     return;
 
   if (inputDevices.data.sensor_tempC <=
-          (heaterStatus.target_tempC - config::tolerance) &&
+          (heaterStatus.target_tempC - Config::tolerance) &&
       heaterStatus.state == State::OFF) {
 
     requestRelaisCommand(Command::Long);
@@ -189,7 +189,7 @@ void SystemController::applyHeatingLogic() {
     return;
   }
   if (inputDevices.data.sensor_tempC >=
-          (heaterStatus.target_tempC + config::tolerance) &&
+          (heaterStatus.target_tempC + Config::tolerance) &&
       heaterStatus.state == State::ON) {
 
     requestRelaisCommand(Command::Long);
@@ -229,10 +229,10 @@ void SystemController::updateMemory() {
 // =============Helper Functions
 void SystemController::clampTargetTempC(float &target) {
   //{{{
-  if (target > config::tempMax)
-    target = config::tempMax;
-  else if (target < config::tempMin)
-    target = config::tempMin;
+  if (target > Config::tempMax)
+    target = Config::tempMax;
+  else if (target < Config::tempMin)
+    target = Config::tempMin;
 };
 //}}}
 

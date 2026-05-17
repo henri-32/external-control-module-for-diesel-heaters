@@ -14,7 +14,7 @@ struct debounceConfig {
   static constexpr int encoder = 100; 
 }; 
 
-struct config {
+struct Config {
   static constexpr unsigned long temperatureRequestInterval = 2000; 
   static constexpr float defaultTemp = 15; 
   static constexpr int encoderValCutoff = 6;

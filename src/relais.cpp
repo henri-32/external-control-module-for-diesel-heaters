@@ -8,6 +8,11 @@ void Relais::init() {
   digitalWrite(m_pin, LOW);
 }
 
+void Relais::update(OutputDevicesIntent::RelaisCommand command) {
+  turnOn(command);
+  turnOff();
+}
+
 void Relais::turnOn(const OutputDevicesIntent::RelaisCommand &command) {
   if (m_relais_state != RelaisState::OFF ||
       command == OutputDevicesIntent::RelaisCommand::None) {
@@ -30,10 +35,6 @@ void Relais::turnOff() {
   m_relais_state = RelaisState::OFF;
 }
 
-void Relais::update(OutputDevicesIntent::RelaisCommand command) {
-  turnOn(command);
-  turnOff();
-}
 
 void Relais::applyPulseLengthFromIntent(
     const OutputDevicesIntent::RelaisCommand &command) {
@@ -43,11 +44,11 @@ void Relais::applyPulseLengthFromIntent(
   case cmd::None:
     return;
   case cmd::Long:
-    m_pulse_ms = config::RelaisLongPulse_ms;
+    m_pulse_ms = Config::RelaisLongPulse_ms;
     break;
 
   case cmd::Short:
-    m_pulse_ms = config::RelaisShortPulse_ms;
+    m_pulse_ms = Config::RelaisShortPulse_ms;
     break;
   }
 }

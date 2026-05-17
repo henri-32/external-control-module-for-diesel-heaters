@@ -2,7 +2,6 @@
 #include "interfaces.h"
 #include "types.h"
 #include <string>
-#include <utility>
 #include <vector>
 
 #pragma GCC diagnostic push
@@ -13,6 +12,13 @@ class TestInputDevices : public IInputDevices {
 public:
   TestInputDevices(InputDevicesDataSet &inputData) : IInputDevices(inputData) {}
   //{{{
+  //This class is intended to isolate the testing of the controller
+  //by giving direct access to the inputData and outputIntent for testing
+  //the real class InputDevices works with interfaces so it's possible   
+  ////to use the real class with HardwareStubs. That is done at the 
+  //Integration Test of SystemController but requires all HardwareStubs 
+  //to be initialised and denies direct access to the I/O structs
+  
   void init() override{};
   void update() override{};
 };
@@ -20,11 +26,15 @@ public:
 
 class TestOutputDevices : public IOutputDevices {
   //{{{
+  //See Comment in TestInputDevices  
 public:
-  TestOutputDevices(OutputDevicesIntent &outputIntent)
-      : IOutputDevices(outputIntent) {}
+  TestOutputDevices(OutputDevicesIntent &outputIntent, IRelais &relais)
+      : IOutputDevices(outputIntent), m_relais(relais) {}
   void init() override{};
-  void update() override{};
+  void update() override;
+
+private:
+  IRelais &m_relais;
 };
 //}}}
 
@@ -60,7 +70,12 @@ class TestRelais : public IRelais {
   //{{{
 public:
   void init() override{};
-  void update(OutputDevicesIntent::RelaisCommand intent) override{};
+  void update(OutputDevicesIntent::RelaisCommand intent) override;
+
+  OutputDevicesIntent::RelaisCommand returnLastRecievedCommand();
+
+private:
+  OutputDevicesIntent::RelaisCommand lastCommand;
 };
 //}}}
 

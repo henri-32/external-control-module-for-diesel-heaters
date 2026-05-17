@@ -18,7 +18,7 @@ protected:
   }
 };
 
-TEST_F(RelaisTest, init_configures_output_and_deactivates_relais) {
+TEST_F(RelaisTest, init_Configures_output_and_deactivates_relais) {
 //{{{
   driver.init();
 

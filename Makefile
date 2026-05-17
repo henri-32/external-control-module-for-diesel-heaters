@@ -113,13 +113,13 @@ OBJS := $(C_OBJS) $(CPP_OBJS)
 DEPS := $(OBJS:.o=.d)
 
 TEST_CPP_SRCS := \
-	tests/SystemController_unit_tests.cpp \
+	tests/systemController_white_box_tests.cpp \
+	tests/systemController_black_box_tests.cpp \
 	tests/display_unit_tests.cpp \
 	tests/relais_unit_tests.cpp \
 	tests/encoder_driver_unit_test.cpp \
 	tests/temperature_sensor_unit_test.cpp \
 	tests/test_devices.cpp \
-	tests/systemcontroller_integration_test.cpp \
 	tests/ArduinoStubs.cpp \
 	src/controller.cpp \
 	src/devicegroups.cpp \

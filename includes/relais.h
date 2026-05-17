@@ -21,7 +21,7 @@ private:
   void turnOn(const OutputDevicesIntent::RelaisCommand &intent);
   void turnOff();
   void applyPulseLengthFromIntent(
-      const OutputDevicesIntent::RelaisCommand &intent_copy);
+      const OutputDevicesIntent::RelaisCommand &command);
   void activate() { digitalWrite(m_pin, HIGH); }
   void deactivate() { digitalWrite(m_pin, LOW); };
 

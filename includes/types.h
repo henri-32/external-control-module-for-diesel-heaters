@@ -29,7 +29,7 @@ struct HeaterStatus {
   enum class Mode { TEMP, POWER };
   Mode mode = Mode::TEMP;
 
-  float target_tempC = config::defaultTemp;
+  float target_tempC = Config::defaultTemp;
 };
 
 #ifdef MEMORY_FUNCTIONS
@@ -57,7 +57,7 @@ struct CalculationData {
 };
 #endif
 
-class OutputDevicesIntent {
+struct OutputDevicesIntent {
 public:
   struct DisplayContent {
     float temp_c;
