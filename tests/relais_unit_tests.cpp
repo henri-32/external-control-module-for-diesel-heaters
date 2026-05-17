@@ -7,19 +7,18 @@ using ODI = OutputDevicesIntent;
 
 class RelaisTest : public ::testing::Test {
 protected:
-
   static constexpr uint8_t kPin = 7;
   ODI intentBuffer;
   Relais driver{kPin};
 
   void SetUp() override {
-	initSpies();
+    initSpies();
     setMillis(1000);
   }
 };
 
 TEST_F(RelaisTest, init_Configures_output_and_deactivates_relais) {
-//{{{
+  //{{{
   driver.init();
 
   EXPECT_EQ(pinWritten_mode, kPin);
@@ -30,7 +29,7 @@ TEST_F(RelaisTest, init_Configures_output_and_deactivates_relais) {
 //}}}
 
 TEST_F(RelaisTest, update_with_none_does_nothing_when_off) {
-//{{{
+  //{{{
   driver.update(intentBuffer.relaisCommand);
 
   EXPECT_EQ(writtenState, NOSTATE);
@@ -38,34 +37,66 @@ TEST_F(RelaisTest, update_with_none_does_nothing_when_off) {
 }
 //}}}
 
-TEST_F(RelaisTest,
-       short_command_activates_then_deactivates_on_next_update) {
-//{{{
-  intentBuffer.relaisCommand = ODI::RelaisCommand::Short; 
+TEST_F(RelaisTest, short_command_activates_then_deactivates_on_next_update) {
+  //{{{
+  intentBuffer.relaisCommand = ODI::RelaisCommand::Short;
   driver.update(intentBuffer.relaisCommand);
 
   EXPECT_EQ(pinWritten_state, kPin);
   EXPECT_EQ(writtenState, HIGH);
 
-  advanceMillis(250);
+  advanceMillis(Config::RelaisShortPulse_ms);
   driver.update(ODI::RelaisCommand::None);
 
   EXPECT_EQ(pinWritten_state, kPin);
   EXPECT_EQ(writtenState, LOW);
 }
 //{{{
-TEST_F(RelaisTest, long_command_stays_on_for_one_check_then_turns_off) {
-//{{{
-  intentBuffer.relaisCommand = ODI::RelaisCommand::Long; 
+
+TEST_F(RelaisTest, long_command_activates_then_deactivates_on_next_update) {
+  //{{{
+  intentBuffer.relaisCommand = ODI::RelaisCommand::Short;
+  driver.update(intentBuffer.relaisCommand);
+
+  EXPECT_EQ(pinWritten_state, kPin);
+  EXPECT_EQ(writtenState, HIGH);
+
+  advanceMillis(Config::RelaisLongPulse_ms);
+  driver.update(ODI::RelaisCommand::None);
+
+  EXPECT_EQ(pinWritten_state, kPin);
+  EXPECT_EQ(writtenState, LOW);
+}
+//}}}
+
+TEST_F(RelaisTest, short_command_stays_on_for_one_check_then_turns_off) {
+  //{{{
+  intentBuffer.relaisCommand = ODI::RelaisCommand::Short;
   driver.update(intentBuffer.relaisCommand);
 
   EXPECT_EQ(writtenState, HIGH);
 
-  advanceMillis(1000);
+  advanceMillis(Config::RelaisShortPulse_ms - 1);
   driver.update(ODI::RelaisCommand::None);
   EXPECT_EQ(writtenState, HIGH);
 
-  advanceMillis(600);
+  advanceMillis(2);
+  driver.update(ODI::RelaisCommand::None);
+  EXPECT_EQ(writtenState, LOW);
+}
+//}}}
+TEST_F(RelaisTest, long_command_stays_on_for_one_check_then_turns_off) {
+  //{{{
+  intentBuffer.relaisCommand = ODI::RelaisCommand::Long;
+  driver.update(intentBuffer.relaisCommand);
+
+  EXPECT_EQ(writtenState, HIGH);
+
+  advanceMillis(Config::RelaisLongPulse_ms - 1);
+  driver.update(ODI::RelaisCommand::None);
+  EXPECT_EQ(writtenState, HIGH);
+
+  advanceMillis(2);
   driver.update(ODI::RelaisCommand::None);
   EXPECT_EQ(writtenState, LOW);
 }
