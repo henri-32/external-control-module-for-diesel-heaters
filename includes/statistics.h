@@ -36,7 +36,7 @@ private:
   LongtimeData longTimeDataBuffer;
   InputDevicesDataSet data;
   HeaterStatus m_status;
-  HeaterStatus::HeatingState m_lastState = HeaterStatus::HeatingState::OFF;
+  HeaterStatus::State m_lastState = HeaterStatus::State::OFF;
   CalculationData calculationData;
   bool m_longTimeDataReady = false;
 
@@ -51,9 +51,9 @@ private:
   void rememberLastON_OFF() {
     if (m_status.heatingState == m_lastState)
       return;
-    if (m_status.heatingState == HeaterStatus::HeatingState::ON) {
+    if (m_status.heatingState == HeaterStatus::State::ON) {
       calculationData.lastON = timeStamp;
-    } else if (m_status.heatingState == HeaterStatus::HeatingState::OFF) {
+    } else if (m_status.heatingState == HeaterStatus::State::OFF) {
       calculationData.lastOFF = timeStamp;
     }
   }
@@ -61,7 +61,7 @@ private:
   void calculateCycleCounter() {
     if (m_status.heatingState == m_lastState)
       return;
-    if (m_status.heatingState == HeaterStatus::HeatingState::ON) {
+    if (m_status.heatingState == HeaterStatus::State::ON) {
       runtimeData.cycleCounter += 1;
     }
   }
@@ -76,7 +76,7 @@ private:
   void calculateDutyStats() {
     if (m_status.heatingState == m_lastState)
       return;
-    if (m_status.heatingState == HeaterStatus::HeatingState::ON) {
+    if (m_status.heatingState == HeaterStatus::State::ON) {
       calculationData.accumulatedTimeOFF += timeStamp - calculationData.lastOFF;
     } else {
       calculationData.accumulatedTimeON += timeStamp - calculationData.lastON;

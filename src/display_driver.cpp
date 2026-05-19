@@ -156,11 +156,11 @@ void DisplayDriver::createStateStringsForDisplay(
     const ODI::DisplayContent &content) {
   //{{{
   switch (content.status.state) {
-  case HeaterStatus::HeatingState::ON:
+  case HeaterStatus::State::ON:
     strncpy(string_of_states[0], "ON", 21);
     string_of_states[0][20] = '\0';
     break;
-  case HeaterStatus::HeatingState::OFF:
+  case HeaterStatus::State::OFF:
     strncpy(string_of_states[0], "OFF", 21);
     string_of_states[0][20] = '\0';
     break;

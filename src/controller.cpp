@@ -39,7 +39,7 @@ void SystemController::applyPowerSwitchInput() {
   unabhängig vom Zustand per modeSwitch gewechselt werden kann. Und es ist
   nötig, damit ich beim Verlassen des Bootes, die Heizung aus machen kann und
   sie korrekt herunterfährt, bevor ich den Strom wegnehme*/
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   using ODI = OutputDevicesIntent;
 
   if (!inputDevices.data.switchAction.power) {
@@ -174,7 +174,7 @@ void SystemController::applyEncoderInput() {
 
 void SystemController::applyHeatingLogic() {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   using Command = OutputDevicesIntent::RelaisCommand;
 
   if (heaterStatus.mode != HeaterStatus::Mode::TEMP)

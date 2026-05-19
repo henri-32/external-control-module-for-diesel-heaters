@@ -46,7 +46,7 @@ protected:
 TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_with_alternator_off_to_on_no_relay_action) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   inputData.switchAction.power = true;
   inputData.alternator.pressed = true;
   inputData.alternator.used = false;
@@ -64,7 +64,7 @@ TEST_F(SystemControllerUnitTest,
 TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_with_alternator_on_to_off_no_relay_action) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   inputData.switchAction.power = true;
   inputData.alternator.pressed = true;
   inputData.alternator.used = false;
@@ -85,7 +85,7 @@ TEST_F(SystemControllerUnitTest,
 TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_with_alternator_unrelated_input_ignored) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   inputData.switchAction.power = true;
   inputData.alternator.pressed = true;
   inputData.alternator.used = false;
@@ -109,7 +109,7 @@ TEST_F(SystemControllerUnitTest,
 TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_with_alternator_unrelated_input_ignored_on_to_off) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   inputData.switchAction.power = true;
   inputData.alternator.pressed = true;
   inputData.alternator.used = false;
@@ -135,7 +135,7 @@ TEST_F(SystemControllerUnitTest,
 TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_without_alternator_off_and_relay_action) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   using Command = OutputDevicesIntent::RelaisCommand;
 
   inputData.switchAction.power = true;
@@ -564,7 +564,7 @@ TEST_F(SystemControllerUnitTest,
 //{{{
 TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_off) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
@@ -581,7 +581,7 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_off) {
 
 TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_on) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
@@ -596,7 +596,7 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_on) {
 
 TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_on) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
@@ -613,7 +613,7 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_on) {
 
 TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_off) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
@@ -628,7 +628,7 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_off) {
 
 TEST_F(SystemControllerUnitTest, apply_heating_logic_early_return_by_wrong_mode) {
   //{{{
-  using State = HeaterStatus::HeatingState;
+  using State = HeaterStatus::State;
   State &m_state = controller.heaterStatus.state;
   controller.heaterStatus.mode = HeaterStatus::Mode::POWER;
   inputData.sensor_tempC = 10;

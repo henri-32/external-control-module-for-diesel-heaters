@@ -75,7 +75,7 @@ public:
   OutputDevicesIntent::RelaisCommand recievedCommand();
 
 private:
-  OutputDevicesIntent::RelaisCommand lastCommand;
+  OutputDevicesIntent::RelaisCommand lastCommand  = OutputDevicesIntent::RelaisCommand::None;
 };
 //}}}
 

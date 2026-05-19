@@ -23,8 +23,8 @@ struct InputDevicesDataSet {
 };
 
 struct HeaterStatus {
-  enum class HeatingState { OFF, ON };
-  HeatingState state = HeatingState::OFF;
+  enum class State { OFF, ON };
+  State state = State::OFF;
 
   enum class Mode { TEMP, POWER };
   Mode mode = Mode::TEMP;
