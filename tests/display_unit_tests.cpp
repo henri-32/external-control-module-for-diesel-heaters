@@ -1,8 +1,23 @@
+#include "ArduinoStubs.h"
 #include "display_driver.h"
 #include "test_devices.h"
-#include "ArduinoStubs.h"
 #include <gtest/gtest.h>
 
+TEST(InitTests, displayInit) {
+  //{{{
+  //Pretty senseless init() testing but now it's written
+  OutputDevicesIntent outputIntent;
+  TestDisplay m_display;
+  DisplayDriver display{m_display, outputIntent.displayContent,
+                        outputIntent.lcd_state};
+  display.init();
+
+  EXPECT_EQ(m_display.m_init_called, 1);
+  EXPECT_EQ(m_display.no_backlight_calls, 1); 
+  EXPECT_EQ(m_display.no_display_calls, 1); 
+  EXPECT_EQ(m_display.clear_calls, 1); 
+};
+//}}}
 class DisplayTest : public ::testing::Test {
 protected:
   OutputDevicesIntent outputIntent;
@@ -11,13 +26,11 @@ protected:
   DisplayDriver driver{display, outputIntent.displayContent,
                        outputIntent.lcd_state};
 
-  void SetUp() override {
-  ArduinoStubSpies::setMillis(1000); 
-}
+  void SetUp() override { ArduinoStubSpies::setMillis(1000); }
 };
 
 TEST_F(DisplayTest, init_gets_called) {
-//{{{
+  //{{{
   driver.init();
 
   ASSERT_EQ(display.m_init_called, true);
@@ -28,7 +41,7 @@ TEST_F(DisplayTest, init_gets_called) {
 //}}}
 
 TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
-//{{{
+  //{{{
   outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::OFF;
 
   driver.update();
@@ -40,7 +53,7 @@ TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
 //}}}
 
 TEST_F(DisplayTest, update_page1_writes_expected_lines) {
-//{{{
+  //{{{
   outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::Page1;
   outputIntent.displayContent.temp_c = 21.3F;
   outputIntent.displayContent.status.target_tempC = 19.8F;
@@ -60,7 +73,7 @@ TEST_F(DisplayTest, update_page1_writes_expected_lines) {
 //}}}
 
 TEST_F(DisplayTest, update_with_same_content_does_not_rewrite_lines) {
-//{{{
+  //{{{
   outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::Page1;
   outputIntent.displayContent.temp_c = 20.0F;
   outputIntent.displayContent.status.target_tempC = 18.5F;

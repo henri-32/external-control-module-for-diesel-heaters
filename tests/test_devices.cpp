@@ -35,6 +35,7 @@ float TestTemperatureSensorHardware::getTempCByIndex(uint8_t index) {
   getTempCByIndexCount++;
   return m_tempReturn;
 }
+
 void TestTemperatureSensorHardware::setTempReturn(float temp) {
   m_tempReturn = temp;
 }

@@ -4,17 +4,20 @@
 #include <gtest/gtest.h>
 using namespace ArduinoStubSpies;
 
-// Test-Hinweise für EncoderDriver:
-// - position simuliert den absoluten Hardware-Encoder-Zählerstand.
-// - Der Treiber arbeitet auf Deltas (current - prev) und zählt nur ganze
-//   Schritte: 4 Impulse == 1 Schritt (steps = m_delta / 4).
-// - Jeder TEST_F startet mit frischem Fixture (m_prev=0, m_delta=0,
-//   m_last_change_ms=0). Es gibt keinen Zustandstransfer zwischen Tests.
-// - Nach jeder Positionsänderung wird m_last_change_ms neu gesetzt.
-//   Solange debounceConfig::encoder seit der letzten Änderung nicht
-//   abgelaufen ist, liefert readSteps() immer 0.
-// - Änderungen werden nicht verworfen: Sie werden in m_delta gesammelt.
-//   Ausgegeben werden nur ganze Schritte, der Rest bleibt im Delta.
+// Test notes for EncoderDriver:
+// - position simulates the absolute hardware encoder counter value.
+// - The driver operates on deltas (current - prev) and counts only full
+//   steps: 4 pulses == 1 step (steps = m_delta / 4).
+// - Each TEST_F starts with a fresh fixture (m_prev=0, m_delta=0,
+//   m_last_change_ms=0). There is no state transfer between tests.
+// - After every position change, m_last_change_ms is reset.
+//   As long as debounceConfig::encoder has not elapsed since the last
+//   change, readSteps() always returns 0.
+// - Changes are not discarded: they are accumulated in m_delta.
+//   Only full steps are emitted; the remainder stays in delta.
+//
+// - The init() isn't really testable, because only internal states 
+//   are manipulated. 
 
 class EncoderDriverTest : public ::testing::Test {
 protected:
@@ -38,11 +41,11 @@ TEST_F(EncoderDriverTest, returns_zero_when_hardware_position_is_zero) {
 
 TEST_F(EncoderDriverTest, returns_zero_within_debounce_interval) {
   //{{{
-  // Innerhalb Debounce
+  // Within debounce
   testEncoder.position = 4;
   EXPECT_EQ(driver.readSteps(), 0);
 
-  // Immer noch innerhalb Debounce
+  // Still within debounce
   advanceMillis(debounceConfig::encoder - 1);
   testEncoder.position = 4;
   EXPECT_EQ(driver.readSteps(), 0);
@@ -51,13 +54,13 @@ TEST_F(EncoderDriverTest, returns_zero_within_debounce_interval) {
 
 TEST_F(EncoderDriverTest, returns_one_step_after_debounce_with_stable_position) {
   //{{{
-  // Erstes Polling erkennt 0 -> 4, speichert Delta und startet Debounce.
-  // Daher hier noch keine Schritt-Ausgabe.
+  // First polling detects 0 -> 4, stores delta, and starts debounce.
+  // Therefore no step is emitted yet.
   testEncoder.position = 4;
   driver.readSteps();
 
-  // Nach Ablauf der Debounce-Zeit:
-  // diff == 0, m_delta bleibt 4, Ausgabe 4/4 == 1.
+  // After debounce time has elapsed:
+  // diff == 0, m_delta stays 4, emitted result 4/4 == 1.
   testEncoder.position = 4;
   advanceMillis(debounceConfig::encoder);
   EXPECT_EQ(driver.readSteps(), 1);
@@ -95,14 +98,14 @@ TEST_F(EncoderDriverTest,
   advanceMillis(debounceConfig::encoder);
   EXPECT_EQ(driver.readSteps(), 1);
 
-  // Debounce seit letzter Positionsänderung ist noch nicht vorbei.
+  // Debounce since the last position change has not elapsed yet.
   testEncoder.position = 8;
   EXPECT_EQ(driver.readSteps(), 0);
 
   advanceMillis(debounceConfig::encoder / 2);
   EXPECT_EQ(driver.readSteps(), 0);
 
-  // Die Änderung auf Position 8 setzt den Debounce-Timer neu.
+  // The change to position 8 resets the debounce timer.
   advanceMillis(debounceConfig::encoder / 2);
   EXPECT_EQ(driver.readSteps(), 1);
 };
@@ -118,13 +121,13 @@ TEST_F(EncoderDriverTest, repeated_reads_still_wait_until_debounce_after_change)
   advanceMillis(debounceConfig::encoder);
   EXPECT_EQ(driver.readSteps(), 1);
 
-  // Debounce seit letzter Positionsänderung ist noch nicht vorbei.
+  // Debounce since the last position change has not elapsed yet.
   testEncoder.position = 8;
   advanceMillis(debounceConfig::encoder / 2);
   EXPECT_EQ(driver.readSteps(), 0);
 
-  // Auch wenn die frühere Ruhephase (bei Position 4) abgelaufen wäre:
-  // Die neue Änderung auf Position 8 hat den Debounce neu gestartet.
+  // Even if the earlier quiet period (at position 4) would have elapsed:
+  // The new change to position 8 restarted debounce.
   advanceMillis(debounceConfig::encoder / 2);
   EXPECT_EQ(driver.readSteps(), 0);
 

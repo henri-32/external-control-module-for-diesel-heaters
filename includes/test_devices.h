@@ -12,13 +12,13 @@ class TestInputDevices : public IInputDevices {
 public:
   TestInputDevices(InputDevicesDataSet &inputData) : IInputDevices(inputData) {}
   //{{{
-  //This class is intended to isolate the testing of the controller
-  //by giving direct access to the inputData and outputIntent for testing
-  //the real class InputDevices works with interfaces so it's possible   
-  ////to use the real class with HardwareStubs. That is done at the 
-  //Integration Test of SystemController but requires all HardwareStubs 
-  //to be initialised and denies direct access to the I/O structs
-  
+  // This class is intended to isolate the testing of the controller
+  // by giving direct access to the inputData and outputIntent for testing
+  // the real class InputDevices works with interfaces so it's possible
+  ////to use the real class with HardwareStubs. That is done at the
+  // Integration Test of SystemController but requires all HardwareStubs
+  // to be initialised and denies direct access to the I/O structs
+
   void init() override{};
   void update() override{};
 };
@@ -26,7 +26,7 @@ public:
 
 class TestOutputDevices : public IOutputDevices {
   //{{{
-  //See Comment in TestInputDevices  
+  // See Comment in TestInputDevices
 public:
   TestOutputDevices(OutputDevicesIntent &outputIntent, IRelais &relais)
       : IOutputDevices(outputIntent), m_relais(relais) {}
@@ -46,9 +46,7 @@ public:
   void display() override { ++display_calls; };
   void noBacklight() override { ++no_backlight_calls; };
   void backlight() override { ++backlight_calls; };
-  void setCursor(uint8_t col, uint8_t row) override {
-    cursor_calls.emplace_back(col, row);
-  };
+  void setCursor(uint8_t col, uint8_t row) override{};
   void printstr(const char text[]) override {
     printed_lines.emplace_back(text);
   };
@@ -75,7 +73,8 @@ public:
   OutputDevicesIntent::RelaisCommand recievedCommand();
 
 private:
-  OutputDevicesIntent::RelaisCommand lastCommand  = OutputDevicesIntent::RelaisCommand::None;
+  OutputDevicesIntent::RelaisCommand lastCommand =
+      OutputDevicesIntent::RelaisCommand::None;
 };
 //}}}
 

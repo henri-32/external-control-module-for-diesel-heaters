@@ -5,6 +5,20 @@
 using namespace ArduinoStubSpies;
 using ODI = OutputDevicesIntent;
 
+
+TEST(InitTests, relaisInit) {
+//{{{
+  Relais relais {8}; 
+
+  relais.init();
+
+  EXPECT_EQ(pinWritten_state, 8); 
+  EXPECT_EQ(writtenState, LOW); 
+  EXPECT_EQ(pinWritten_mode, 8); 
+  EXPECT_EQ(writtenMode, OUTPUT); 
+}; 
+
+//}}}
 class RelaisTest : public ::testing::Test {
 protected:
   static constexpr uint8_t kPin = 7;
