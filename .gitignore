@@ -6,12 +6,14 @@
 # Build artifacts
 /build/
 /build_test/
+/build_test_debug/
 /compile_commands.json
 
 # Local tooling output
 /.logs/
 /neovim_utils/quickfix_list.txt
 .codex
+.agents
 
 # Python
 /venv/
