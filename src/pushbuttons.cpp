@@ -1,5 +1,10 @@
 #include "pushbuttons.h"
 
+#ifdef TEST_BUILD
+#include "ArduinoStubs.h"
+#else
+#include "Arduino.h"
+#endif
 PushButton::PushButton(uint8_t pin) : m_pin(pin) {}
 
 void PushButton::init() {
@@ -8,6 +13,7 @@ void PushButton::init() {
   m_last_read = m_stable;
 }
 
+bool PushButton::pressed() const { return m_stable == LOW; };
 bool PushButton::released() {
   bool reading = digitalRead(m_pin);
 
@@ -26,5 +32,3 @@ bool PushButton::released() {
 
   return false;
 }
-
-

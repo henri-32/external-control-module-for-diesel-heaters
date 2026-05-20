@@ -9,12 +9,6 @@ public:
   void init() override;
   void update() override;
 
-#ifdef TEST_BUILD
-public: 
-#else
-private:
-#endif
-
   void renderLines();
   void writeDisplay(char lines[4][21]);
 

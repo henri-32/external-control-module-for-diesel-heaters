@@ -1,18 +1,12 @@
 #pragma once
 #include "interfaces.h"
 
-#ifdef TEST_BUILD
-#include "ArduinoStubs.h"
-#else
-#include "Arduino.h"
-#endif
-
 class PushButton : public IPushButton {
 public:
   explicit PushButton(uint8_t pin);
 
   void init() override;
-  bool pressed() const override { return m_stable == LOW; }
+  bool pressed() const override; 
   bool released() override;
 
 private:

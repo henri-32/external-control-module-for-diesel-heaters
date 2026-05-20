@@ -1,1 +1,4 @@
 1. Refactor vom alternator.used flag. Das wird gerade bei den InputDevices gehalten und vom SystemController consumed. Das sollte denke ich eher im Controller gehalten werden und die inputDevices halten nur noch den Status pressed/released. Dann ist das sauber getrennt. 
+
+
+2. CONST ÜBERARBEITEN IM GANZEN PROJEKT

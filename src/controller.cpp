@@ -1,6 +1,5 @@
 #include "controller.h"
 #include "interfaces.h"
-#include "config.h"
 
 SystemController::SystemController(IInputDevices &i, IOutputDevices &o)
     : inputDevices(i), outputDevices(o) {}

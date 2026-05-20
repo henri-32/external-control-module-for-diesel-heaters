@@ -1,6 +1,7 @@
 #pragma once
 #include "config.h"
 #include <stdint.h>
+#include <limits.h>
 
 // Werttypen
 struct InputDevicesDataSet {
@@ -61,7 +62,7 @@ public:
   struct DisplayContent {
     float temp_c;
     HeaterStatus status;
-#ifdef MEMORYFUNCTIONS
+#ifdef MEMORY_FUNCTIONS
     RuntimeData runtimeDisplayData;
     LongtimeData EEPROM_Values;
 #endif

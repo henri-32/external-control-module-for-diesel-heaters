@@ -157,8 +157,6 @@ all: $(BUILD_DIR)/main.hex
 test: $(TEST_BUILD_DIR)/unit_tests
 
 test_debug: $(TEST_DEBUG_BIN)
-
-
 	 
 
 $(BUILD_DIR)/main.elf: $(OBJS)
