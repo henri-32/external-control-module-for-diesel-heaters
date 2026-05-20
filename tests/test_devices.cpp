@@ -22,7 +22,7 @@ TestRelais::recievedCommand() {
 };
 //}}}
 
-void TestDisplay::init() { m_init_called = true; }
+void TestDisplayHardware::init() { m_init_called = true; }
 
 int TestEncoderHardware::read() { return position; }
 

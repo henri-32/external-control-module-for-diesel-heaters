@@ -2,3 +2,6 @@
 
 
 2. CONST ÜBERARBEITEN IM GANZEN PROJEKT
+
+
+3. #define in der config zu einem make Target machen

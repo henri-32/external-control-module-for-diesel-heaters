@@ -36,7 +36,7 @@ private:
 };
 //}}}
 
-class TestDisplay : public IDisplay {
+class TestDisplayHardware : public IDisplayHardware {
   //{{{
 public:
   void clear() override { ++clear_calls; };

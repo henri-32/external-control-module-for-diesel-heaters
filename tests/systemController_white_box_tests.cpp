@@ -14,7 +14,7 @@ protected:
   OutputDevicesIntent outputIntentBuffer;
 
   // Hardware fakes
-  TestDisplay testDisplay;
+  TestDisplayHardware testDisplay;
   TestRelais testRelais;
   TestToggleSwitch powerSwitch;
   TestToggleSwitch modeSwitch;

@@ -3,7 +3,7 @@
 
 class DisplayDriver : public IDisplayDriver {
 public:
-  DisplayDriver(IDisplay &display, OutputDevicesIntent::DisplayContent &dc,
+  DisplayDriver(IDisplayHardware &display, OutputDevicesIntent::DisplayContent &dc,
                 OutputDevicesIntent::LCD_StateIntent &ds);
 
   void init() override;
@@ -17,7 +17,7 @@ public:
       const OutputDevicesIntent::DisplayContent &content);
   void clearLine(uint8_t line);
 
-  IDisplay &m_display;
+  IDisplayHardware &m_display;
   static constexpr uint8_t Rows = 4;
   static constexpr uint8_t Cols = 21;
   char m_lineBuffer[Rows][Cols] = {};

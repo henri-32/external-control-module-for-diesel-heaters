@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <limits.h>
 
-// Werttypen
 struct InputDevicesDataSet {
   struct SwitchAction {
     bool power = false;

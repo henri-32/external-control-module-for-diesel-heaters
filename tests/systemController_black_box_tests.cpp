@@ -264,7 +264,6 @@ TEST_F(SystemControllerBlackBox,
 };
 //}}}
 
-//
 TEST_F(
     SystemControllerBlackBox,
     in_temp_mode_relais_command_and_state_switch_by_temperatures_out_of_tolerance_for_both_directions) {

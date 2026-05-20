@@ -7,7 +7,7 @@ TEST(InitTests, displayInit) {
   //{{{
   //Pretty senseless init() testing but now it's written
   OutputDevicesIntent outputIntent;
-  TestDisplay m_display;
+  TestDisplayHardware m_display;
   DisplayDriver display{m_display, outputIntent.displayContent,
                         outputIntent.lcd_state};
   display.init();
@@ -21,7 +21,7 @@ TEST(InitTests, displayInit) {
 class DisplayTest : public ::testing::Test {
 protected:
   OutputDevicesIntent outputIntent;
-  TestDisplay display;
+  TestDisplayHardware display;
 
   DisplayDriver driver{display, outputIntent.displayContent,
                        outputIntent.lcd_state};

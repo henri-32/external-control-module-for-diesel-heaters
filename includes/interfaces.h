@@ -39,7 +39,17 @@ protected:
 };
 //}}}
 
-class IDisplay {
+class IDisplayDriver : public IDriver {
+  //{{{
+public:
+  virtual void update() = 0;
+
+protected:
+  ~IDisplayDriver() = default;
+};
+//}}}
+
+class IDisplayHardware {
   //{{{
 public:
   virtual void clear() = 0;
@@ -52,27 +62,17 @@ public:
   virtual void init() = 0;
 
 protected:
-  ~IDisplay() = default;
+  ~IDisplayHardware() = default;
 };
 //}}}
 
-class IDisplayDriver : public IDriver {
+class IEncoderDriver : public IDriver {
   //{{{
 public:
-  virtual void update() = 0;
+  virtual int readSteps() = 0;
 
 protected:
-  ~IDisplayDriver() = default;
-};
-//}}}
-
-class IRelais : public IDriver {
-  //{{{
-public:
-  virtual void update(OutputDevicesIntent::RelaisCommand intent) = 0;
-
-protected:
-  ~IRelais() = default;
+  ~IEncoderDriver() = default;
 };
 //}}}
 
@@ -86,13 +86,25 @@ protected:
 };
 //}}}
 
-class IEncoderDriver : public IDriver {
+class ITempSensorDriver : public IDriver {
   //{{{
 public:
-  virtual int readSteps() = 0;
+  virtual float pollTemp() = 0;
 
 protected:
-  ~IEncoderDriver() = default;
+  ~ITempSensorDriver() = default;
+};
+//}}}
+
+class ITempSensorHardware {
+  //{{{
+public:
+  virtual void begin() = 0;
+  virtual void requestTemperatures() = 0;
+  virtual float getTempCByIndex(uint8_t) = 0;
+
+protected:
+  ~ITempSensorHardware() = default;
 };
 //}}}
 
@@ -117,24 +129,13 @@ protected:
 };
 //}}}
 
-class ITempSensorHardware {
+class IRelais : public IDriver {
   //{{{
 public:
-  virtual void begin() = 0;
-  virtual void requestTemperatures() = 0;
-  virtual float getTempCByIndex(uint8_t) = 0;
+  virtual void update(OutputDevicesIntent::RelaisCommand intent) = 0;
 
 protected:
-  ~ITempSensorHardware() = default;
+  ~IRelais() = default;
 };
 //}}}
 
-class ITempSensorDriver : public IDriver {
-  //{{{
-public:
-  virtual float pollTemp() = 0;
-
-protected:
-  ~ITempSensorDriver() = default;
-};
-//}}}

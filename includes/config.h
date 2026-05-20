@@ -1,5 +1,6 @@
 #pragma once
-// #define MEMORY_FUNCTIONS
+
+//#define MEMORY_FUNCTIONS
 
 struct pinConfig {
   static constexpr int powerSwitch = 2;

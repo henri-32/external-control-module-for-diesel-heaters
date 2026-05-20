@@ -14,7 +14,7 @@ using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
 #include <Arduino.h>
 #endif
 
-DisplayDriver::DisplayDriver(IDisplay &display, ODI::DisplayContent &dc,
+DisplayDriver::DisplayDriver(IDisplayHardware &display, ODI::DisplayContent &dc,
                              LCDIntent &ds)
     : m_display(display), m_displayContent(dc), m_displayState(ds) {}
 

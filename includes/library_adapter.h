@@ -9,7 +9,7 @@
 #include <DallasTemperature.h>
 
 
-class LCDAdapter : public IDisplay {
+class LCDAdapter : public IDisplayHardware {
 public:
   LCDAdapter(uint8_t lcdAddr, uint8_t lcd_cos, uint8_t lcd_rows)
       : m_lcdAddr(lcdAddr), m_lcd_cos(lcd_cos), m_lcd_rows(lcd_rows){};
