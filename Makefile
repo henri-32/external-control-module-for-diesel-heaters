@@ -1,8 +1,9 @@
 .DEFAULT_GOAL := all
 
-.PHONY: all setup install compiledb compiledb_test test test_debug run_test clean
+.PHONY: all setup install compiledb compiledb_test test test_debug run_test clean ccache_prep
 
 MAKEFLAGS += --no-print-directory
+MAKEFLAGS += -j4 
 
 setup:
 	@scripts/setup.sh
@@ -15,19 +16,43 @@ install: requirements.txt
 
 compiledb:
 	@rm -f compile_commands.json
-	@make clean 
-	@bear -- $(MAKE) all 
-	@echo "compiledb updated to production build"
+	@$(MAKE) clean 
+	@bear -- $(MAKE) USE_CCACHE=0 all  
+	@echo "compiledb updated to production build\n"
+
+compiledb_fast: 
+	@rm -f compile_commands.json 
+	@bear -- $(MAKE) USE_CCACHE=1 all 
+	@echo "compiledb updated to production build\n"
+
 
 compiledb_test:
 	@rm -f compile_commands.json
-	@make clean
-	@bear -- $(MAKE) test
-	@echo "compiledb updated to test build"
+	@$(MAKE) clean
+	@bear -- $(MAKE) USE_CCACHE=0 test
+	@echo "compiledb updated to test build\n"
 
-CC :=  avr-gcc
-CXX :=  avr-g++
-TESTCC := ccache g++
+compiledb_test_fast: 
+	@rm -f compile_commands.json
+	@bear -- $(MAKE) USE_CCACHE=1 test
+	@echo "compiledb updated to test build\\nn"
+
+USE_CCACHE ?= 1
+CCACHE ?= ccache
+CCACHE_TMPDIR ?= $(CURDIR)/.cache/ccache-tmp
+CCACHE_DIR ?= $(CURDIR)/.cache/ccache
+
+ifeq ($(USE_CCACHE),1)
+export CCACHE_TEMPDIR := $(CCACHE_TMPDIR)
+export CCACHE_DIR := $(CCACHE_DIR)
+CC := $(CCACHE) avr-gcc
+CXX := $(CCACHE) avr-g++
+TESTCC := $(CCACHE) g++
+else
+CC := avr-gcc
+CXX := avr-g++
+TESTCC := g++
+endif
 
 MCU := atmega328p
 F_CPU := 16000000UL
@@ -152,12 +177,17 @@ TEST_CPP_OBJS := $(addprefix $(TEST_BUILD_DIR)/,$(TEST_CPP_SRCS:.cpp=.o))
 TEST_OBJS := $(TEST_CPP_OBJS) $(TEST_CC_OBJS)
 TEST_DEPS := $(TEST_OBJS:.o=.d)
 
-all: $(BUILD_DIR)/main.hex
+all: ccache_prep $(BUILD_DIR)/main.hex
 
-test: $(TEST_BUILD_DIR)/unit_tests
+test: ccache_prep $(TEST_BUILD_DIR)/unit_tests
 
-test_debug: $(TEST_DEBUG_BIN)
+test_debug: ccache_prep $(TEST_DEBUG_BIN)
 	 
+ccache_prep:
+ifeq ($(USE_CCACHE),1)
+	@mkdir -p "$(CCACHE_TEMPDIR)"
+endif
+
 
 $(BUILD_DIR)/main.elf: $(OBJS)
 	@$(CXX) -mmcu=$(MCU) -Wl,--gc-sections $^ -o $@
@@ -220,11 +250,7 @@ $(TEST_DEBUG_BUILD_DIR)/%.o: %.cpp $(TEST_DEBUG_PCH_GCH)
 	@mkdir -p $(dir $@)
 	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_DEBUGFLAGS) $(TEST_PCH_FLAGS) $(TEST_INCLUDES) -c $< -o $@
 
-$(TEST_DEBUG_BUILD_DIR)/%.o: %.cc $(TEST_DEBUG_PCH_GCH)
-	@mkdir -p $(dir $@)
-	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_DEBUGFLAGS) $(TEST_PCH_FLAGS) $(TEST_INCLUDES) -c $< -o $@
-
-run_test:
+run_test: test
 	python3 scripts/run_test.py
 
 clean:
