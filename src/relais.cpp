@@ -1,6 +1,13 @@
 #include "relais.h"
 #include "config.h"
 
+
+#ifdef TEST_BUILD
+#include "ArduinoStubs.h"
+#else
+#include <Arduino.h>
+#endif
+
 Relais::Relais(const uint8_t pin) : m_pin(pin) {}
 
 void Relais::init() {
@@ -35,7 +42,6 @@ void Relais::turnOff() {
   m_relais_state = RelaisState::OFF;
 }
 
-
 void Relais::applyPulseLengthFromIntent(
     const OutputDevicesIntent::RelaisCommand &command) {
   using cmd = OutputDevicesIntent::RelaisCommand;
@@ -52,3 +58,7 @@ void Relais::applyPulseLengthFromIntent(
     break;
   }
 }
+
+void Relais::activate() { digitalWrite(m_pin, HIGH); }
+
+void Relais::deactivate() { digitalWrite(m_pin, LOW); }

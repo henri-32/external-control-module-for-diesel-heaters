@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-.PHONY: all setup install compiledb compiledb_test test run_test clean
+.PHONY: all setup install compiledb compiledb_test test test_debug run_test clean
 
 MAKEFLAGS += --no-print-directory
 
@@ -25,9 +25,9 @@ compiledb_test:
 	@bear -- $(MAKE) test
 	@echo "compiledb updated to test build"
 
-CC := avr-gcc
-CXX := avr-g++
-TESTCC := g++
+CC :=  avr-gcc
+CXX :=  avr-g++
+TESTCC := ccache g++
 
 MCU := atmega328p
 F_CPU := 16000000UL
@@ -65,8 +65,22 @@ TEST_INCLUDES := \
 	-Itests \
 	-Iincludes
 
+TEST_PCH := includes/pch_test.h
+TEST_PCH_GCH := $(TEST_BUILD_DIR)/pch_test.h.gch
+TEST_PCH_FLAGS := -include pch_test.h -Winvalid-pch 
+
 TEST_CPPFLAGS := -DTEST_BUILD
-TEST_CXXFLAGS := -std=c++20 -Wall -Wextra -pthread -g -MMD -MP -fsanitize=address,undefined -g
+TEST_CXXFLAGS := -std=c++20 -Wall -Wextra -pthread 
+TEST_DEBUGFLAGS := -g -MMD -MP -fsanitize=address,undefined
+
+TEST_DEBUG_BUILD_DIR := build_test_debug
+TEST_DEBUG_PCH_GCH := $(TEST_DEBUG_BUILD_DIR)/pch_test.h.gch
+TEST_DEBUG_CPP_OBJS = $(addprefix $(TEST_DEBUG_BUILD_DIR)/,$(TEST_CPP_SRCS:.cpp=.o))
+TEST_DEBUG_OBJS = $(TEST_DEBUG_CPP_OBJS)
+TEST_DEBUG_DEPS = $(TEST_DEBUG_OBJS:.o=.d)
+GTEST_DEBUG_OBJ := $(TEST_DEBUG_BUILD_DIR)/gtest-all.o
+GTEST_DEBUG_LIB := $(TEST_DEBUG_BUILD_DIR)/libtest.a
+TEST_DEBUG_BIN := $(TEST_DEBUG_BUILD_DIR)/unit_tests
 
 
 
@@ -142,6 +156,11 @@ all: $(BUILD_DIR)/main.hex
 
 test: $(TEST_BUILD_DIR)/unit_tests
 
+test_debug: $(TEST_DEBUG_BIN)
+
+
+	 
+
 $(BUILD_DIR)/main.elf: $(OBJS)
 	@$(CXX) -mmcu=$(MCU) -Wl,--gc-sections $^ -o $@
 	@echo "linked to $@"
@@ -171,19 +190,47 @@ $(GTEST_LIB): $(GTEST_OBJ)
 	@ar rcs $@ $^ 
 	@echo "gtest library build" 
 
-$(TEST_BUILD_DIR)/%.o: %.cpp
+$(TEST_PCH_GCH): $(TEST_PCH)
 	@mkdir -p $(dir $@)
-	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_INCLUDES) -c $< -o $@
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_INCLUDES) -x c++-header $< -o $@
 
-$(TEST_BUILD_DIR)/%.o: %.cc
+$(TEST_BUILD_DIR)/%.o: %.cpp $(TEST_PCH_GCH)
 	@mkdir -p $(dir $@)
-	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_INCLUDES) -c $< -o $@
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_PCH_FLAGS) $(TEST_INCLUDES) -c $< -o $@ 
+
+$(TEST_BUILD_DIR)/%.o: %.cc $(TEST_PCH_GCH)
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_PCH_FLAGS) $(TEST_INCLUDES) -c $< -o $@
+
+$(TEST_DEBUG_BIN): $(TEST_DEBUG_OBJS) $(GTEST_DEBUG_LIB)
+	@$(TESTCC) $(TEST_CXXFLAGS) $(TEST_DEBUGFLAGS) $^ -o $@
+	@echo "build_test_debug/unit_tests created"
+
+$(GTEST_DEBUG_OBJ): $(GTEST_ROOT)/src/gtest-all.cc $(TEST_DEBUG_PCH_GCH)
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_DEBUGFLAGS) $(TEST_PCH_FLAGS) $(TEST_INCLUDES) -c $< -o $@
+
+$(GTEST_DEBUG_LIB): $(GTEST_DEBUG_OBJ)
+	@ar rcs $@ $^
+	@echo "gtest debug library build"
+
+$(TEST_DEBUG_PCH_GCH): $(TEST_PCH)
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_DEBUGFLAGS) $(TEST_INCLUDES) -x c++-header $< -o $@
+
+$(TEST_DEBUG_BUILD_DIR)/%.o: %.cpp $(TEST_DEBUG_PCH_GCH)
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_DEBUGFLAGS) $(TEST_PCH_FLAGS) $(TEST_INCLUDES) -c $< -o $@
+
+$(TEST_DEBUG_BUILD_DIR)/%.o: %.cc $(TEST_DEBUG_PCH_GCH)
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_DEBUGFLAGS) $(TEST_PCH_FLAGS) $(TEST_INCLUDES) -c $< -o $@
 
 run_test:
 	python3 scripts/run_test.py
 
 clean:
-	@rm -rf $(BUILD_DIR) $(TEST_BUILD_DIR) compile_commands.json
+	@rm -rf $(BUILD_DIR) $(TEST_BUILD_DIR) $(TEST_DEBUG_BUILD_DIR) compile_commands.json
 	@echo "build artifacts, compile commands and test binary removed"
 
--include $(DEPS) $(TEST_DEPS)
+-include $(DEPS) $(TEST_DEPS) $(TEST_DEBUG_DEPS)

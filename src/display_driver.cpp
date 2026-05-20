@@ -1,7 +1,8 @@
 #include "display_driver.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
+
 
 using ODI = OutputDevicesIntent; 
 using LCDIntent = OutputDevicesIntent::LCD_StateIntent;

@@ -1,7 +1,5 @@
 #pragma once
-
 #include "interfaces.h"
-#include "types.h"
 
 class InputDevices : public IInputDevices {
 public:

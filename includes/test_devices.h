@@ -1,8 +1,7 @@
 #pragma once
 #include "interfaces.h"
 #include "types.h"
-#include <string>
-#include <vector>
+#include "pch_test.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"

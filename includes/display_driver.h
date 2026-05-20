@@ -1,6 +1,5 @@
 #pragma once
 #include "interfaces.h"
-#include "types.h"
 
 class DisplayDriver : public IDisplayDriver {
 public:

@@ -1,12 +1,13 @@
 #pragma once
-#include "interfaces.h"
-#include "devicegroups.h"
 #include "types.h"
 
 #ifdef MEMORY_FUNCTIONS
 #include "memory.h"
 #include "statistics.h"
 #endif
+
+class IInputDevices; 
+class IOutputDevices; 
 
 class SystemController {
 public:

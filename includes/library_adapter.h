@@ -2,11 +2,12 @@
 // weiter. Sie dienen dem Zweck Sensoren virtualisieren zu können.
 
 #pragma once
+#include "LiquidCrystal_I2C.h"
 #include "interfaces.h"
 #include <Encoder.h>
-#include <LiquidCrystal_I2C.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+
 
 class LCDAdapter : public IDisplay {
 public:
