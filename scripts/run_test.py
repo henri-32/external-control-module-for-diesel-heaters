@@ -60,7 +60,7 @@ if return_code != 0:
             "--server", 
             str(nvim_server),
             "--remote-send", 
-            "<C-\><C-N>:cgetfile /{}<CR>:copen<CR>".format(ql_file), 
+            r"<C-\><C-N>:cgetfile /{}<CR>:copen<CR>".format(ql_file), 
         ],
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,

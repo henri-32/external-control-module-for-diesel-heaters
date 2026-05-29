@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-.PHONY: all setup install compiledb compiledb_test test test_debug integrationtest run_test clean ccache_prep
+.PHONY: all setup install compiledb compiledb_test test test_debug run_test clean ccache_prep
 
 MAKEFLAGS += --no-print-directory
 MAKEFLAGS += -j4 
