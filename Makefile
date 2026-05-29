@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-.PHONY: all setup install compiledb compiledb_test test test_debug run_test clean ccache_prep
+.PHONY: all setup install compiledb compiledb_test test test_debug integrationtest run_test clean ccache_prep
 
 MAKEFLAGS += --no-print-directory
 MAKEFLAGS += -j4 
@@ -35,7 +35,7 @@ compiledb_test:
 compiledb_test_fast: 
 	@rm -f compile_commands.json
 	@bear -- $(MAKE) USE_CCACHE=1 test
-	@echo "compiledb updated to test build\\nn"
+	@echo "compiledb updated to test build\n"
 
 USE_CCACHE ?= 1
 CCACHE ?= ccache
@@ -60,6 +60,7 @@ F_CPU := 16000000UL
 LIBRARIES := includes/libraries
 BUILD_DIR := build
 TEST_BUILD_DIR := build_test
+INTEGRATIONTEST_BUILD_DIR := build_integrationtest
 
 COMMON_DEFINES := -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO -DARDUINO_ARCH_AVR -DDECIMAL_DIG=__DECIMAL_DIG__
 COMMON_OPT := -Os -ffunction-sections -fdata-sections
@@ -152,14 +153,6 @@ OBJS := $(C_OBJS) $(CPP_OBJS)
 DEPS := $(OBJS:.o=.d)
 
 TEST_CPP_SRCS := \
-	tests/systemController_white_box_tests.cpp \
-	tests/systemController_black_box_tests.cpp \
-	tests/display_unit_tests.cpp \
-	tests/relais_unit_tests.cpp \
-	tests/encoder_driver_unit_test.cpp \
-	tests/temperature_sensor_unit_test.cpp \
-	tests/test_devices.cpp \
-	tests/ArduinoStubs.cpp \
 	src/controller.cpp \
 	src/devicegroups.cpp \
 	src/temperature_sensor_driver.cpp \
@@ -167,22 +160,47 @@ TEST_CPP_SRCS := \
 	src/relais.cpp \
 	src/pushbuttons.cpp \
 	src/toggle_switches.cpp \
-	src/encoder_driver.cpp
+	src/encoder_driver.cpp \
+	tests/test_devices.cpp \
+	tests/ArduinoStubs.cpp \
+	tests/systemController_white_box_tests.cpp \
+	tests/systemController_black_box_tests.cpp \
+	tests/display_unit_tests.cpp \
+	tests/relais_unit_tests.cpp \
+	tests/encoder_driver_unit_test.cpp \
+	tests/temperature_sensor_unit_test.cpp 
 
+INTEGRATIONTEST_CPP_SRCS:= \
+	src/controller.cpp \
+	src/devicegroups.cpp \
+	src/temperature_sensor_driver.cpp \
+	src/display_driver.cpp \
+	src/relais.cpp \
+	src/pushbuttons.cpp \
+	src/toggle_switches.cpp \
+	src/encoder_driver.cpp \
+	tests/ArduinoStubs.cpp \
+	tests/test_devices.cpp \
+	tests/systemController_integration_test.cpp
+	
 
 GTEST_LIB :=$(TEST_BUILD_DIR)/libtest.a
 GTEST_OBJ :=$(TEST_BUILD_DIR)/gtest-all.o
 
-TEST_CPP_OBJS := $(addprefix $(TEST_BUILD_DIR)/,$(TEST_CPP_SRCS:.cpp=.o))
-TEST_OBJS := $(TEST_CPP_OBJS) $(TEST_CC_OBJS)
+TEST_OBJS := $(addprefix $(TEST_BUILD_DIR)/,$(TEST_CPP_SRCS:.cpp=.o))
 TEST_DEPS := $(TEST_OBJS:.o=.d)
+
+INTEGRATIONTEST_OBJS := $(addprefix $(INTEGRATIONTEST_BUILD_DIR)/,$(INTEGARTIONTEST_CPP_SRCS:.cpp=.o))
+INTEGRATIONTEST_DEPS := $(INTEGRATIONTEST_OBJS:.o=.d)
 
 all: ccache_prep $(BUILD_DIR)/main.hex
 
 test: ccache_prep $(TEST_BUILD_DIR)/unit_tests
 
 test_debug: ccache_prep $(TEST_DEBUG_BIN)
-	 
+
+integrationtest: ccache_prep $(INTEGRATIONTEST_BUILD_DIR)/integration_test	 
+
 ccache_prep:
 ifeq ($(USE_CCACHE),1)
 	@mkdir -p "$(CCACHE_TEMPDIR)"
@@ -210,6 +228,11 @@ $(TEST_BUILD_DIR)/unit_tests: $(TEST_OBJS) $(GTEST_LIB)
 	@$(TESTCC) $(TEST_CXXFLAGS) $^ -o $@
 	@echo "build_tests/unit_tests created"
 
+$(INTEGRATIONTEST_BUILD_DIR)/integration_test: $(INTEGRATIONTEST_OBJS) $(GTEST_LIB)
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CXXFLAGS) $^ -o $@
+	@echo "build_integrationtest created"
+
 $(GTEST_OBJ): $(GTEST_ROOT)/src/gtest-all.cc
 	@mkdir -p $(dir $@)
 	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_INCLUDES) -c $< -o $@
@@ -229,6 +252,10 @@ $(TEST_BUILD_DIR)/%.o: %.cpp $(TEST_PCH_GCH)
 $(TEST_BUILD_DIR)/%.o: %.cc $(TEST_PCH_GCH)
 	@mkdir -p $(dir $@)
 	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_PCH_FLAGS) $(TEST_INCLUDES) -c $< -o $@
+
+$(INTEGRATIONTEST_BUILD_DIR)/%.o: %.cpp $(TEST_PCH_GCH) 
+	@mkdir -p $(dir $@)
+	@$(TESTCC) $(TEST_CPPFLAGS) $(TEST_CXXFLAGS) $(TEST_PCH_FLAGS) $(TEST_INCLUDES) -c $< -o $@ 
 
 $(TEST_DEBUG_BIN): $(TEST_DEBUG_OBJS) $(GTEST_DEBUG_LIB)
 	@$(TESTCC) $(TEST_CXXFLAGS) $(TEST_DEBUGFLAGS) $^ -o $@
@@ -254,7 +281,7 @@ run_test: test
 	python3 scripts/run_test.py
 
 clean:
-	@rm -rf $(BUILD_DIR) $(TEST_BUILD_DIR) $(TEST_DEBUG_BUILD_DIR) compile_commands.json
+	@rm -rf $(BUILD_DIR) $(TEST_BUILD_DIR) $(TEST_DEBUG_BUILD_DIR) $(INTEGRATIONTEST_BUILD_DIR) compile_commands.json
 	@echo "build artifacts, compile commands and test binary removed"
 
 -include $(DEPS) $(TEST_DEPS) $(TEST_DEBUG_DEPS)

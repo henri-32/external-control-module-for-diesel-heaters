@@ -5,3 +5,5 @@
 
 
 3. #define in der config zu einem make Target machen
+
+4. Aufsetzen der integration Tests fixen. Evtl. sogar noch die anderen, weil gtest_main anscheinend nicht gelinkt wird
