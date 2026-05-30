@@ -26,7 +26,7 @@ protected:
   DisplayDriver driver{display, outputIntent.displayContent,
                        outputIntent.lcd_state};
 
-  void SetUp() override { ArduinoStubSpies::setMillis(1000); }
+  void SetUp() override { ArduinoStubSpies::setMillis(100); }
 };
 
 TEST_F(DisplayTest, init_gets_called) {
