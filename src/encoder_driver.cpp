@@ -33,7 +33,7 @@ void EncoderDriver::poll() {
 }
 
 int EncoderDriver::translatePositionToInput() {
-  if (millis() - m_last_change_ms < debounceConfig::encoder)
+  if (millis() - m_last_change_ms < DebounceConfig::encoder)
     return 0;
   int steps = m_delta / 4; // Wird auf ganze Schritte runtergebrochen und rest
                            // vernichtet bei Ganzzahldivision

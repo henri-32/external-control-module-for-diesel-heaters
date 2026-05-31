@@ -11,8 +11,10 @@ struct pinConfig {
   static constexpr int relais = 4;
 };
 
-struct debounceConfig {
+struct DebounceConfig {
   static constexpr int encoder = 100; 
+  static constexpr unsigned long pushButton = 50; 
+  static constexpr unsigned long toggleSwitch = 50; 
 }; 
 
 struct Config {
