@@ -695,8 +695,3 @@ TEST_F(SystemControllerUnitTest, cycle_pages_intent_reacts_to_cycling_left) {
 //}}}
 //}}}
 
-//====================================
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-};

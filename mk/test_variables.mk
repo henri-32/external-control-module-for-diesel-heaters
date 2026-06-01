@@ -25,7 +25,7 @@ TEST_CPP_SRCS := \
 	tests/encoder_driver_unit_test.cpp \
 	tests/temperature_sensor_unit_test.cpp 
 
-INTEGRATIONTEST_CPP_SRCS:= \
+INTEGRATIONTEST_CPP_SRC:= \
 	src/controller.cpp \
 	src/devicegroups.cpp \
 	src/temperature_sensor_driver.cpp \
@@ -39,6 +39,7 @@ INTEGRATIONTEST_CPP_SRCS:= \
 	tests/systemController_integration_test.cpp
 
 TEST_OBJS := $(addprefix $(TEST_BUILD_DIR)/,$(TEST_CPP_SRCS:.cpp=.o))
+
 TEST_DEPS := $(TEST_OBJS:.o=.d)
 
 TEST_DEBUG_OBJS = $(TEST_DEBUG_CPP_OBJS)

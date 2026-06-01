@@ -6,6 +6,7 @@
 # Build artifacts
 /build/
 /build_test/
+/build_integrationtest/
 /build_test_debug/
 /compile_commands.json
 
