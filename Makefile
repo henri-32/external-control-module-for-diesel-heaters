@@ -6,7 +6,7 @@ include mk/test_rules.mk
 
 .DEFAULT_GOAL := mcu
 
-.PHONY: mcu setup install compiledb_mcu compiledb_test test test_debug run_test clean ccache_prep
+.PHONY: mcu setup install compiledb_mcu compiledb_test test test_debug integrationtest integrationtest_debug run_test run_integrationtest clean ccache_prep
 
 MAKEFLAGS += --no-print-directory
 
@@ -35,8 +35,10 @@ test_logged:
 
 integrationtest: ccache_prep $(INTEGRATIONTEST_BUILD_DIR)/integration_test
 
+integrationtest_debug: ccache_prep $(INTEGRATIONTEST_DEBUG_BIN)
+
 clean:
-	@rm -rf $(MCU_BUILD_DIR) $(TEST_BUILD_DIR) $(TEST_DEBUG_BUILD_DIR) $(INTEGRATIONTEST_BUILD_DIR) compile_commands.json
+	@rm -rf $(MCU_BUILD_DIR) $(TEST_BUILD_DIR) $(TEST_DEBUG_BUILD_DIR) $(INTEGRATIONTEST_BUILD_DIR) $(INTEGRATIONTEST_DEBUG_BUILD_DIR) compile_commands.json
 	@echo "build artifacts, compile commands and test binary removed"
 
 setup:
@@ -71,4 +73,4 @@ compiledb_test_fast:
 	@bear -- $(MAKE) USE_CCACHE=1 test
 	@echo "compiledb updated to test build\n"
 
--include $(MCU_DEPS) $(TEST_DEPS) $(TEST_DEBUG_DEPS)
+-include $(MCU_DEPS) $(TEST_DEPS) $(TEST_DEBUG_DEPS) $(INTEGRATIONTEST_DEPS) $(INTEGRATIONTEST_DEBUG_DEPS)

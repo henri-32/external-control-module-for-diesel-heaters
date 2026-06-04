@@ -7,6 +7,7 @@
 /build/
 /build_test/
 /build_integrationtest/
+/build_integrationtest_debug/
 /build_test_debug/
 /compile_commands.json
 

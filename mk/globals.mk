@@ -6,6 +6,7 @@ MCU_BUILD_DIR := build
 TEST_BUILD_DIR := build_test
 TEST_DEBUG_BUILD_DIR := build_test_debug
 INTEGRATIONTEST_BUILD_DIR := build_integrationtest
+INTEGRATIONTEST_DEBUG_BUILD_DIR := build_integrationtest_debug
 
 BUILD_LOG := .logs/build.log
 LIBRARIES := includes/libraries
