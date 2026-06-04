@@ -95,7 +95,11 @@ class TestToggleSwitch : public IToggleSwitch {
 public:
   TestToggleSwitch() = default;
   void init() override{};
-  bool changed() override { return false; };
+  bool changed() override { return nextReturn; };
+  void setNextChangedReturn(bool nr);
+
+private: 
+  bool nextReturn = false; 
 };
 //}}}
 

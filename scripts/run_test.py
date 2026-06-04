@@ -2,6 +2,7 @@ import subprocess
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import argparse
+import sys
 
 p = Path(__file__).resolve()
 project_root = p.parent.parent
@@ -83,11 +84,15 @@ def main(binary):
             close_fds=True)
     
         print(
-    "Gtest Run on {} failed with code {}\n"
-    "See .logs/{} for log".format(binary.name, return_code, log_file.name))
-    
+        "Gtest Run on {} failed with code {}\n"
+        "See .logs/{} for log".format(binary.name, return_code, log_file.name))
+        sys.exit(1) 
+
     else: 
         print("All {} green".format(binary.name))
+        sys.exit(0)
 
 args = parser.parse_args()
-main(args.binary)
+
+if __name__ == "__main__": 
+    main(args.binary)

@@ -1,10 +1,9 @@
 1. Refactor vom alternator.used flag. Das wird gerade bei den InputDevices gehalten und vom SystemController consumed. Das sollte denke ich eher im Controller gehalten werden und die inputDevices halten nur noch den Status pressed/released. Dann ist das sauber getrennt. 
 
-
 2. CONST ÜBERARBEITEN IM GANZEN PROJEKT
 
 3. #define in der config zu einem make Target machen
 
-4. Aufsetzen der integration Tests fixen. Evtl. sogar noch die anderen, weil gtest_main anscheinend nicht gelinkt wird
+4. Im Integrationtest ist ein Segmentation Fault. Wahrscheinlich wieder irgendeine Klasse mehrfach definiert. Um das zu Debuggen müssen nochd ie Sanitizer Flag Build Pfade hinzugefügt werden. 
 
-5. INTEGRATIONSTESTS Schreiben 
+

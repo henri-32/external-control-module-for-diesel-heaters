@@ -23,7 +23,7 @@ test: ccache_prep $(TEST_BUILD_DIR)/unit_tests
 run_test: test
 	python3 scripts/run_test.py unit_tests
 
-run_integration_test: integrationtest
+run_integrationtest: integrationtest
 	python3 scripts/run_test.py integration_test
 
 test_debug: ccache_prep $(TEST_DEBUG_BIN)
