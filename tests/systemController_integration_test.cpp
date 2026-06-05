@@ -27,9 +27,8 @@ public:
 
 private:
   EncoderDriver encoderDriver{encoderHardware};
-  DisplayDriver displayDriver{displayHardware,
-                              outputDevices.intent.displayContent,
-                              outputDevices.intent.lcd_state};
+  DisplayDriver displayDriver{displayHardware, outputIntent.displayContent,
+                              outputIntent.lcd_state};
 
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;
