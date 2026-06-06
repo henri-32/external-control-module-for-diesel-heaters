@@ -24,7 +24,7 @@ float TemperatureSensorDriver::pollTemp() {
 }
 
 void TemperatureSensorDriver::startTemperatureRequest() {
-  if (millis() - m_last_temp_request < m_request_intervall_ms)
+  if (millis() - m_last_temp_request < kRequestIntervalMs)
     return;
   if (m_tempRequestPending)
     return;
@@ -36,7 +36,7 @@ void TemperatureSensorDriver::startTemperatureRequest() {
 void TemperatureSensorDriver::measureTemperature() {
   if (!m_tempRequestPending)
     return;
-  if (millis() - m_last_temp_request < m_conversion_time_ms)
+  if (millis() - m_last_temp_request < kConversionTimeMs)
     return;
   m_temp_c = m_sensorHardware.getTempCByIndex(0);
   m_tempRequestPending = false;

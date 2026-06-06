@@ -17,7 +17,7 @@ using RelaisCmd = OutputDevicesIntent::RelaisCommand;
 class SystemControllerIntegrationTest : public ::testing::Test {
   //{{{
 public:
-  // Modifieable Hardwarestubs for Tests
+  // Modifiable Hardwarestubs for Tests
   //=============================================================
   //=============================================================
   TestToggleSwitch powerSwitch;
@@ -84,13 +84,13 @@ protected:
   void rotateEncoderSteps(int steps) {
     encoderHardware.position += steps * 4;
     controller();
-    advanceMillis(DebounceConfig::encoder + 1);
+    advanceMillis(DebounceConfig::kEncoderMs + 1);
     controller();
   }
 
   void pollSensorTemp(float temp) {
     tempSensorHardware.setTempReturn(temp);
-    advanceMillis(Config::temperatureRequestInterval);
+    advanceMillis(Config::kTemperatureRequestIntervalMs);
     controller();
     advanceMillis(750);
     controller();
@@ -122,7 +122,7 @@ protected:
 
 TEST_F(SystemControllerIntegrationTest, controllerinit) {
   //{{{
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
   EXPECT_EQ(displayHardware.no_backlight_calls, 2);
   EXPECT_EQ(displayHardware.no_display_calls, 2);
 
@@ -136,12 +136,12 @@ TEST_F(SystemControllerIntegrationTest, controllerinit) {
 
 TEST_F(
     SystemControllerIntegrationTest,
-    relaisCommand_in_output_intent_resets_internally_after_tick_while_relais_recieved_command) {
+    relaisCommand_in_output_intent_resets_internally_after_tick_while_relais_received_command) {
   //{{{
   pulsePowerSwitch();
 
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 }
 //}}}
 
@@ -153,12 +153,12 @@ TEST_F(
   relais.reset();
 
   expectDisplayState("Zustand:   OFF");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 
   pulsePowerSwitch();
 
   expectDisplayState("Zustand:   ON");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 }
 //}}}
 
@@ -174,12 +174,12 @@ TEST_F(
   pulseModeSwitch();
 
   expectDisplayMode("Mode:      POWER");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Short);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Short);
 
   pulseModeSwitch();
 
   expectDisplayMode("Mode:      TEMP");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Short);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Short);
 }
 //}}}
 
@@ -196,13 +196,13 @@ TEST_F(
 
   expectDisplayMode("Mode:      POWER");
   expectDisplayState("Zustand:   ON");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 
   pulsePowerSwitch();
 
   expectDisplayMode("Mode:      POWER");
   expectDisplayState("Zustand:   OFF");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 }
 //}}}
 
@@ -284,7 +284,7 @@ TEST_F(SystemControllerIntegrationTest,
 
   controller();
 
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
   expectDisplayMode("Mode:      POWER");
 }
 //}}}
@@ -303,7 +303,7 @@ TEST_F(SystemControllerIntegrationTest,
 
   controller();
 
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
   expectDisplayState("Zustand:   ON");
 }
 //}}}
@@ -315,15 +315,15 @@ TEST_F(
   releaseDisplayButton();
   relais.reset();
 
-  pollSensorTemp(Config::defaultTemp - Config::tolerance);
+  pollSensorTemp(Config::kDefaultTempC - Config::kToleranceC);
 
   expectDisplayState("Zustand:   ON");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 
-  pollSensorTemp(Config::defaultTemp + Config::tolerance);
+  pollSensorTemp(Config::kDefaultTempC + Config::kToleranceC);
 
   expectDisplayState("Zustand:   OFF");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 }
 //}}}
 
@@ -335,22 +335,22 @@ TEST_F(
   relais.reset();
 
   pulseModeSwitch();
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Short);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Short);
 
   expectDisplayMode("Mode:      POWER");
   expectDisplayState("Zustand:   OFF");
 
-  pollSensorTemp(Config::defaultTemp - Config::tolerance);
+  pollSensorTemp(Config::kDefaultTempC - Config::kToleranceC);
 
   expectDisplayMode("Mode:      POWER");
   expectDisplayState("Zustand:   OFF");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 
-  pollSensorTemp(Config::defaultTemp + Config::tolerance);
+  pollSensorTemp(Config::kDefaultTempC + Config::kToleranceC);
 
   expectDisplayMode("Mode:      POWER");
   expectDisplayState("Zustand:   OFF");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 }
 //}}}
 
@@ -361,27 +361,27 @@ TEST_F(
   releaseDisplayButton();
   relais.reset();
 
-  pollSensorTemp(Config::defaultTemp - Config::tolerance);
+  pollSensorTemp(Config::kDefaultTempC - Config::kToleranceC);
 
   expectDisplayState("Zustand:   ON");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 
   controller();
   controller();
 
   expectDisplayState("Zustand:   ON");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 
-  pollSensorTemp(Config::defaultTemp + Config::tolerance);
+  pollSensorTemp(Config::kDefaultTempC + Config::kToleranceC);
 
   expectDisplayState("Zustand:   OFF");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 
   controller();
   controller();
 
   expectDisplayState("Zustand:   OFF");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 }
 //}}}
 
@@ -392,24 +392,24 @@ TEST_F(
   releaseDisplayButton();
   relais.reset();
 
-  pollSensorTemp(Config::defaultTemp - Config::tolerance);
+  pollSensorTemp(Config::kDefaultTempC - Config::kToleranceC);
 
   expectDisplayState("Zustand:   ON");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 
-  pollSensorTemp(Config::defaultTemp - Config::tolerance + 1);
+  pollSensorTemp(Config::kDefaultTempC - Config::kToleranceC + 1);
 
   expectDisplayState("Zustand:   ON");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 
-  pollSensorTemp(Config::defaultTemp + Config::tolerance);
-
-  expectDisplayState("Zustand:   OFF");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
-
-  pollSensorTemp(Config::defaultTemp + Config::tolerance - 1);
+  pollSensorTemp(Config::kDefaultTempC + Config::kToleranceC);
 
   expectDisplayState("Zustand:   OFF");
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
+
+  pollSensorTemp(Config::kDefaultTempC + Config::kToleranceC - 1);
+
+  expectDisplayState("Zustand:   OFF");
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 }
 //}}}

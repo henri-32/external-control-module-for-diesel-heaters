@@ -11,7 +11,7 @@ protected:
   TemperatureSensorDriver driver{testSensor};
 
   void SetUp() override {
-    setMillis(Config::temperatureRequestInterval);
+    setMillis(Config::kTemperatureRequestIntervalMs);
     initSpies();
     testSensor.setTempReturn(10.0);
   }
@@ -24,7 +24,7 @@ TEST_F(TemperatureDriverTest,
   EXPECT_EQ(testSensor.getTempCByIndex(), 10.0);
 
   driver.pollTemp();
-  advanceMillis(Config::temperatureRequestInterval);
+  advanceMillis(Config::kTemperatureRequestIntervalMs);
 
   EXPECT_EQ(driver.pollTemp(), 10.0);
 }
@@ -35,9 +35,9 @@ TEST_F(TemperatureDriverTest,
   //{{{
   testSensor.setTempReturn(10.0);
   driver.pollTemp();
-  advanceMillis(Config::temperatureRequestInterval);
+  advanceMillis(Config::kTemperatureRequestIntervalMs);
   driver.pollTemp();
-  advanceMillis(Config::temperatureRequestInterval - 1);
+  advanceMillis(Config::kTemperatureRequestIntervalMs - 1);
 
   testSensor.setTempReturn(20.0);
   EXPECT_EQ(driver.pollTemp(), 10.0);
@@ -49,13 +49,13 @@ TEST_F(TemperatureDriverTest,
   //{{{
   testSensor.setTempReturn(10.0);
   driver.pollTemp();
-  advanceMillis(Config::temperatureRequestInterval);
+  advanceMillis(Config::kTemperatureRequestIntervalMs);
   EXPECT_EQ(driver.pollTemp(), 10.0);
 
-  advanceMillis(Config::temperatureRequestInterval);
+  advanceMillis(Config::kTemperatureRequestIntervalMs);
   testSensor.setTempReturn(20.0);
   driver.pollTemp();
-  advanceMillis(Config::temperatureRequestInterval);
+  advanceMillis(Config::kTemperatureRequestIntervalMs);
   EXPECT_EQ(driver.pollTemp(), 20.0);
 }
 //}}}
@@ -86,7 +86,7 @@ TEST_F(TemperatureDriverTest, correct_read_on_conversion_time) {
 TEST_F(TemperatureDriverTest, no_double_requests_while_request_pending) {
   //{{{
   driver.pollTemp();
-  advanceMillis(Config::temperatureRequestInterval);
+  advanceMillis(Config::kTemperatureRequestIntervalMs);
   driver.pollTemp();
   advanceMillis(10);
   driver.pollTemp();

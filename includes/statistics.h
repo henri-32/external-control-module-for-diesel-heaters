@@ -27,7 +27,7 @@ public:
     return longTimeDataBuffer;
   }
 
-  static constexpr unsigned long writingIntervall = 2UL * 60UL * 60UL * 1000UL; // 2h
+  static constexpr unsigned long kWritingIntervalMs = 2UL * 60UL * 60UL * 1000UL; // 2h
   unsigned long lastWrite = 0;
   unsigned long timeStamp;
 
@@ -36,7 +36,7 @@ private:
   LongtimeData longTimeDataBuffer;
   InputDevicesDataSet data;
   HeaterStatus m_status;
-  HeaterStatus::State m_lastState = HeaterStatus::State::OFF;
+  HeaterStatus::State m_lastState = HeaterStatus::State::Off;
   CalculationData calculationData;
   bool m_longTimeDataReady = false;
 
@@ -51,9 +51,9 @@ private:
   void rememberLastON_OFF() {
     if (m_status.heatingState == m_lastState)
       return;
-    if (m_status.heatingState == HeaterStatus::State::ON) {
+    if (m_status.heatingState == HeaterStatus::State::On) {
       calculationData.lastON = timeStamp;
-    } else if (m_status.heatingState == HeaterStatus::State::OFF) {
+    } else if (m_status.heatingState == HeaterStatus::State::Off) {
       calculationData.lastOFF = timeStamp;
     }
   }
@@ -61,22 +61,22 @@ private:
   void calculateCycleCounter() {
     if (m_status.heatingState == m_lastState)
       return;
-    if (m_status.heatingState == HeaterStatus::State::ON) {
+    if (m_status.heatingState == HeaterStatus::State::On) {
       runtimeData.cycleCounter += 1;
     }
   }
 
   void calculateDiffTempToTarget() {
-    calculationData.TempDiffcontainer +=
+    calculationData.tempDiffAccumulator +=
         data.sensor_tempC - m_status.target_tempC;
     runtimeData.mediumDiffTempToTarget =
-        calculationData.TempDiffcontainer / calculationData.updateCounter;
+        calculationData.tempDiffAccumulator / calculationData.updateCounter;
   }
 
   void calculateDutyStats() {
     if (m_status.heatingState == m_lastState)
       return;
-    if (m_status.heatingState == HeaterStatus::State::ON) {
+    if (m_status.heatingState == HeaterStatus::State::On) {
       calculationData.accumulatedTimeOFF += timeStamp - calculationData.lastOFF;
     } else {
       calculationData.accumulatedTimeON += timeStamp - calculationData.lastON;
@@ -126,7 +126,7 @@ private:
   }
 
   void writeLongTimeStats() {
-    if (timeStamp - lastWrite < writingIntervall)
+    if (timeStamp - lastWrite < kWritingIntervalMs)
       return;
     lastWrite = timeStamp;
 

@@ -22,13 +22,13 @@ struct InputDevicesDataSet {
 };
 
 struct HeaterStatus {
-  enum class State { OFF, ON };
-  State state = State::OFF;
+  enum class State { Off, On };
+  State state = State::Off;
 
-  enum class Mode { TEMP, POWER };
-  Mode mode = Mode::TEMP;
+  enum class Mode { Temp, Power };
+  Mode mode = Mode::Temp;
 
-  float target_tempC = Config::defaultTemp;
+  float target_tempC = Config::kDefaultTempC;
 };
 
 #ifdef MEMORY_FUNCTIONS
@@ -47,7 +47,7 @@ struct RuntimeData {
 
 struct CalculationData {
   uint16_t updateCounter = 0;
-  float TempDiffcontainer = 0.0;
+  float tempDiffAccumulator = 0.0;
   unsigned long lastON = 0;
   unsigned long lastOFF = 0;
   unsigned long accumulatedTimeOFF = 0;
@@ -68,11 +68,11 @@ public:
   };
   DisplayContent displayContent;
 
-  enum class LCD_StateIntent { Page1, Page2, Page3, Page4, OFF };
-  LCD_StateIntent lcd_state = LCD_StateIntent::OFF;
+  enum class LcdStateIntent { Page1, Page2, Page3, Page4, Off };
+  LcdStateIntent lcd_state = LcdStateIntent::Off;
 
-  enum class LCD_CycleDirection { none, right, left };
-  LCD_CycleDirection lcd_cycleDirection = LCD_CycleDirection::none;
+  enum class LcdCycleDirection { None, Right, Left };
+  LcdCycleDirection lcd_cycleDirection = LcdCycleDirection::None;
 
   enum class RelaisCommand { Long, Short, None };
   RelaisCommand relaisCommand = RelaisCommand::None;

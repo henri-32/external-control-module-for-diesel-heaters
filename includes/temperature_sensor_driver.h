@@ -16,11 +16,11 @@ private:
 
   unsigned long m_last_temp_request = 0;
   bool m_tempRequestPending = false;
-  static constexpr unsigned long m_request_intervall_ms =
-      Config::temperatureRequestInterval;
+  static constexpr unsigned long kRequestIntervalMs =
+      Config::kTemperatureRequestIntervalMs;
 
   // Hardcoded, because it's no config value, but a DS18B20 Hardware
   // related timespan
-  static constexpr unsigned long m_conversion_time_ms = 750;
-  float m_temp_c = Config::defaultTemp;
+  static constexpr unsigned long kConversionTimeMs = 750;
+  float m_temp_c = Config::kDefaultTempC;
 };

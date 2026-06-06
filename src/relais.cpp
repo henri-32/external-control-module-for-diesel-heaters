@@ -21,25 +21,25 @@ void Relais::update(OutputDevicesIntent::RelaisCommand command) {
 }
 
 void Relais::turnOn(const OutputDevicesIntent::RelaisCommand &command) {
-  if (m_relais_state != RelaisState::OFF ||
+  if (m_relais_state != RelaisState::Off ||
       command == OutputDevicesIntent::RelaisCommand::None) {
     return;
   }
   applyPulseLengthFromIntent(command);
   activate();
   m_pulse_start_ms = millis();
-  m_relais_state = RelaisState::ON;
+  m_relais_state = RelaisState::On;
 };
 
 void Relais::turnOff() {
-  if (m_relais_state != RelaisState::ON) {
+  if (m_relais_state != RelaisState::On) {
     return;
   }
   if (millis() - m_pulse_start_ms < m_pulse_ms) {
     return;
   }
   deactivate();
-  m_relais_state = RelaisState::OFF;
+  m_relais_state = RelaisState::Off;
 }
 
 void Relais::applyPulseLengthFromIntent(
@@ -50,11 +50,11 @@ void Relais::applyPulseLengthFromIntent(
   case cmd::None:
     return;
   case cmd::Long:
-    m_pulse_ms = Config::RelaisLongPulse_ms;
+    m_pulse_ms = Config::kRelaisLongPulseMs;
     break;
 
   case cmd::Short:
-    m_pulse_ms = Config::RelaisShortPulse_ms;
+    m_pulse_ms = Config::kRelaisShortPulseMs;
     break;
   }
 }

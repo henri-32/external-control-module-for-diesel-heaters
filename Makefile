@@ -10,6 +10,8 @@ include mk/test_rules.mk
 
 MAKEFLAGS += --no-print-directory
 
+targets: 
+	@echo "mcu\nmcu_logged\ntest\ntest_debug\ntest_logged\nrun_test\nrun_test_debug\nintegrationtest\nintegrationtest_debug\nrun_integrationtest\nrun_integrationtest_debug\ncompiledb_mcu\ncompiledb_fast\ncompiledb_test\ncompiledb_test_fast\ncompiledb_integrationtest\ncompiledb_integrationtest_fast\nclean\nsetup\ninstall"
 
 mcu: ccache_prep $(MCU_BUILD_DIR)/main.hex
 
@@ -20,20 +22,6 @@ mcu_logged:
 
 test: ccache_prep $(TEST_BUILD_DIR)/unit_tests 
 
-run_test: test
-	python3 scripts/run_test.py unit_tests
-
-run_test_debug: test_debug 
-	python3 scripts/run_test.py unit_tests_debug
-
-run_integrationtest: integrationtest
-	python3 scripts/run_test.py integration_test
-
-run_integrationtest_debug: integrationtest_debug 
-	python3 scripts/run_test.py integrationtest_debug
-
-
-
 test_debug: ccache_prep $(TEST_DEBUG_BIN)
 
 test_logged: 
@@ -41,22 +29,21 @@ test_logged:
 	@$(MAKE) test > $(BUILD_LOG) 2>&1 
 	@echo 'Build Log for "test" target written to $(BUILD_LOG)' 
 
+run_test: test
+	python3 scripts/run_test.py unit_tests
+
+run_test_debug: test_debug 
+	python3 scripts/run_test.py unit_tests_debug
+
 integrationtest: ccache_prep $(INTEGRATIONTEST_BUILD_DIR)/integration_test
 
 integrationtest_debug: ccache_prep $(INTEGRATIONTEST_DEBUG_BIN)
 
-clean:
-	@rm -rf $(MCU_BUILD_DIR) $(TEST_BUILD_DIR) $(TEST_DEBUG_BUILD_DIR) $(INTEGRATIONTEST_BUILD_DIR) $(INTEGRATIONTEST_DEBUG_BUILD_DIR) compile_commands.json
-	@echo "build artifacts, compile commands and test binary removed"
+run_integrationtest: integrationtest
+	python3 scripts/run_test.py integration_test
 
-setup:
-	@scripts/setup.sh
-
-requirements.txt: requirements.in
-	python -m piptools compile
-
-install: requirements.txt
-	venv/bin/pip install -r requirements.txt
+run_integrationtest_debug: integrationtest_debug 
+	python3 scripts/run_test.py integrationtest_debug
 
 compiledb_mcu:
 	@rm -f compile_commands.json
@@ -92,6 +79,20 @@ compiledb_integrationtest_fast:
 	@bear -- $(MAKE) USE_CCACHE=1 integrationtest
 	@echo 'compiledb updated to integrationtest build' 
 
+
+clean:
+	@rm -rf $(MCU_BUILD_DIR) $(TEST_BUILD_DIR) $(TEST_DEBUG_BUILD_DIR) $(INTEGRATIONTEST_BUILD_DIR) $(INTEGRATIONTEST_DEBUG_BUILD_DIR) compile_commands.json
+	@echo "build artifacts, compile commands and test binary removed"
+
+setup:
+	@scripts/setup.sh
+
+
+install: requirements.txt
+	venv/bin/pip install -r requirements.txt
+
+requirements.txt: requirements.in
+	python -m piptools compile
 
 
 -include $(MCU_DEPS) $(TEST_DEPS) $(TEST_DEBUG_DEPS) $(INTEGRATIONTEST_DEPS) $(INTEGRATIONTEST_DEBUG_DEPS)

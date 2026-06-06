@@ -4,6 +4,6 @@
 
 3. #define in der config zu einem make Target machen
 
-4. Im Integrationtest ist ein Segmentation Fault. Wahrscheinlich wieder irgendeine Klasse mehrfach definiert. Um das zu Debuggen müssen nochd ie Sanitizer Flag Build Pfade hinzugefügt werden. 
+4. Im Integrationtest ist ein Segmentation Fault. Wahrscheinlich wieder irgendeine Klasse mehrfach definiert. Um das zu Debuggen müssen noch die Sanitizer Flag Build Pfade hinzugefügt werden. 
 
 

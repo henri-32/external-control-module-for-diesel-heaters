@@ -1,7 +1,7 @@
 #include "ArduinoStubs.h"
 using namespace ArduinoStubSpies;
 
-// Diese Funktionen müssen global sein, umd er Arduino Signatur zu entsprechen
+// Diese Funktionen müssen global sein, um der Arduino Signatur zu entsprechen
 void digitalWrite(int pin, PinState state) {
   pinWritten_state = pin;
   writtenState = state;

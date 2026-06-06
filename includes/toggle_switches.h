@@ -13,6 +13,6 @@ private:
   bool m_current;
   bool m_prev;
   unsigned long m_last_debounce_ms = 0;
-  static constexpr unsigned long m_debounce_delay_ms = DebounceConfig::toggleSwitch;
+  static constexpr unsigned long kDebounceDelayMs = DebounceConfig::kToggleSwitchMs;
 };
 

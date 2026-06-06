@@ -14,5 +14,5 @@ private:
   bool m_stable;
   bool m_last_read;
   unsigned long m_last_debounce_ms = 0;
-  static constexpr unsigned long m_debounce_delay_ms = DebounceConfig::pushButton;
+  static constexpr unsigned long kDebounceDelayMs = DebounceConfig::kPushButtonMs;
 };

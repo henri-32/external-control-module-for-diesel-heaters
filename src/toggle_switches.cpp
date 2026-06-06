@@ -18,7 +18,7 @@ bool ToggleSwitch::changed() {
   m_current = digitalRead(m_pin);
   if (m_current == m_prev)
     return false;
-  if (millis() - m_last_debounce_ms < m_debounce_delay_ms)
+  if (millis() - m_last_debounce_ms < kDebounceDelayMs)
     return false;
 
   m_prev = m_current;

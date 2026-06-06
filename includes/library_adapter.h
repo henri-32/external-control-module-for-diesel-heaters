@@ -11,8 +11,8 @@
 
 class LCDAdapter : public IDisplayHardware {
 public:
-  LCDAdapter(uint8_t lcdAddr, uint8_t lcd_cos, uint8_t lcd_rows)
-      : m_lcdAddr(lcdAddr), m_lcd_cos(lcd_cos), m_lcd_rows(lcd_rows){};
+  LCDAdapter(uint8_t lcdAddr, uint8_t lcd_cols, uint8_t lcd_rows)
+      : m_lcdAddr(lcdAddr), m_lcd_cols(lcd_cols), m_lcd_rows(lcd_rows){};
 
   void clear() override;
   void noDisplay() override;
@@ -26,9 +26,9 @@ public:
 
 private:
   uint8_t m_lcdAddr;
-  uint8_t m_lcd_cos;
+  uint8_t m_lcd_cols;
   uint8_t m_lcd_rows;
-  LiquidCrystal_I2C liquidCristal_I2C{m_lcdAddr, m_lcd_cos, m_lcd_rows};
+  LiquidCrystal_I2C liquidCrystal_I2C{m_lcdAddr, m_lcd_cols, m_lcd_rows};
 };
 //}}}
 

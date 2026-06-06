@@ -18,8 +18,8 @@ private:
   void deactivate() ;
 
   const uint8_t m_pin;
-  enum class RelaisState { ON, OFF };
-  RelaisState m_relais_state = RelaisState::OFF;
+  enum class RelaisState { On, Off };
+  RelaisState m_relais_state = RelaisState::Off;
   uint16_t m_pulse_ms = 0;
   unsigned long m_pulse_start_ms = 0;
 };

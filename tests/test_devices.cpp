@@ -14,7 +14,7 @@ void TestRelais::update(OutputDevicesIntent::RelaisCommand intent) {
 }
 //}}}
 
-OutputDevicesIntent::RelaisCommand TestRelais::recievedCommand() {
+OutputDevicesIntent::RelaisCommand TestRelais::receivedCommand() {
   //{{{
   // This TestClass holds the lastCommand as a state. The real relais
   // class does not. This is only intended to keep track of the calls

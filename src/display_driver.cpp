@@ -5,7 +5,7 @@
 
 
 using ODI = OutputDevicesIntent; 
-using LCDIntent = OutputDevicesIntent::LCD_StateIntent;
+using LCDIntent = OutputDevicesIntent::LcdStateIntent;
 
 #ifdef TEST_BUILD
 #include "ArduinoStubs.h"
@@ -29,7 +29,7 @@ void DisplayDriver::init() {
 
 void DisplayDriver::update() {
   //{{{
-  if (m_displayState == LCDIntent::OFF) {
+  if (m_displayState == LCDIntent::Off) {
     m_display.noBacklight();
     m_display.noDisplay();
     return;
@@ -93,7 +93,7 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[3], 21, "%s", "");
 	#endif
     break;
-  case LCDIntent::OFF:
+  case LCDIntent::Off:
     m_display.noBacklight();
     m_display.noDisplay();
     break;
@@ -103,7 +103,7 @@ void DisplayDriver::renderLines() {
 
 void DisplayDriver::writeDisplay(char lines[4][21]) {
   //{{{
-  if (millis() - last_update_ms < min_update_interval_ms)
+  if (millis() - last_update_ms < kMinUpdateIntervalMs)
     return;
 
   for (uint8_t i = 0; i < 4; i++) {
@@ -147,7 +147,7 @@ void DisplayDriver::formatTempFloatsForDisplay() {
   case LCDIntent::Page4:
     break;
 
-  case LCDIntent::OFF:
+  case LCDIntent::Off:
     break;
   }
 }
@@ -157,21 +157,21 @@ void DisplayDriver::createStateStringsForDisplay(
     const ODI::DisplayContent &content) {
   //{{{
   switch (content.status.state) {
-  case HeaterStatus::State::ON:
+  case HeaterStatus::State::On:
     strncpy(string_of_states[0], "ON", 21);
     string_of_states[0][20] = '\0';
     break;
-  case HeaterStatus::State::OFF:
+  case HeaterStatus::State::Off:
     strncpy(string_of_states[0], "OFF", 21);
     string_of_states[0][20] = '\0';
     break;
   }
   switch (content.status.mode) {
-  case HeaterStatus::Mode::TEMP:
+  case HeaterStatus::Mode::Temp:
     strncpy(string_of_states[1], "TEMP", 21);
     string_of_states[1][20] = '\0';
     break;
-  case HeaterStatus::Mode::POWER:
+  case HeaterStatus::Mode::Power:
     strncpy(string_of_states[1], "POWER", 21);
     string_of_states[1][20] = '\0';
     break;

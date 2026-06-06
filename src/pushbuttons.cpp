@@ -22,7 +22,7 @@ bool PushButton::released() {
     m_last_read = reading;
   }
 
-  if (millis() - m_last_debounce_ms < m_debounce_delay_ms)
+  if (millis() - m_last_debounce_ms < kDebounceDelayMs)
     return false;
 
   if (m_stable != reading) {

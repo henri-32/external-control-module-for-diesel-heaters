@@ -53,13 +53,13 @@ TODO: Foto verlinken
 ### Pin-Belegungen
 Aus `includes/config.h`:
 
-- `D2`: `powerSwitch`
-- `D3`: `modeSwitch`
-- `D4`: `relais`
-- `D5`: `tempSensor` (DS18B20 OneWire)
-- `D6`: Encoder A (`myEncoder[0]`)
-- `D7`: Encoder B (`myEncoder[1]`)
-- `D8`: `displayButton`
+- `D2`: `kPowerSwitchPin`
+- `D3`: `kModeSwitchPin`
+- `D4`: `kRelaisPin`
+- `D5`: `kTempSensorPin` (DS18B20 OneWire)
+- `D6`: Encoder A (`kEncoderPinA`)
+- `D7`: Encoder B (`kEncoderPinB`)
+- `D8`: `kDisplayButtonPin`
 - `I2C (A4/A5 beim UNO)`: LCD (`LCDAdapter{0x27, 20, 4}`)
 
 ### Build
@@ -69,10 +69,10 @@ make all
 
 ### Quick Start (Bedienung)
 1. System einschalten und Startzustand am Display prüfen.
-2. Mit `modeSwitch` zwischen `POWER` und `TEMP` umschalten.
+2. Mit `kModeSwitchPin` zwischen `POWER` und `TEMP` umschalten.
 3. Im `TEMP`-Modus mit dem Encoder die Solltemperatur einstellen.
-4. Mit gedrücktem `displayButton` und Encoder die LCD-Seiten wechseln.
-5. Mit `powerSwitch` die Heizung manuell ein-/ausschalten.
+4. Mit gedrücktem `kDisplayButtonPin` und Encoder die LCD-Seiten wechseln.
+5. Mit `kPowerSwitchPin` die Heizung manuell ein-/ausschalten.
 
 ### Steuerlogik (Laufzeitverhalten)
 Die Hauptschleife ruft pro Zyklus `controller()` auf. Intern passiert:
@@ -85,19 +85,19 @@ Die Hauptschleife ruft pro Zyklus `controller()` auf. Intern passiert:
 
 Steuerverhalten:
 
-- `powerSwitch` Änderung:
+- `kPowerSwitchPin` Änderung:
   - Normal: Relais `Long`-Puls (1500 ms), Heizungszustand toggeln (`ON/OFF`)
-  - Bei gedrücktem `displayButton`: nur internen Zustand toggeln, kein Relais
-- `modeSwitch` Änderung:
+  - Bei gedrücktem `kDisplayButtonPin`: nur internen Zustand toggeln, kein Relais
+- `kModeSwitchPin` Änderung:
   - Normal: Relais `Short`-Puls (200 ms), Modus toggeln (`POWER/TEMP`)
-  - Bei gedrücktem `displayButton`: nur internen Modus toggeln, kein Relais
-- `displayButton` bei Loslassen:
+  - Bei gedrücktem `kDisplayButtonPin`: nur internen Modus toggeln, kein Relais
+- `kDisplayButtonPin` bei Loslassen:
   - ohne Kombiaktion: LCD zwischen `OFF` und `Page1` umschalten
   - nach Kombiaktion: keine zusätzliche Display-Umschaltung
 - Encoder drehen:
-  - ohne gedrückten `displayButton`: Solltemperatur anpassen
+  - ohne gedrückten `kDisplayButtonPin`: Solltemperatur anpassen
     (`target_tempC += encoder_steps * 0.5`, begrenzt auf 5..30 °C)
-  - mit gedrücktem `displayButton`: LCD-Seiten zyklisch wechseln
+  - mit gedrücktem `kDisplayButtonPin`: LCD-Seiten zyklisch wechseln
 
 Temperaturregelung (`TEMP`-Modus):
 
@@ -111,14 +111,14 @@ Aus `includes/config.h`:
 
 | Parameter | Wert | Bedeutung |
 | --- | --- | --- |
-| `defaultTemp` | `15` | Start-Solltemperatur in °C |
-| `tempStep` | `0.5` | Schrittweite pro Encoder-Impuls in °C |
-| `tempMin` | `5` | Untere Solltemperaturgrenze in °C |
-| `tempMax` | `30` | Obere Solltemperaturgrenze in °C |
-| `tolerance` | `1.5` | Hysterese um die Solltemperatur in °C |
-| `encoderValCutoff` | `6` | Grenzwert zur Interpretation von Encoder-Schritten |
-| `RelaisLongPulse_ms` | `1500` | Langer Relais-Puls (Power-Toggle) |
-| `RelaisShortPulse_ms` | `200` | Kurzer Relais-Puls (Mode-Toggle) |
+| `kDefaultTempC` | `15` | Start-Solltemperatur in °C |
+| `kTempStepC` | `0.5` | Schrittweite pro Encoder-Impuls in °C |
+| `kTempMinC` | `5` | Untere Solltemperaturgrenze in °C |
+| `kTempMaxC` | `30` | Obere Solltemperaturgrenze in °C |
+| `kToleranceC` | `1.5` | Hysterese um die Solltemperatur in °C |
+| `kEncoderValCutoff` | `6` | Grenzwert zur Interpretation von Encoder-Schritten |
+| `kRelaisLongPulseMs` | `1500` | Langer Relais-Puls (Power-Toggle) |
+| `kRelaisShortPulseMs` | `200` | Kurzer Relais-Puls (Mode-Toggle) |
 
 ### Praktische Nutzung
 Hierdurch wird folgende Nutzung ermöglicht:
@@ -156,13 +156,13 @@ noch keine interpretierbaren Anzeigen.
 
 ### Zukünftige Aufgaben 
 - Korrektur der Memory Funktionen zur statistischen Auswertung
-- Zusätzliche Anbingung an die Drehbetätigung des originalen Encoders, 
+- Zusätzliche Anbindung an die Drehbetätigung des originalen Encoders, 
   um vollständig über den eigenen Controller steuern zu können. 
 
 ### Sicherheitshinweis
 - Heizung nicht hart über Wegnahme der Versorgung abschalten, wenn ein
   geregeltes Nachlauf-/Abkühlverhalten erforderlich ist.
-- Die Verantwortung für sicheren Einbau und Betrieb liegt selbstverstänglich
+- Die Verantwortung für sicheren Einbau und Betrieb liegt selbstverständlich
   beim Anwender.
 
 

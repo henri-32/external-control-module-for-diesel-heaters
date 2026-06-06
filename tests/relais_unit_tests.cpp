@@ -59,7 +59,7 @@ TEST_F(RelaisTest, short_command_activates_then_deactivates_on_next_update) {
   EXPECT_EQ(pinWritten_state, kPin);
   EXPECT_EQ(writtenState, HIGH);
 
-  advanceMillis(Config::RelaisShortPulse_ms);
+  advanceMillis(Config::kRelaisShortPulseMs);
   driver.update(ODI::RelaisCommand::None);
 
   EXPECT_EQ(pinWritten_state, kPin);
@@ -75,7 +75,7 @@ TEST_F(RelaisTest, long_command_activates_then_deactivates_on_next_update) {
   EXPECT_EQ(pinWritten_state, kPin);
   EXPECT_EQ(writtenState, HIGH);
 
-  advanceMillis(Config::RelaisLongPulse_ms);
+  advanceMillis(Config::kRelaisLongPulseMs);
   driver.update(ODI::RelaisCommand::None);
 
   EXPECT_EQ(pinWritten_state, kPin);
@@ -90,7 +90,7 @@ TEST_F(RelaisTest, short_command_stays_on_for_one_check_then_turns_off) {
 
   EXPECT_EQ(writtenState, HIGH);
 
-  advanceMillis(Config::RelaisShortPulse_ms - 1);
+  advanceMillis(Config::kRelaisShortPulseMs - 1);
   driver.update(ODI::RelaisCommand::None);
   EXPECT_EQ(writtenState, HIGH);
 
@@ -106,7 +106,7 @@ TEST_F(RelaisTest, long_command_stays_on_for_one_check_then_turns_off) {
 
   EXPECT_EQ(writtenState, HIGH);
 
-  advanceMillis(Config::RelaisLongPulse_ms - 1);
+  advanceMillis(Config::kRelaisLongPulseMs - 1);
   driver.update(ODI::RelaisCommand::None);
   EXPECT_EQ(writtenState, HIGH);
 

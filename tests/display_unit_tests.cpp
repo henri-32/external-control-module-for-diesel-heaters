@@ -42,7 +42,7 @@ TEST_F(DisplayTest, init_gets_called) {
 
 TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
   //{{{
-  outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::OFF;
+  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::Off;
 
   driver.update();
 
@@ -54,11 +54,11 @@ TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
 
 TEST_F(DisplayTest, update_page1_writes_expected_lines) {
   //{{{
-  outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::Page1;
+  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::Page1;
   outputIntent.displayContent.temp_c = 21.3F;
   outputIntent.displayContent.status.target_tempC = 19.8F;
-  outputIntent.displayContent.status.state = HeaterStatus::State::ON;
-  outputIntent.displayContent.status.mode = HeaterStatus::Mode::POWER;
+  outputIntent.displayContent.status.state = HeaterStatus::State::On;
+  outputIntent.displayContent.status.mode = HeaterStatus::Mode::Power;
 
   driver.update();
 
@@ -74,11 +74,11 @@ TEST_F(DisplayTest, update_page1_writes_expected_lines) {
 
 TEST_F(DisplayTest, update_with_same_content_does_not_rewrite_lines) {
   //{{{
-  outputIntent.lcd_state = OutputDevicesIntent::LCD_StateIntent::Page1;
+  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::Page1;
   outputIntent.displayContent.temp_c = 20.0F;
   outputIntent.displayContent.status.target_tempC = 18.5F;
-  outputIntent.displayContent.status.state = HeaterStatus::State::OFF;
-  outputIntent.displayContent.status.mode = HeaterStatus::Mode::TEMP;
+  outputIntent.displayContent.status.state = HeaterStatus::State::Off;
+  outputIntent.displayContent.status.mode = HeaterStatus::Mode::Temp;
 
   driver.update();
   const size_t printed_after_first_update = display.printed_lines.size();

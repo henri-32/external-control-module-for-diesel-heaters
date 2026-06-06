@@ -4,7 +4,7 @@
 class DisplayDriver : public IDisplayDriver {
 public:
   DisplayDriver(IDisplayHardware &display, OutputDevicesIntent::DisplayContent &dc,
-                OutputDevicesIntent::LCD_StateIntent &ds);
+                OutputDevicesIntent::LcdStateIntent &ds);
 
   void init() override;
   void update() override;
@@ -18,14 +18,14 @@ public:
   void clearLine(uint8_t line);
 
   IDisplayHardware &m_display;
-  static constexpr uint8_t Rows = 4;
-  static constexpr uint8_t Cols = 21;
-  char m_lineBuffer[Rows][Cols] = {};
-  char string_of_states[Rows][Cols] = {};
+  static constexpr uint8_t kRows = 4;
+  static constexpr uint8_t kCols = 21;
+  char m_lineBuffer[kRows][kCols] = {};
+  char string_of_states[kRows][kCols] = {};
   char lastLine[4][21] = {"", "", "", ""};
   // States
   OutputDevicesIntent::DisplayContent &m_displayContent;
-  OutputDevicesIntent::LCD_StateIntent &m_displayState;
+  OutputDevicesIntent::LcdStateIntent &m_displayState;
   // Formatting in Helperfunktion
   int t_int;
   int t_frac;
@@ -35,5 +35,5 @@ public:
   int diff_frac;
   // Timing
   unsigned long last_update_ms = 0;
-  const uint8_t min_update_interval_ms = 100;
+  static constexpr uint8_t kMinUpdateIntervalMs = Config::kMinLcdUpdateIntervalMs;
 };

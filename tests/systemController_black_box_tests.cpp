@@ -33,13 +33,13 @@ TEST(InitTests, controllerinit) {
 
   EXPECT_EQ(inputData.switchAction.mode, false);
   EXPECT_EQ(inputData.switchAction.power, false);
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
   EXPECT_EQ(outputIntent.relaisCommand, RelaisCmd::None);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
-  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LCD_StateIntent::OFF);
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::TEMP);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
-            Config::defaultTemp);
+            Config::kDefaultTempC);
 }
 //}}}
 
@@ -76,12 +76,12 @@ protected:
 
 TEST_F(
     SystemControllerBlackBox,
-    relaisCommand_in_output_intent_resets_internally_after_tick_while_relais_recieved_command) {
+    relaisCommand_in_output_intent_resets_internally_after_tick_while_relais_received_command) {
   //{{{
   inputData.switchAction.power = true;
 
   controller();
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
   EXPECT_EQ(outputIntent.relaisCommand, RelaisCmd::None);
 }
 //}}}
@@ -92,13 +92,13 @@ TEST_F(
   //{{{
   inputData.switchAction.power = true;
 
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::ON);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 }
 //}}}
 
@@ -106,20 +106,20 @@ TEST_F(
     SystemControllerBlackBox,
     mode_switch_send_relais_command_and_heater_mode_switches_correctly_from_temp_to_power_and_back) {
   //{{{
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::TEMP);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
   inputData.switchAction.mode = true;
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Short);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Power);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Short);
 
   inputData.switchAction.mode = true;
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::TEMP);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Short);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Short);
 }
 //}}}
 
@@ -127,56 +127,56 @@ TEST_F(
     SystemControllerBlackBox,
     power_switch_changes_mode_from_temp_to_power_but_not_from_power_to_temp_while_sending_relais_command_and_switching_power_state) {
   //{{{
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::TEMP);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
   inputData.switchAction.power = true;
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::ON);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Power);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 
   inputData.switchAction.power = true;
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Power);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 }
 //}}}
 
 TEST_F(SystemControllerBlackBox, encoder_steps_change_target_temp) {
   //{{{
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
-            Config::defaultTemp);
+            Config::kDefaultTempC);
 
   inputData.encoder_val = 1;
 
   controller();
 
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
-            Config::defaultTemp + Config::tempStep);
+            Config::kDefaultTempC + Config::kTempStepC);
 }
 //}}}
 
 TEST_F(SystemControllerBlackBox, encoder_negative_steps_change_target_temp) {
   //{{{
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
-            Config::defaultTemp);
+            Config::kDefaultTempC);
 
   inputData.encoder_val = -1;
 
   controller();
 
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
-            Config::defaultTemp - Config::tempStep);
+            Config::kDefaultTempC - Config::kTempStepC);
 }
 //}}}
 
 TEST_F(SystemControllerBlackBox, display_button_turns_display_on_and_off) {
   //{{{
-  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LCD_StateIntent::OFF);
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
 
   inputData.alternator.used = false;
   inputData.alternator.released = true;
@@ -184,14 +184,14 @@ TEST_F(SystemControllerBlackBox, display_button_turns_display_on_and_off) {
   controller();
 
   EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LCD_StateIntent::Page1);
+            OutputDevicesIntent::LcdStateIntent::Page1);
 
   inputData.alternator.used = false;
   inputData.alternator.released = true;
 
   controller();
 
-  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LCD_StateIntent::OFF);
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
 }
 //}}}
 
@@ -199,7 +199,7 @@ TEST_F(SystemControllerBlackBox,
        encoder_and_alternator_cycle_pages_and_consumes_alternator) {
   //{{{
 
-  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LCD_StateIntent::OFF);
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
 
   inputData.alternator.used = false;
   inputData.alternator.released = true;
@@ -207,7 +207,7 @@ TEST_F(SystemControllerBlackBox,
   controller();
 
   EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LCD_StateIntent::Page1);
+            OutputDevicesIntent::LcdStateIntent::Page1);
 
   inputData.alternator.released = false;
   inputData.alternator.pressed = true;
@@ -217,7 +217,7 @@ TEST_F(SystemControllerBlackBox,
   controller();
 
   EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LCD_StateIntent::Page2);
+            OutputDevicesIntent::LcdStateIntent::Page2);
   EXPECT_EQ(inputData.alternator.used, true);
 
   inputData.alternator.released = false;
@@ -227,14 +227,14 @@ TEST_F(SystemControllerBlackBox,
 
   controller();
   EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LCD_StateIntent::Page1);
+            OutputDevicesIntent::LcdStateIntent::Page1);
 }
 //}}}
 
 TEST_F(SystemControllerBlackBox,
        modeSwitch_and_alternator_switches_only_state) {
   //{{{
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::TEMP);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
   inputData.alternator.released = false;
   inputData.alternator.pressed = true;
   inputData.alternator.used = false;
@@ -242,15 +242,15 @@ TEST_F(SystemControllerBlackBox,
 
   controller();
 
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Power);
 };
 //}}}
 
 TEST_F(SystemControllerBlackBox,
        powerSwitch_and_alternator_switches_only_state) {
   //{{{
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
 
   inputData.alternator.released = false;
   inputData.alternator.pressed = true;
@@ -259,8 +259,8 @@ TEST_F(SystemControllerBlackBox,
 
   controller();
 
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::ON);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
 };
 //}}}
 
@@ -268,19 +268,19 @@ TEST_F(
     SystemControllerBlackBox,
     in_temp_mode_relais_command_and_state_switch_by_temperatures_out_of_tolerance_for_both_directions) {
   //{{{
-  inputData.sensor_tempC = Config::defaultTemp - Config::tolerance;
+  inputData.sensor_tempC = Config::kDefaultTempC - Config::kToleranceC;
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::ON);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 
-  inputData.sensor_tempC = Config::defaultTemp + Config::tolerance;
+  inputData.sensor_tempC = Config::kDefaultTempC + Config::kToleranceC;
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 };
 //}}}
 
@@ -293,22 +293,22 @@ TEST_F(
   controller();
   inputData.switchAction.mode = false;
 
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Power);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
 
-  inputData.sensor_tempC = Config::defaultTemp - Config::tolerance;
-
-  controller();
-
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
-
-  inputData.sensor_tempC = Config::defaultTemp + Config::tolerance;
+  inputData.sensor_tempC = Config::kDefaultTempC - Config::kToleranceC;
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::POWER);
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Power);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
+
+  inputData.sensor_tempC = Config::kDefaultTempC + Config::kToleranceC;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Power);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
 };
 //}}}
 
@@ -317,31 +317,31 @@ TEST_F(
     no_relais_and_state_action_when_temp_is_out_of_tolerance_in_stable_state) {
   //{{{
 
-  inputData.sensor_tempC = Config::defaultTemp - Config::tolerance;
+  inputData.sensor_tempC = Config::kDefaultTempC - Config::kToleranceC;
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::ON);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
-
-  controller();
-  controller();
-
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::ON);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
-
-  inputData.sensor_tempC = Config::defaultTemp + Config::tolerance;
-
-  controller();
-
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
 
   controller();
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None);
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
+
+  inputData.sensor_tempC = Config::kDefaultTempC + Config::kToleranceC;
+
+  controller();
+
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
+
+  controller();
+  controller();
+
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 };
 //}}}
 
@@ -350,33 +350,33 @@ TEST_F(
     no_relais_and_state_action_when_temp_gets_into_tolerance_from_stable_state){
     //{{{
 
-  inputData.sensor_tempC = Config::defaultTemp - Config::tolerance; 
+  inputData.sensor_tempC = Config::kDefaultTempC - Config::kToleranceC; 
   
   controller(); 
 
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::ON);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long); 
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long); 
 
-  inputData.sensor_tempC = Config::defaultTemp - Config::tolerance + 1; 
+  inputData.sensor_tempC = Config::kDefaultTempC - Config::kToleranceC + 1; 
 
   controller();
 
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::ON);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None); 
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None); 
 
-  inputData.sensor_tempC = Config::defaultTemp + Config::tolerance; 
+  inputData.sensor_tempC = Config::kDefaultTempC + Config::kToleranceC; 
 
   controller(); 
  
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::Long); 
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long); 
 
-  inputData.sensor_tempC = Config::defaultTemp + Config::tolerance - 1; 
+  inputData.sensor_tempC = Config::kDefaultTempC + Config::kToleranceC - 1; 
 
   controller(); 
 
-  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::OFF);
-  EXPECT_EQ(relais.recievedCommand(), RelaisCmd::None); 
+  EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
+  EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None); 
 
   
 };
