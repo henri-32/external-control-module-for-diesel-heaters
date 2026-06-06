@@ -74,6 +74,7 @@ public:
   void update(OutputDevicesIntent::RelaisCommand intent) override;
 
   OutputDevicesIntent::RelaisCommand recievedCommand();
+  void reset(); 
 
 private:
   OutputDevicesIntent::RelaisCommand lastCommand =
@@ -108,8 +109,14 @@ class TestPushButton : public IPushButton {
 public:
   TestPushButton() = default;
   void init() override{};
-  bool pressed() const override { return false; };
-  bool released() override { return false; };
+  bool pressed() const override { return nextPressed; };
+  bool released() override { return nextReleased; };
+  void setNextPressedReturn(bool nr);
+  void setNextReleasedReturn(bool nr);
+
+private:
+  bool nextPressed = false;
+  bool nextReleased = false;
 };
 //}}}
 

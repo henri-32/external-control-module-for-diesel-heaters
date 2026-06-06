@@ -24,6 +24,11 @@ OutputDevicesIntent::RelaisCommand TestRelais::recievedCommand() {
   return lc;
 };
 //}}}
+void TestRelais::reset() {
+//{{{
+ lastCommand = OutputDevicesIntent::RelaisCommand::None;  
+}
+//}}}
 
 void TestDisplayHardware::init() { m_init_called = true; }
 
@@ -57,3 +62,7 @@ void TestTemperatureSensorHardware::resetTestCounter() {
 //}}}
 
 void TestToggleSwitch::setNextChangedReturn(bool nr) {nextReturn = nr;}
+
+void TestPushButton::setNextPressedReturn(bool nr) { nextPressed = nr; }
+
+void TestPushButton::setNextReleasedReturn(bool nr) { nextReleased = nr; }

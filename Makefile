@@ -62,23 +62,36 @@ compiledb_mcu:
 	@rm -f compile_commands.json
 	@$(MAKE) clean 
 	@bear -- $(MAKE) USE_CCACHE=0 mcu  
-	@echo "compiledb updated to production build\n"
+	@echo "compiledb updated to production build"
 
 compiledb_fast: 
 	@rm -f compile_commands.json 
 	@bear -- $(MAKE) USE_CCACHE=1 mcu 
-	@echo "compiledb updated to production build\n"
-
+	@echo "compiledb updated to production build"
 
 compiledb_test:
 	@rm -f compile_commands.json
 	@$(MAKE) clean
 	@bear -- $(MAKE) USE_CCACHE=0 test
-	@echo "compiledb updated to test build\n"
+	@echo "compiledb updated to test build"
 
 compiledb_test_fast: 
 	@rm -f compile_commands.json
 	@bear -- $(MAKE) USE_CCACHE=1 test
-	@echo "compiledb updated to test build\n"
+	@echo "compiledb updated to test build"
+
+compiledb_integrationtest: 
+	@rm -f compile_commands.json 
+	@$(MAKE) clean 
+	@bear -- $(MAKE) integrationtest
+	@echo 'compiledb updated to integrationtest build'
+
+compiledb_integrationtest_fast: 
+	@rm -f compile_commands.json 
+	@$(MAKE) clean 
+	@bear -- $(MAKE) USE_CCACHE=1 integrationtest
+	@echo 'compiledb updated to integrationtest build' 
+
+
 
 -include $(MCU_DEPS) $(TEST_DEPS) $(TEST_DEBUG_DEPS) $(INTEGRATIONTEST_DEPS) $(INTEGRATIONTEST_DEBUG_DEPS)
