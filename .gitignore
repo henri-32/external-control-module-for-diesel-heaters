@@ -12,7 +12,7 @@
 /compile_commands.json
 
 # Local tooling output
-/.logs/
+.logs/*
 /neovim_utils/quickfix_list.txt
 .codex
 .agents
