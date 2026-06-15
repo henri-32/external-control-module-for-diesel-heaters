@@ -105,8 +105,9 @@ clean:
 	@rm -rf $(MCU_BUILD_DIR) $(TEST_BUILD_DIR) $(TEST_DEBUG_BUILD_DIR) $(INTEGRATIONTEST_BUILD_DIR) $(INTEGRATIONTEST_DEBUG_BUILD_DIR) compile_commands.json
 	@echo "build artifacts, compile commands and test binary removed"
 
-setup: install
+setup: 
 	@scripts/setup.sh
+	@$(MAKE) install
 
 
 install: requirements.txt
