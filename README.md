@@ -1,13 +1,16 @@
-# Externe Steuerung für Dieselheizungen (LF Bros Fokus)
+# Externe Steuerung für Dieselheizungen (LF Bros)
 
-Minimal-invasive Zusatzsteuerung für Dieselheizungen: Die reguläre
+Minimal-invasive Zusatzsteuerung für Dieselheizungen: Die proprietäre
 Steuerungssoftware bleibt unangetastet, nur der vorhandene An/Aus-Eingang wird
-über ein Relais betätigt. Damit wird temperaturabhängiges vollständiges
+überbrückt und mit diesem Controller und einem Relais betätigt. 
+Damit wird temperaturabhängiges vollständiges
 Ein-/Ausschalten ermöglicht.
 
 <p align="center"> 
   <img src="images/assembledController.jpeg" width="300" height="600">
 </p>
+(Auf der linken Seite die originale Steuerung, auf der rechten Seite 
+Controller und Display dieses Projekts)
 
 ## Projekt
 
@@ -17,26 +20,19 @@ Viele günstige Dieselheizungen können die Heizleistung regeln, aber nicht
 selbstständig vollständig an- und ausschalten, wenn die Solltemperatur über-
 oder unterschritten wird.
 
-Ein hartes Abschalten über die Stromversorgung ist keine Option, weil die
-Heizung zum Schutz kontrolliert nachlüften und abkühlen muss.
+Ein hartes Abschalten über das Wegnehmen der Stromversorgung ist keine Option,
+weil dieHeizung zum Schutz kontrolliert nachlüften und abkühlen muss.
 
-Das originale Steuergerät ist proprietär. Deshalb erweitert dieses Projekt die
-Funktionalität extern und minimal-invasiv: Es greift nicht in die interne
-Steuerungssoftware ein, sondern betätigt nur den vorhandenen An-/Aus-Eingang
-über ein Relais.
-
-Dadurch bleibt die restliche Funktionalität des originalen Steuergeräts
-erhalten. Ein- und Ausschalten kann weiter manuell oder automatisch über den
+Die Funktionalität des originalen Steuergeräts bleibt erhalten. 
+Ein- und Ausschalten kann weiter manuell oder Temperaturgeregelt über den
 Arduino-Controller erfolgen.
 
-Um Entscheidungen über das Ein-/Ausschalten zu ermöglichen, wird der Status
+Um Entscheidungen über das Ein-/Ausschalten zu ermöglichen, wird das Verhalten
 der originalen Steuerung emuliert.
 
-### Scope und Annahmen
+### Annahmen
 - Primär entwickelt für eine LF Bros Dieselheizung.
-- Der Ansatz ist auf ähnliche Heizungen übertragbar.
-- Es wird nicht in die proprietäre interne Kommunikationslogik des
-  Heizungscontrollers eingegriffen.
+- Der Ansatz sollte auf ähnliche Heizungen übertragbar sein.
 
 ### Hardware
 - Arduino UNO
@@ -48,7 +44,10 @@ der originalen Steuerung emuliert.
 - Netzteil 12V auf 5V für Arduino
 
 ### Hardware-Eingriff
-TODO: Foto verlinken
+<p align="center"> 
+  <img src="/images/solderingSpotOnEncoder.jpeg" width="300" height="600">
+</p>
+(Überbrücken des Druckknopfes am Encoder der originalen Steuerung)
 
 ### Pin-Belegungen
 Aus `includes/config.h`:
@@ -62,19 +61,34 @@ Aus `includes/config.h`:
 - `D8`: `kDisplayButtonPin`
 - `I2C (A4/A5 beim UNO)`: LCD (`LCDAdapter{0x27, 20, 4}`)
 
-### Build
-Die `.hex`-Datei zum Flashen kann über das Make-Target gebaut werden:
+### Setup
+`make setup` installiert das python venv und legt notwendige Ordner an. 
 
-make all
+### Build 
+`make targets` listet alle verfügbaren Make targets 
+Wichtige Targets
+`make mcu` Firmware build 
+`make test` Unit Tests 
+`make run_test` baut Unit Tests und führt den Testrunner aus 
+(Nur fehlerhafte Tests erzeugen eine ausführliche Ausgabe) 
+`make run_integrationtest` entsprechend...
+`make mcu_logged` logged die build Ausgabe 
+`make test_logged` entsprechend...
+`make integrationtest` Integrationstest (nativ mit Stubs) 
+`make test_debug` Unit-Tests mit Debug Symbolen  
+`make integrationtest_debug` entsprechend...
 
-### Quick Start (Bedienung)
+### Bedienung
 1. System einschalten und Startzustand am Display prüfen.
-2. Mit `kModeSwitchPin` zwischen `POWER` und `TEMP` umschalten.
+2. Mit `Modeschalter` zwischen `POWER` und `TEMP` umschalten.
 3. Im `TEMP`-Modus mit dem Encoder die Solltemperatur einstellen.
-4. Mit gedrücktem `kDisplayButtonPin` und Encoder die LCD-Seiten wechseln.
-5. Mit `kPowerSwitchPin` die Heizung manuell ein-/ausschalten.
+4. Mit gedrücktem `DisplayButton` und Encoder die LCD-Seiten wechseln 
+(Ohne experimentelle Memoryfunctions irrelevant) 
+5. Mit `Powerschalter` die Heizung manuell ein-/ausschalten. Bei Betätigen 
+des Schalters wird immer in den POWER Modus gewechselt und die Temperatur-
+regelung außer Kraft gesetzt. 
 
-### Steuerlogik (Laufzeitverhalten)
+### Steuerlogik
 Die Hauptschleife ruft pro Zyklus `controller()` auf. Intern passiert:
 
 1. Eingänge lesen (`inputDevices.update()`)
@@ -101,15 +115,20 @@ Steuerverhalten:
 
 Temperaturregelung (`TEMP`-Modus):
 
-- Wenn `sensor_tempC <= target_tempC - 1.5` und Heizung `OFF`:
+- Wenn `sensor_tempC <= target_tempC - tolerance` und Heizung `OFF`:
   Relais `Long`-Puls, Zustand auf `ON`
-- Wenn `sensor_tempC >= target_tempC + 1.5` und Heizung `ON`:
+- Wenn `sensor_tempC >= target_tempC + tolerance` und Heizung `ON`:
   Relais `Long`-Puls, Zustand auf `OFF`
 
+
+Die Relais Pulse sind die tatsächliche Einwirkung auf den originalen Controller. 
+In meinem Fall schaltet dort kurzes Drücken des Schalters den Modus um und langes
+Drücken die Heizung aus. Dementsprechend ist bei mir die Config gewählt. 
+ 
 ### Konfigurationswerte
 Aus `includes/config.h`:
 
-| Parameter | Wert | Bedeutung |
+| Parameter | Defaultwert | Bedeutung |
 | --- | --- | --- |
 | `kDefaultTempC` | `15` | Start-Solltemperatur in °C |
 | `kTempStepC` | `0.5` | Schrittweite pro Encoder-Impuls in °C |
@@ -121,12 +140,12 @@ Aus `includes/config.h`:
 | `kRelaisShortPulseMs` | `200` | Kurzer Relais-Puls (Mode-Toggle) |
 
 ### Praktische Nutzung
-Hierdurch wird folgende Nutzung ermöglicht:
+Hierdurch wird folgende praktische Nutzung ermöglicht:
 Controller und Heizung können über eine Stromquelle versorgt werden.
 Bei Einschalten der Stromversorgung startet der Arduino-Controller
 und überwacht die Raumtemperatur. Weicht diese über die konfigurierte
-Toleranz hinaus von der Solltemperatur ab, hat der Controller ohne weitere
-Handlungen sofort die Möglichkeit, die Heizung ein- und auszuschalten.
+Toleranz hinaus von der Solltemperatur ab, hat der Arduinocontroller ohne weitere
+Eingriffe sofort die Möglichkeit, die Heizung über das Relais ein- und auszuschalten.
 
 Mit dem Mode-Switch kann zwischen Temperaturregelung und Powerregelung
 gewechselt werden. Im `POWER`-Modus ist die Temperaturregelung nicht aktiv.
@@ -138,20 +157,20 @@ aus. Die Heizung wechselt automatisch in den `POWER`-Modus, um ein sofortiges
 Eingreifen der Temperaturregelung zu verhindern.
 
 Da der Zustand der originalen Steuerung (AN/AUS und POWER/TEMP)
-nur antizipiert wird, kann es (mehrfach im Entwicklungsprozess, 
+nur antizipiert wird, kann es (mehrfach im Entwicklungsprozess geschehen, 
 mittlerweile hoffentlich nur noch theoretisch) 
 passieren, dass der Zustand von Controller und originaler Steuerung nicht 
 übereinstimmt.
 Deshalb kann bei gedrücktem Display-Knopf der Mode- oder Power-Switch
-betätigt werden. Dann wird nur der interne Controllerzustand ohne
-Relaisbetätigung geändert.
+betätigt werden. Dann wird nur der interne Controllerzustand (je nach Schalter
+MODE oder POWER) ohne Relaisbetätigung geändert, was eine Synchronisation zwischen 
+Heizung und ArduinoController nach Fehlverhalten ermöglicht.
 
 
 ### Artefakte
 Die Memory-Funktionen sollten eine statistische Auswertung des
 Laufzeitverhaltens ermöglichen, um effiziente Konfigurationswerte zu ermitteln.
-Aktuell beeinflussen sie die Kernfunktionalität nicht negativ, liefern aber
-noch keine interpretierbaren Anzeigen.
+Sie liefern keine sinnvollen Werte. 
 
 
 ### Zukünftige Aufgaben 
@@ -159,13 +178,11 @@ noch keine interpretierbaren Anzeigen.
 - Zusätzliche Anbindung an die Drehbetätigung des originalen Encoders, 
   um vollständig über den eigenen Controller steuern zu können. 
 
-### Sicherheitshinweis
-- Heizung nicht hart über Wegnahme der Versorgung abschalten, wenn ein
-  geregeltes Nachlauf-/Abkühlverhalten erforderlich ist.
-- Die Verantwortung für sicheren Einbau und Betrieb liegt selbstverständlich
-  beim Anwender.
 
-
+### Hinweis 
+Es handelt sich um ein Hobbyprojekt. Sollte jemand Teile des Projeks nutzen,
+dementsprechend kann die korrekte Funktionsfähigkeit nicht garantiert werden. 
+ 
 ## Lizenz
 Der eigene Projektcode steht unter der MIT-Lizenz. Details siehe
 [`LICENSE`](LICENSE).

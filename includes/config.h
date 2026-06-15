@@ -7,11 +7,11 @@
 struct PinConfig {
   static constexpr int kPowerSwitchPin = 2;
   static constexpr int kModeSwitchPin = 3;
-  static constexpr int kDisplayButtonPin = 8;
+  static constexpr int kRelaisPin = 4;
+  static constexpr int kTempSensorPin = 5;
   static constexpr int kEncoderPinA = 6;
   static constexpr int kEncoderPinB = 7;
-  static constexpr int kTempSensorPin = 5;
-  static constexpr int kRelaisPin = 4;
+  static constexpr int kDisplayButtonPin = 8;
 };
 
 struct DebounceConfig {
