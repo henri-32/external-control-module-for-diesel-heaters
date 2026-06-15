@@ -1,3 +1,8 @@
+// Experimentelle Features, die statistische Auswertung während der Laufzeit 
+// ermöglichen sollten. Ich habe sie geschrieben, bevor ich wusste was Unit-Tests 
+// sind. Dementsprechend ist irgendwo ein Bug drin und die Features sind noch nicht 
+// zu gebrauchen 
+
 #pragma once
 #include "types.h"
 #include <EEPROM.h>

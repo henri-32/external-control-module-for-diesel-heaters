@@ -8,8 +8,8 @@
 #include <gtest/gtest.h>
 #include <string>
 
-// Naming is equivalent to the SystemController black box Tests.
-// Assertions use observable test-stub outputs: relais and display hardware.
+// Die Benennung entspricht den SystemController-Black-Box-Tests.
+// Prüfungen verwenden beobachtbare Ausgaben der Test-Stubs: Relais- und Display-Hardware.
 
 using namespace ArduinoStubSpies;
 using RelaisCmd = OutputDevicesIntent::RelaisCommand;
@@ -17,7 +17,7 @@ using RelaisCmd = OutputDevicesIntent::RelaisCommand;
 class SystemControllerIntegrationTest : public ::testing::Test {
   //{{{
 public:
-  // Modifiable Hardwarestubs for Tests
+  // Veränderbare Hardware-Stubs für Tests
   //=============================================================
   //=============================================================
   TestToggleSwitch powerSwitch;
@@ -45,7 +45,7 @@ private:
   OutputDevices outputDevices{outputIntent, displayDriver, relais};
 
 public:
-  // Only for controller() operator use in testing to control the ticks
+  // Nur für die Verwendung des controller()-Operators in Tests, um die Ticks zu steuern.
   SystemController controller{inputDevices, outputDevices};
 
 protected:

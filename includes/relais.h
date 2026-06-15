@@ -3,6 +3,7 @@
 #include "interfaces.h"
 
 class Relais : public IRelais {
+//Treiberklasse für das Relais
 public:
   explicit Relais(const uint8_t pin);
 

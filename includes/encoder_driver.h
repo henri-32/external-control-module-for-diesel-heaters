@@ -2,6 +2,7 @@
 #include "interfaces.h"
 
 class EncoderDriver : public IEncoderDriver {
+//Treiberklasse für den Encoder
 public:
   explicit EncoderDriver(IEncoderHardware &encoderHardware);
 

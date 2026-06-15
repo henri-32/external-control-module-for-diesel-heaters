@@ -2,6 +2,8 @@
 #include "interfaces.h"
 
 class DisplayDriver : public IDisplayDriver {
+//Treiberklasse für das I2C Display. Enthält auch Rendering und Berechnung 
+//der darzustellenden Informationen
 public:
   DisplayDriver(IDisplayHardware &display, OutputDevicesIntent::DisplayContent &dc,
                 OutputDevicesIntent::LcdStateIntent &ds);

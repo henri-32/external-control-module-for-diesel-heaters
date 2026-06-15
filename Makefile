@@ -6,12 +6,33 @@ include mk/test_rules.mk
 
 .DEFAULT_GOAL := mcu
 
-.PHONY: mcu setup install compiledb_mcu compiledb_test test test_debug integrationtest integrationtest_debug run_test run_integrationtest clean ccache_prep
+.PHONY: targets mcu mcu_logged setup install compiledb_mcu compiledb_fast compiledb_test compiledb_test_fast compiledb_integrationtest compiledb_integrationtest_fast test test_debug test_logged integrationtest integrationtest_debug run_test run_test_debug run_integrationtest run_integrationtest_debug clean ccache_prep
 
 MAKEFLAGS += --no-print-directory
 
 targets: 
-	@echo "mcu\nmcu_logged\ntest\ntest_debug\ntest_logged\nrun_test\nrun_test_debug\nintegrationtest\nintegrationtest_debug\nrun_integrationtest\nrun_integrationtest_debug\ncompiledb_mcu\ncompiledb_fast\ncompiledb_test\ncompiledb_test_fast\ncompiledb_integrationtest\ncompiledb_integrationtest_fast\nclean\nsetup\ninstall"
+	@printf '%s\n' \
+		targets \
+		mcu \
+		mcu_logged \
+		test \
+		test_debug \
+		test_logged \
+		run_test \
+		run_test_debug \
+		integrationtest \
+		integrationtest_debug \
+		run_integrationtest \
+		run_integrationtest_debug \
+		compiledb_mcu \
+		compiledb_fast \
+		compiledb_test \
+		compiledb_test_fast \
+		compiledb_integrationtest \
+		compiledb_integrationtest_fast \
+		clean \
+		setup \
+		install
 
 mcu: ccache_prep $(MCU_BUILD_DIR)/main.hex
 

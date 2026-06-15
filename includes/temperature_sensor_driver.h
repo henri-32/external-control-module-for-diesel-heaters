@@ -2,6 +2,7 @@
 #include "interfaces.h"
 
 class TemperatureSensorDriver : public ITempSensorDriver {
+//Treiberklasse für den Temperatursensor
 public:
   explicit TemperatureSensorDriver(ITempSensorHardware &sensorHardware);
 

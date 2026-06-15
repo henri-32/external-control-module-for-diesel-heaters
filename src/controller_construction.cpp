@@ -16,6 +16,7 @@ InputDevicesDataSet inputData;
 OutputDevicesIntent outputIntent;
 
 // Hardware Konstruktion
+// Pin Konfiguration findet in config.h statt
 ToggleSwitch powerSwitch{PinConfig::kPowerSwitchPin};
 ToggleSwitch modeSwitch{PinConfig::kModeSwitchPin};
 PushButton displayButton{PinConfig::kDisplayButtonPin};
@@ -26,6 +27,8 @@ OneWire one_wire{PinConfig::kTempSensorPin};
 TempSensorAdapter tempSensorHardware{one_wire};
 TemperatureSensorDriver tempSensorDriver{tempSensorHardware};
 
+//Absichtlich hardcoded, da Display Hardware im aktuellen 
+//System sowieso nicht sinnvoll getauscht werden kann. 
 LCDAdapter lcdAdapter{0x27, 20, 4};
 DisplayDriver displayDriver{lcdAdapter, outputIntent.displayContent,
                             outputIntent.lcd_state};

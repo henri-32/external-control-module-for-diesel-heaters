@@ -5,7 +5,7 @@
 
 TEST(InitTests, displayInit) {
   //{{{
-  //Pretty senseless init() testing but now it's written
+  // Ziemlich sinnloser init()-Test, aber jetzt ist er geschrieben.
   OutputDevicesIntent outputIntent;
   TestDisplayHardware m_display;
   DisplayDriver display{m_display, outputIntent.displayContent,

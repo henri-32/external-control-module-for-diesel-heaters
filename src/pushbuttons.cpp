@@ -5,6 +5,7 @@
 #else
 #include "Arduino.h"
 #endif
+
 PushButton::PushButton(uint8_t pin) : m_pin(pin) {}
 
 void PushButton::init() {

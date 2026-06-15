@@ -2,7 +2,7 @@
 
 void TestOutputDevices::update() {
   //{{{
-  // simulates the behavior of the real Class,
+  // Simuliert das Verhalten der echten Klasse.
   m_relais.update(intent.relaisCommand);
   intent.relaisCommand = OutputDevicesIntent::RelaisCommand::None;
 }
@@ -16,9 +16,9 @@ void TestRelais::update(OutputDevicesIntent::RelaisCommand intent) {
 
 OutputDevicesIntent::RelaisCommand TestRelais::receivedCommand() {
   //{{{
-  // This TestClass holds the lastCommand as a state. The real relais
-  // class does not. This is only intended to keep track of the calls
-  // to the relais and does not logically hold up to the real driver.
+  // Diese Testklasse hält lastCommand als Zustand. Die echte Relais-Klasse
+  // tut das nicht. Das dient nur dazu, die Aufrufe an das Relais
+  // nachzuverfolgen, und entspricht logisch nicht dem echten Treiber.
   OutputDevicesIntent::RelaisCommand lc = lastCommand;
   lastCommand = OutputDevicesIntent::RelaisCommand::None;
   return lc;

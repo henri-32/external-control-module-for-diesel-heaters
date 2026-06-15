@@ -15,12 +15,14 @@ class TestInputDevices : public IInputDevices {
 public:
   TestInputDevices(InputDevicesDataSet &inputData) : IInputDevices(inputData) {}
   //{{{
-  // This class is intended to isolate the testing of the controller
-  // by giving direct access to the inputData and outputIntent for testing
-  // the real class InputDevices works with interfaces so it's possible
-  ////to use the real class with HardwareStubs. That is done at the
-  // Integration Test of SystemController but requires all HardwareStubs
-  // to be initialised and denies direct access to the I/O structs
+// Diese Klasse dient dazu, den Controller isoliert zu testen,
+// indem sie für Tests direkten Zugriff auf inputData und outputIntent ermöglicht.
+// Die reale Klasse InputDevices arbeitet mit Interfaces, sodass es möglich ist,
+// die reale Klasse zusammen mit Hardware-Stubs zu verwenden. Das geschieht im
+// Integrationstest des SystemController, erfordert jedoch, dass alle HardwareStubs
+// initialisiert werden, und verhindert den direkten Zugriff auf die I/O-Structs.
+// Diese Klasse ermöglicht das isolierte Testen des SystemControllers über dessen Ein-/
+// Ausgabe-Structs
 
   void init() override{};
   void update() override{};
@@ -29,7 +31,7 @@ public:
 
 class TestOutputDevices : public IOutputDevices {
   //{{{
-  // See Comment in TestInputDevices
+  // Siehe Kommentar TestInputDevices
 public:
   TestOutputDevices(OutputDevicesIntent &outputIntent, IRelais &relais)
       : IOutputDevices(outputIntent), m_relais(relais) {}
@@ -40,6 +42,10 @@ private:
   IRelais &m_relais;
 };
 //}}}
+
+//==================================================================
+// Die folgenden Klassen sind die jeweiligen Test-Stubs zu den Geräten
+//==================================================================
 
 class TestDisplayHardware : public IDisplayHardware {
   //{{{
@@ -69,6 +75,7 @@ public:
 
 class TestRelais : public IRelais {
   //{{{
+
 public:
   void init() override{};
   void update(OutputDevicesIntent::RelaisCommand intent) override;

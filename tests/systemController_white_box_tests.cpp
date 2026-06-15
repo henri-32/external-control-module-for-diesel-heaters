@@ -9,11 +9,11 @@
 
 class SystemControllerUnitTest : public ::testing::Test {
 protected:
-  // Backing storage for device groups
+  // Hintergrundspeicher für Gerätegruppen
   InputDevicesDataSet inputDataBuffer;
   OutputDevicesIntent outputIntentBuffer;
 
-  // Hardware fakes
+  // Hardware-Fakes
   TestDisplayHardware testDisplay;
   TestRelais testRelais;
   TestToggleSwitch powerSwitch;
@@ -22,26 +22,26 @@ protected:
   TestEncoderHardware encoderHardware;
   TestTemperatureSensorHardware tempSensorHardware;
 
-  // Drivers
+  // Treiber
   DisplayDriver displayDriver{testDisplay, outputIntentBuffer.displayContent,
                               outputIntentBuffer.lcd_state};
   EncoderDriver encoderDriver{encoderHardware};
   TemperatureSensorDriver tempSensorDriver{tempSensorHardware};
 
-  // Device groups
+  // Gerätegruppen
   InputDevices inputDevices{inputDataBuffer, powerSwitch, modeSwitch,
                             displayButton, encoderDriver, tempSensorDriver};
   OutputDevices outputDevices{outputIntentBuffer, displayDriver, testRelais};
 
-  // System under test
+  // Zu testendes System
   SystemController controller{inputDevices, outputDevices};
 
-  // Shortcuts to controller-owned state
+  // Abkürzungen auf den vom Controller verwalteten Zustand
   InputDevicesDataSet &inputData = controller.inputDevices.data;
   OutputDevicesIntent &outputIntent = controller.outputDevices.intent;
 };
 
-// Handling of Power Switch Input
+// Verarbeitung des Power-Schalter-Inputs
 //{{{
 TEST_F(SystemControllerUnitTest,
        apply_power_switch_input_path_with_alternator_off_to_on_no_relay_action) {
@@ -91,7 +91,7 @@ TEST_F(SystemControllerUnitTest,
   inputData.alternator.used = false;
   controller.heaterStatus.state = State::Off;
 
-  // unrelated input
+  // Nicht zusammenhängender Input
   inputData.switchAction.mode = true;
   inputData.encoder_val = 10;
   inputData.alternator.released = true;
@@ -115,7 +115,7 @@ TEST_F(SystemControllerUnitTest,
   inputData.alternator.used = false;
   controller.heaterStatus.state = State::On;
 
-  // unrelated input
+  // Nicht zusammenhängender Input
   inputData.switchAction.mode = true;
   inputData.encoder_val = 10;
   inputData.alternator.released = true;
@@ -165,7 +165,7 @@ TEST_F(SystemControllerUnitTest,
 
 //}}}
 
-// Handling of Mode Switch Input
+// Verarbeitung des Mode-Schalter-Inputs
 //{{{
 TEST_F(SystemControllerUnitTest,
        apply_mode_switch_input_path_witch_alternator_power_to_temp_no_relay_action) {
@@ -246,10 +246,10 @@ TEST_F(
   inputData.alternator.used = false;
   controller.heaterStatus.mode = HeaterStatus::Mode::Power;
 
-  // unrelated Input
+  // Nicht zusammenhängender Input
   inputData.switchAction.power = true;
   inputData.encoder_val = 20;
-  // should not make a difference, because get checked in separate function
+  // Sollte keinen Unterschied machen, weil dies in einer separaten Funktion geprüft wird.
   inputData.alternator.used = true;
   inputData.alternator.released = true;
 
@@ -267,7 +267,7 @@ TEST_F(
 //}}}
 //}}}
 
-// Handling of Display Button
+// Verarbeitung des Display-Buttons
 //{{{
 TEST_F(SystemControllerUnitTest,
        apply_display_button_input_no_action_without_alternator) {
@@ -306,7 +306,7 @@ TEST_F(SystemControllerUnitTest, apply_display_button_input_output_intent_sets) 
 
 //}}}
 
-// Handling of Encoder Input
+// Verarbeitung des Encoder-Inputs
 //{{{
 TEST_F(SystemControllerUnitTest, apply_encoder_input_min_step) {
   //{{{
@@ -559,7 +559,7 @@ TEST_F(SystemControllerUnitTest,
 //}}}
 //}}}
 
-// HELPER
+// HELFER
 //  applyHeatingLogic
 //{{{
 TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_off) {
@@ -694,4 +694,3 @@ TEST_F(SystemControllerUnitTest, cycle_pages_intent_reacts_to_cycling_left) {
 }
 //}}}
 //}}}
-

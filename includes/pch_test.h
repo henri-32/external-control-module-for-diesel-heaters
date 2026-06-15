@@ -1,3 +1,4 @@
+// Vorkompilierte Header für Test-Builds
 #ifndef PCH_TEST_H
 #define PCH_TEST_H 
 

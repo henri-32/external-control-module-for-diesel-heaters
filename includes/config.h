@@ -1,5 +1,7 @@
 #pragma once
 
+//Das ist vorrübergehende die Option um die MEMORY_FUNCTIONS in den build zu integrieren 
+//Langfristig soll das ein eigenes Buildtarget werden.
 //#define MEMORY_FUNCTIONS
 
 struct PinConfig {

@@ -3,6 +3,11 @@
 #include <stdint.h>
 #include <limits.h>
 
+//=========================================
+//Hier werden die Ein-/ und Ausgabe Structs
+//des SystemControllers definiert
+//=========================================
+
 struct InputDevicesDataSet {
   struct SwitchAction {
     bool power = false;

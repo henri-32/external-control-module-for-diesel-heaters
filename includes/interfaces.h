@@ -1,6 +1,12 @@
 #pragma once
 #include "types.h"
 
+//Verschiedene abstrakte Interface Klassen 
+//Sie wurden nachträglich auf die Treiberklassen drauf gesetzt. 
+//Daher bestanden alle Methoden schon in den derived classes. 
+//Sie wurden ins Interface aufgenommen, um vollständige Implementierung 
+//der TestStubs sicherzustellen 
+ 
 class IInputDevices {
   //{{{
 public:

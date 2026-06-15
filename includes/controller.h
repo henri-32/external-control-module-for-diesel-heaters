@@ -10,6 +10,8 @@ class IInputDevices;
 class IOutputDevices; 
 
 class SystemController {
+//Diese Klasse ist der zentrale Top Level Controller, welcher die gesamte Systemkomposition
+//übernimmt
 public:
   SystemController(IInputDevices &i, IOutputDevices &o);
   void operator()();

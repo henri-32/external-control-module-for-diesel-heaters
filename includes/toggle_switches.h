@@ -2,6 +2,7 @@
 #include "interfaces.h"
 
 class ToggleSwitch : public IToggleSwitch {
+//Treiberklasse für die Kippschalter
 public:
   explicit ToggleSwitch(uint8_t pin);
 

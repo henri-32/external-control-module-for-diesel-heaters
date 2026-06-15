@@ -8,8 +8,8 @@ mkdir -p .logs
 mkdir -p build 
 mkdir -p build_test 
 touch .logs/unit_tests.log
-mkdir neovim_utils
-touch neovim_utils/quickfix_list.txt
+git submodule update --init --recursive
+echo 'Project set up...' 
 
 
 

@@ -2,6 +2,7 @@
 #include "interfaces.h"
 
 class PushButton : public IPushButton {
+//Treiberklasse für den Druckknopf am Encoder
 public:
   explicit PushButton(uint8_t pin);
 

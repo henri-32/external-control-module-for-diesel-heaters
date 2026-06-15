@@ -4,18 +4,18 @@
 #include "types.h"
 #include <gtest/gtest.h>
 
-// NOTE:
-// In these blackboxtests outputIntent.displayContent.status.state is
-// used to check the state of the heater. This does not integrate logic
-// from the display driver into these tests, because it's still a
-// controller internal struct.
-// Because the variable is directly set from the real controller state
-// this way is prefered over loosing the encapsulation
-// of the controller state.
+// HINWEIS:
+// In diesen Black-Box-Tests wird outputIntent.displayContent.status.state
+// verwendet, um den Zustand der Heizung zu prüfen. Das integriert keine Logik
+// aus dem Display-Treiber in diese Tests, weil es weiterhin ein
+// controllerinternes Struct ist.
+// Weil die Variable direkt aus dem echten Controller-Zustand gesetzt wird,
+// ist dieser Weg dem Aufweichen der Kapselung des Controller-Zustands
+// vorzuziehen.
 
-// Because the switchActions do'nt get consumed in the tick, but instead
-// are constantly read from the hardware they need to be set explixit for
-// these isolatet tests.
+// Weil die switchActions im Tick nicht konsumiert, sondern fortlaufend aus
+// der Hardware gelesen werden, müssen sie für diese isolierten Tests
+// explizit gesetzt werden.
 
 using namespace ArduinoStubSpies;
 using RelaisCmd = OutputDevicesIntent::RelaisCommand;
@@ -49,11 +49,10 @@ protected:
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;
 
-  // TestRelais is the only needed HardwareStub.
-  // That's because there is no nice way to check the outgoing RelaisCommand
-  // in the outputIntent. The Reason for that is that the command get's
-  // consumed in controller() so outputIntent.relaisCommand is None after
-  // every tick.
+  // TestRelais ist der einzige benötigte Hardware-Stub.
+  // Der Grund ist, dass es keinen sauberen Weg gibt, den ausgehenden
+  // RelaisCommand im outputIntent zu prüfen. Der Befehl wird in controller()
+  // konsumiert, sodass outputIntent.relaisCommand nach jedem Tick None ist.
 
   TestRelais relais;
   TestInputDevices testInput{inputData};
