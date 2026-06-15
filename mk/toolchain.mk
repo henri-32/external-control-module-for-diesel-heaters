@@ -8,11 +8,11 @@ export CCACHE_TEMPDIR := $(CCACHE_TMPDIR)
 export CCACHE_DIR := $(CCACHE_DIR)
 CC := $(CCACHE) avr-gcc
 CXX := $(CCACHE) avr-g++
-TESTCC := $(CCACHE) g++
+TEST_CXX := $(CCACHE) g++
 else
 CC := avr-gcc
 CXX := avr-g++
-TESTCC := g++
+TEST_CXX := g++
 endif
 
 MCU := atmega328p

@@ -21,7 +21,7 @@ parser.add_argument(
         "unit_tests_debug",
         "integrationtest_debug",
     ],
-    help="define binary to be executed",
+    help="define testbinary to be executed",
 )
 
 
@@ -53,7 +53,7 @@ def main(binary):
 
     # ============= XML-File Check =====================
     if not xml_file.exists():
-        raise RuntimeError("No xml_file")
+        raise RuntimeError("No xml_file from gtest")
 
     # ============ XML Parsen für Neovim Quickfix ====================
     tree = ET.parse(xml_file)
@@ -78,7 +78,8 @@ def main(binary):
             f.write(line + "\n")
 
     # ============== Return Code der Tests ======================
-    # With nvim server failed Tests appear in quickfix
+    # Wenn nvim als server läuft werden die Tests direkt in die cf list geladn
+    # und qickfix geöffnet
     if return_code != 0:
         if nvim_server.exists():
             subprocess.Popen(
@@ -97,10 +98,22 @@ def main(binary):
             )
 
         print(
-            "Gtest Run on {} failed with code {}\nSee .logs/{} for log".format(
-                binary.name, return_code, log_file.name
+            "\nGtest Run of {}".format(binary.name),
+                "failed with code {}".format(return_code), 
+                "\nSee .logs/{} for complete gtest log".format(log_file.name)
             )
-        )
+        
+#parsed den gtest output, sodass jeder failed test nur einmal ausgegeben wird
+#indem bei der Zusammenfassung die Schleife beendet wird. 
+        print("\nthe failed tests are:\n")
+        with open (log_file, "r") as f: 
+            for line in f:
+                if "FAILED" in line: 
+                    if "listed below" in line: 
+                        break
+                    else:
+                        print(line)
+        
         sys.exit(1)
 
     else:

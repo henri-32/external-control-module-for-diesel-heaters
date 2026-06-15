@@ -36,7 +36,7 @@ targets:
 
 mcu: ccache_prep $(MCU_BUILD_DIR)/main.hex
 
-mcu_logged: 
+mcu_logged: clean
 	@mkdir -p .logs 
 	@$(MAKE) mcu > $(BUILD_LOG) 
 	@echo 'Build log for "mcu" target written to $(BUILD_LOG)' 
@@ -45,13 +45,13 @@ test: ccache_prep $(TEST_BUILD_DIR)/unit_tests
 
 test_debug: ccache_prep $(TEST_DEBUG_BIN)
 
-test_logged: 
+test_logged: clean 
 	@mkdir -p .logs 
 	@$(MAKE) test > $(BUILD_LOG) 2>&1 
 	@echo 'Build Log for "test" target written to $(BUILD_LOG)' 
 
 run_test: test
-	python3 scripts/run_test.py unit_tests
+	@python3 scripts/run_test.py unit_tests
 
 run_test_debug: test_debug 
 	python3 scripts/run_test.py unit_tests_debug
@@ -105,7 +105,7 @@ clean:
 	@rm -rf $(MCU_BUILD_DIR) $(TEST_BUILD_DIR) $(TEST_DEBUG_BUILD_DIR) $(INTEGRATIONTEST_BUILD_DIR) $(INTEGRATIONTEST_DEBUG_BUILD_DIR) compile_commands.json
 	@echo "build artifacts, compile commands and test binary removed"
 
-setup:
+setup: install
 	@scripts/setup.sh
 
 
