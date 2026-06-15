@@ -47,7 +47,10 @@ der originalen Steuerung emuliert.
 <p align="center"> 
   <img src="/images/solderingSpotOnEncoder.jpeg" width="300" height="600">
 </p>
-(Überbrücken des Druckknopfes am Encoder der originalen Steuerung)
+(Überbrücken des Druckknopfes am Encoder der originalen Steuerung. 
+In Meinem Fall handelte es sich um einen normally closed Schalter, sodass 
+ich zusätzlich die zwei Verbindungen vom Encoder auf die Platine auftrennen
+musste)
 
 ### Pin-Belegungen
 Aus `includes/config.h`:
