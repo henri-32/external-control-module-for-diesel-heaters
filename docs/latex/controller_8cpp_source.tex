@@ -1,0 +1,295 @@
+\doxysection{controller.\+cpp}
+\hypertarget{controller_8cpp_source}{}\label{controller_8cpp_source}\index{src/controller.cpp@{src/controller.cpp}}
+\doxymbox{\hyperlink{controller_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}controller.h"{}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00002}00002\ \textcolor{preprocessor}{\#include\ "{}interfaces.h"{}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00003}00003\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00004}00004\ SystemController::SystemController(IInputDevices\ \&i,\ IOutputDevices\ \&o)}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00005}00005\ \ \ \ \ :\ inputDevices(i),\ outputDevices(o)\ \{\}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00007}00007\ \textcolor{keywordtype}{void}\ SystemController::operator()()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00008}00008\ \ \ inputDevices.update();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00009}00009\ \ \ applyInputdata();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00010}00010\ \ \ applyHeatingLogic();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00011}00011\ \ \ writeOutputIntent();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00012}00012\ \ \ outputDevices.update();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00014}00014\ \textcolor{preprocessor}{\#ifdef\ MEMORY\_FUNCTIONS}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00015}00015\ \ \ systemStatistic.update(inputDevices.data,\ heaterStatus);}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00016}00016\ \ \ updateMemory();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00017}00017\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00018}00018\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00020}00020\ \textcolor{keywordtype}{void}\ SystemController::init()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00021}00021\ \ \ inputDevices.init();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00022}00022\ \ \ outputDevices.init();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00023}00023\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00025}00025\ \textcolor{keywordtype}{void}\ SystemController::applyInputdata()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00026}00026\ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00027}00027\ \ \ applyPowerSwitchInput();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00028}00028\ \ \ applyModeSwitchInput();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00029}00029\ \ \ applyDisplayButtonInput();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00030}00030\ \ \ applyEncoderInput();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00031}00031\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00032}00032\ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00034}00034\ \textcolor{keywordtype}{void}\ SystemController::applyPowerSwitchInput()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00035}00035\ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00036}00036\ \ \ \textcolor{comment}{/*\ Der\ Heizungsmodus\ wird\ beim\ OnOff\ Schalter\ immer\ auf\ POWER\ gewechselt,\ um}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00037}00037\ \textcolor{comment}{\ \ die\ Temperaturlogik\ daran\ zu\ hindern,\ direkt\ zurückzuschalten.\ Das\ ersetzt}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00038}00038\ \textcolor{comment}{\ \ meine\ alte\ Temperatursperre.\ Das\ ist\ unproblematisch\ weil\ der\ Modus}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00039}00039\ \textcolor{comment}{\ \ unabhängig\ vom\ Zustand\ per\ modeSwitch\ gewechselt\ werden\ kann.\ Und\ es\ ist}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00040}00040\ \textcolor{comment}{\ \ nötig,\ damit\ ich\ beim\ Verlassen\ des\ Bootes,\ die\ Heizung\ aus\ machen\ kann\ und}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00041}00041\ \textcolor{comment}{\ \ sie\ korrekt\ herunterfährt,\ bevor\ ich\ den\ Strom\ wegnehme*/}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00042}00042\ \ \ \textcolor{keyword}{using\ }State\ =\ HeaterStatus::State;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00043}00043\ \ \ \textcolor{keyword}{using\ }\doxymbox{\hyperlink{display__driver_8cpp_a2c56ca9012e69d19252b15bb3f37a06f}{ODI}}\ =\ OutputDevicesIntent;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00045}00045\ \ \ \textcolor{keywordflow}{if}\ (!inputDevices.data.switchAction.power)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00046}00046\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00047}00047\ \ \ \};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00049}00049\ \ \ \textcolor{comment}{//\ Alternator\ Path\ switches\ only\ State,\ without\ relay\ action}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00050}00050\ \ \ \textcolor{keywordflow}{if}\ (inputDevices.data.alternator.pressed)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00051}00051\ \ \ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00052}00052\ \ \ \ \ \textcolor{keywordflow}{if}\ (heaterStatus.state\ ==\ State::Off)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00053}00053\ \ \ \ \ \ \ heaterStatus.state\ =\ State::On;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00054}00054\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00055}00055\ \ \ \ \ \ \ heaterStatus.state\ =\ State::Off;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00056}00056\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00058}00058\ \ \ \ \ inputDevices.data.alternator.used\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00059}00059\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00060}00060\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00061}00061\ \ \ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00063}00063\ \ \ \textcolor{keywordflow}{if}\ (heaterStatus.state\ ==\ State::On)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00064}00064\ \ \ \ \ requestRelaisCommand(ODI::RelaisCommand::Long);}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00065}00065\ \ \ \ \ heaterStatus.state\ =\ State::Off;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00066}00066\ \ \ \ \ heaterStatus.mode\ =\ HeaterStatus::Mode::Power;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00068}00068\ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00069}00069\ \ \ \ \ requestRelaisCommand(ODI::RelaisCommand::Long);}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00070}00070\ \ \ \ \ heaterStatus.state\ =\ State::On;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00071}00071\ \ \ \ \ heaterStatus.mode\ =\ HeaterStatus::Mode::Power;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00072}00072\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00073}00073\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00074}00074\ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00076}00076\ \textcolor{keywordtype}{void}\ SystemController::applyModeSwitchInput()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00077}00077\ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00078}00078\ \ \ \textcolor{keyword}{using\ }Mode\ =\ HeaterStatus::Mode;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00079}00079\ \ \ \textcolor{keyword}{using\ }\doxymbox{\hyperlink{display__driver_8cpp_a2c56ca9012e69d19252b15bb3f37a06f}{ODI}}\ =\ OutputDevicesIntent;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00081}00081\ \ \ \textcolor{keywordflow}{if}\ (!inputDevices.data.switchAction.mode)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00082}00082\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00083}00083\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00084}00084\ \ \ \textcolor{comment}{//\ Alternator\ Path\ only\ switches\ Mode\ without\ Relay\ Action}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00085}00085\ \ \ \textcolor{keywordflow}{if}\ (inputDevices.data.alternator.pressed)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00086}00086\ \ \ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00087}00087\ \ \ \ \ \textcolor{keywordflow}{if}\ (heaterStatus.mode\ ==\ Mode::Power)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00088}00088\ \ \ \ \ \ \ heaterStatus.mode\ =\ Mode::Temp;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00089}00089\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00090}00090\ \ \ \ \ \ \ heaterStatus.mode\ =\ Mode::Power;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00091}00091\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00093}00093\ \ \ \ \ inputDevices.data.alternator.used\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00094}00094\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00095}00095\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00096}00096\ \ \ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00098}00098\ \ \ \textcolor{keywordflow}{if}\ (heaterStatus.mode\ ==\ Mode::Power)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00099}00099\ \ \ \ \ requestRelaisCommand(ODI::RelaisCommand::Short);}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00100}00100\ \ \ \ \ heaterStatus.mode\ =\ Mode::Temp;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00101}00101\ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00102}00102\ \ \ \ \ requestRelaisCommand(ODI::RelaisCommand::Short);}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00103}00103\ \ \ \ \ heaterStatus.mode\ =\ Mode::Power;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00104}00104\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00105}00105\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00106}00106\ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00108}00108\ \textcolor{keywordtype}{void}\ SystemController::applyDisplayButtonInput()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00109}00109\ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00110}00110\ \ \ \textcolor{keyword}{using\ }\doxymbox{\hyperlink{display__driver_8cpp_af7e68f4cf1efd961a6590f780349dc97}{LCDIntent}}\ =\ OutputDevicesIntent::LcdStateIntent;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00112}00112\ \ \ \textcolor{keywordflow}{if}\ (!inputDevices.data.alternator.released)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00113}00113\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00114}00114\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00115}00115\ \ \ \textcolor{comment}{//\ Path\ where\ alternator\ was\ used\ in\ combination\ with\ other\ Inputs.}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00116}00116\ \ \ \textcolor{comment}{//\ No\ toggling\ of\ display\ expected}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00117}00117\ \ \ \textcolor{keywordflow}{if}\ (inputDevices.data.alternator.used)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00118}00118\ \ \ \ \ inputDevices.data.alternator.pressed\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00119}00119\ \ \ \ \ inputDevices.data.alternator.used\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00120}00120\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00122}00122\ \ \ \ \ \textcolor{comment}{//\ Path\ without\ alternator\ for\ toggling\ display.\ Action\ happens\ \ on}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00123}00123\ \ \ \ \ \textcolor{comment}{//\ release\ of\ the\ button}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00125}00125\ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00126}00126\ \ \ \ \ \textcolor{keywordflow}{switch}\ (outputDevices.intent.lcd\_state)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00127}00127\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Off:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00128}00128\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Page1;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00129}00129\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00130}00130\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page1:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00131}00131\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Off;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00132}00132\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page2:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00134}00134\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Off;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00135}00135\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00136}00136\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page3:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00137}00137\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Off;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00138}00138\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00139}00139\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page4:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00140}00140\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Off;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00141}00141\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00142}00142\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00143}00143\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00144}00144\ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00146}00146\ \textcolor{keywordtype}{void}\ SystemController::applyEncoderInput()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00147}00147\ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00148}00148\ \ \ \textcolor{keyword}{using\ }LCDDirection\ =\ OutputDevicesIntent::LcdCycleDirection;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00149}00149\ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ val\ =\ inputDevices.data.encoder\_val;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00151}00151\ \ \ \textcolor{keywordflow}{if}\ (val\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00152}00152\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00154}00154\ \ \ \textcolor{keywordflow}{if}\ (inputDevices.data.alternator.pressed)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00155}00155\ \ \ \ \ \textcolor{keywordflow}{if}\ (val\ >=\ 1\ \&\&\ val\ <=\ Config::kEncoderValCutoff)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00156}00156\ \ \ \ \ \ \ outputDevices.intent.lcd\_cycleDirection\ =\ LCDDirection::Right;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00157}00157\ \ \ \ \ \ \ cyclePages();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00158}00158\ \ \ \ \ \ \ inputDevices.data.alternator.used\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00159}00159\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00160}00160\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00161}00161\ \ \ \ \ \textcolor{keywordflow}{if}\ (val\ <=\ -\/1\ \&\&\ val\ >=\ -\/Config::kEncoderValCutoff)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00162}00162\ \ \ \ \ \ \ outputDevices.intent.lcd\_cycleDirection\ =\ LCDDirection::Left;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00163}00163\ \ \ \ \ \ \ cyclePages();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00164}00164\ \ \ \ \ \ \ inputDevices.data.alternator.used\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00165}00165\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00166}00166\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00167}00167\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00168}00168\ \ \ heaterStatus.target\_tempC\ +=\ val\ *\ Config::kTempStepC;\ \textcolor{comment}{//\ encoderVal\ ist\ signed}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00169}00169\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00170}00170\ \ \ \textcolor{comment}{//\ Limits\ to\ Config.h\ struct\ limits}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00171}00171\ \ \ clampTargetTempC(heaterStatus.target\_tempC);}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00172}00172\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00173}00173\ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00175}00175\ \textcolor{keywordtype}{void}\ SystemController::applyHeatingLogic()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00176}00176\ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00177}00177\ \ \ \textcolor{keyword}{using\ }State\ =\ HeaterStatus::State;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00178}00178\ \ \ \textcolor{keyword}{using\ }Command\ =\ OutputDevicesIntent::RelaisCommand;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00180}00180\ \ \ \textcolor{keywordflow}{if}\ (heaterStatus.mode\ !=\ HeaterStatus::Mode::Temp)}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00181}00181\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00183}00183\ \ \ \textcolor{keywordflow}{if}\ (inputDevices.data.sensor\_tempC\ <=}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ (heaterStatus.target\_tempC\ -\/\ Config::kToleranceC)\ \&\&}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00185}00185\ \ \ \ \ \ \ heaterStatus.state\ ==\ State::Off)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00187}00187\ \ \ \ \ requestRelaisCommand(Command::Long);}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00188}00188\ \ \ \ \ heaterStatus.state\ =\ State::On;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00189}00189\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00190}00190\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00191}00191\ \ \ \textcolor{keywordflow}{if}\ (inputDevices.data.sensor\_tempC\ >=}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ (heaterStatus.target\_tempC\ +\ Config::kToleranceC)\ \&\&}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00193}00193\ \ \ \ \ \ \ heaterStatus.state\ ==\ State::On)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00195}00195\ \ \ \ \ requestRelaisCommand(Command::Long);}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00196}00196\ \ \ \ \ heaterStatus.state\ =\ State::Off;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00197}00197\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00198}00198\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00199}00199\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00200}00200\ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00202}00202\ \textcolor{keywordtype}{void}\ SystemController::writeOutputIntent()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00203}00203\ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00204}00204\ \ \ outputDevices.intent.displayContent.temp\_c\ =\ inputDevices.data.sensor\_tempC;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00205}00205\ \ \ outputDevices.intent.displayContent.status.target\_tempC\ =}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00206}00206\ \ \ \ \ \ \ heaterStatus.target\_tempC;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00207}00207\ \ \ outputDevices.intent.displayContent.status.state\ =\ heaterStatus.state;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00208}00208\ \ \ outputDevices.intent.displayContent.status.mode\ =\ heaterStatus.mode;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00209}00209\ \textcolor{preprocessor}{\#ifdef\ MEMORY\_FUNCTIONS}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00210}00210\ \ \ outputDevices.intent.displayContent.runtimeDisplayData\ =}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00211}00211\ \ \ \ \ \ \ systemStatistic.getRuntimeDate();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00212}00212\ \ \ outputDevices.intent.displayContent.EEPROM\_Values\ =}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00213}00213\ \ \ \ \ \ \ memoryController.getFinalAverages();}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00214}00214\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00215}00215\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00216}00216\ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00217}00217\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00218}00218\ \textcolor{keywordtype}{void}\ SystemController::updateMemory()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00219}00219\ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00220}00220\ \textcolor{preprocessor}{\#ifdef\ MEMORY\_FUNCTIONS}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00221}00221\ \ \ LongtimeData\ newLongtimeData;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00222}00222\ \ \ \textcolor{keywordflow}{if}\ (systemStatistic.takeLongTimeData(newLongtimeData))\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00223}00223\ \ \ \ \ memoryController.update(newLongtimeData);}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00224}00224\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00225}00225\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00226}00226\ \};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00227}00227\ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00229}00229\ \textcolor{comment}{//\ =============Helper\ Functions}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00230}00230\ \textcolor{keywordtype}{void}\ SystemController::clampTargetTempC(\textcolor{keywordtype}{float}\ \&target)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00231}00231\ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00232}00232\ \ \ \textcolor{keywordflow}{if}\ (target\ >\ Config::kTempMaxC)}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00233}00233\ \ \ \ \ target\ =\ Config::kTempMaxC;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00234}00234\ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (target\ <\ Config::kTempMinC)}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00235}00235\ \ \ \ \ target\ =\ Config::kTempMinC;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00236}00236\ \};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00237}00237\ \textcolor{comment}{//\}\}\}}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00239}00239\ \textcolor{keywordtype}{void}\ SystemController::cyclePages()\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00240}00240\ \ \ \textcolor{comment}{//\{\{\{}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00241}00241\ \ \ \textcolor{keyword}{using\ }\doxymbox{\hyperlink{display__driver_8cpp_af7e68f4cf1efd961a6590f780349dc97}{LCDIntent}}\ =\ OutputDevicesIntent::LcdStateIntent;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00243}00243\ \ \ \textcolor{keywordflow}{if}\ (outputDevices.intent.lcd\_cycleDirection\ ==}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00244}00244\ \ \ \ \ \ \ OutputDevicesIntent::LcdCycleDirection::Right)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00245}00245\ \ \ \ \ \textcolor{keywordflow}{switch}\ (outputDevices.intent.lcd\_state)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00246}00246\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Off:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00247}00247\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00248}00248\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page1:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00249}00249\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Page2;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00250}00250\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00251}00251\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page2:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00252}00252\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Page3;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00253}00253\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00254}00254\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page3:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00255}00255\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Page4;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00256}00256\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00257}00257\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page4:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00258}00258\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Page1;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00259}00259\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00260}00260\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00261}00261\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00262}00262\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00263}00263\ \ \ \textcolor{keywordflow}{if}\ (outputDevices.intent.lcd\_cycleDirection\ ==}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00264}00264\ \ \ \ \ \ \ OutputDevicesIntent::LcdCycleDirection::Left)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00265}00265\ \ \ \ \ \textcolor{keywordflow}{switch}\ (outputDevices.intent.lcd\_state)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00266}00266\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Off:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00267}00267\ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00268}00268\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page1:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00269}00269\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Page3;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00270}00270\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00271}00271\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page2:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00272}00272\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Page1;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00273}00273\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00274}00274\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page3:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00275}00275\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Page2;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00276}00276\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00277}00277\ \ \ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page4:}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00278}00278\ \ \ \ \ \ \ outputDevices.intent.lcd\_state\ =\ LCDIntent::Page3;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00279}00279\ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00280}00280\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00281}00281\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00282}00282\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00283}00283\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00284}00284\ }
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00285}00285\ \textcolor{keywordtype}{void}\ SystemController::requestRelaisCommand(}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00286}00286\ \ \ \ \ OutputDevicesIntent::RelaisCommand\ command)\ \{}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00287}00287\ \ \ outputDevices.intent.relaisCommand\ =\ command;}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00288}00288\ \}}
+\DoxyCodeLine{\Hypertarget{controller_8cpp_source_l00289}00289\ \textcolor{comment}{//\}\}\}}}
+
+\end{DoxyCode}

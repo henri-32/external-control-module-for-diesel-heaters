@@ -1,0 +1,51 @@
+\doxysection{encoder\+\_\+driver.\+cpp}
+\hypertarget{encoder__driver_8cpp_source}{}\label{encoder__driver_8cpp_source}\index{src/encoder\_driver.cpp@{src/encoder\_driver.cpp}}
+\doxymbox{\hyperlink{encoder__driver_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}encoder\_driver.h"{}}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00002}00002\ \textcolor{preprocessor}{\#}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00003}00003\ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00004}00004\ \textcolor{preprocessor}{\#ifdef\ TEST\_BUILD\ }}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00005}00005\ \textcolor{preprocessor}{\#include\ "{}ArduinoStubs.h"{}}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00006}00006\ \textcolor{preprocessor}{\#else\ }}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#include\ "{}Arduino.h"{}}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00008}00008\ \textcolor{preprocessor}{\#endif\ }}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00010}00010\ EncoderDriver::EncoderDriver(IEncoderHardware\ \&encoderHardware)}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00011}00011\ \ \ \ \ :\ m\_encoderHardware(encoderHardware)\ \{\}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00013}00013\ \textcolor{keywordtype}{void}\ EncoderDriver::init()\ \{}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00014}00014\ \ \ m\_prev\ =\ m\_encoderHardware.read();\ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00015}00015\ \ \ m\_current\ =\ m\_prev;\ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00016}00016\ \ \ m\_delta\ =\ 0;\ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00017}00017\ \ \ m\_last\_change\_ms\ =\ millis();\ \ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00018}00018\ \};}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00020}00020\ \textcolor{keywordtype}{int}\ EncoderDriver::readSteps()\ \{}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00021}00021\ \ \ poll();}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00022}00022\ \ \ \textcolor{keywordflow}{return}\ translatePositionToInput();}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00023}00023\ \}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00025}00025\ \textcolor{keywordtype}{void}\ EncoderDriver::poll()\ \{}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00026}00026\ \ \ m\_current\ =\ m\_encoderHardware.read();}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00027}00027\ \ \ \textcolor{keywordtype}{long}\ diff\ =\ m\_current\ -\/\ m\_prev;}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00028}00028\ \ \ \textcolor{keywordflow}{if}\ (diff\ ==\ 0)}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00029}00029\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00030}00030\ \ \ m\_delta\ +=\ diff;}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00031}00031\ \ \ m\_last\_change\_ms\ =\ millis();}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00032}00032\ \ \ m\_prev\ =\ m\_current;}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00033}00033\ \}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00035}00035\ \textcolor{keywordtype}{int}\ EncoderDriver::translatePositionToInput()\ \{}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00036}00036\ \ \ \textcolor{keywordflow}{if}\ (millis()\ -\/\ m\_last\_change\_ms\ <\ DebounceConfig::kEncoderMs)}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00037}00037\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00038}00038\ \ \ \textcolor{keywordtype}{int}\ steps\ =\ m\_delta\ /\ 4;\ \textcolor{comment}{//\ Wird\ auf\ ganze\ Schritte\ runtergebrochen\ und\ rest}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ vernichtet\ bei\ Ganzzahldivision}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00040}00040\ \ \ m\_delta\ -\/=\ steps\ *\ 4;\ \ \ \ \textcolor{comment}{//\ Das\ Delta\ wird\ um\ die\ Schritte\ die\ ganz\ gemacht}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ wurden\ wieder\ reduziert\ (in\ Rohwerten)\ so\ bleibt}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ der\ Rest\ für\ den\ nächsten\ Aufruf\ erhalten}}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00043}00043\ \ \ \textcolor{keywordflow}{return}\ steps;}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00044}00044\ \};}
+\DoxyCodeLine{\Hypertarget{encoder__driver_8cpp_source_l00045}00045\ }
+
+\end{DoxyCode}

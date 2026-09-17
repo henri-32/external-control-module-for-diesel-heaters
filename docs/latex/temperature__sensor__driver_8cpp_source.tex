@@ -1,0 +1,50 @@
+\doxysection{temperature\+\_\+sensor\+\_\+driver.\+cpp}
+\hypertarget{temperature__sensor__driver_8cpp_source}{}\label{temperature__sensor__driver_8cpp_source}\index{src/temperature\_sensor\_driver.cpp@{src/temperature\_sensor\_driver.cpp}}
+\doxymbox{\hyperlink{temperature__sensor__driver_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}temperature\_sensor\_driver.h"{}}}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00003}00003\ \textcolor{preprocessor}{\#ifdef\ TEST\_BUILD\ }}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00004}00004\ \textcolor{preprocessor}{\#include\ "{}ArduinoStubs.h"{}}}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00005}00005\ \textcolor{preprocessor}{\#else\ }}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00006}00006\ \textcolor{preprocessor}{\#include\ "{}Arduino.h"{}}}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#endif\ }}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00009}00009\ TemperatureSensorDriver::TemperatureSensorDriver(}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00010}00010\ \ \ \ \ ITempSensorHardware\ \&sensorHardware)}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00011}00011\ \ \ \ \ :\ m\_sensorHardware(sensorHardware)\ \{}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00012}00012\ \}}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00014}00014\ \textcolor{keywordtype}{void}\ TemperatureSensorDriver::init()\ \{}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00015}00015\ \ \ m\_sensorHardware.begin();}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00016}00016\ \ \ m\_sensorHardware.requestTemperatures();}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00017}00017\ \ \ m\_temp\_c\ =\ m\_sensorHardware.getTempCByIndex(0);}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00018}00018\ \}}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00020}00020\ \textcolor{keywordtype}{float}\ TemperatureSensorDriver::pollTemp()\ \{}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00021}00021\ \ \ startTemperatureRequest();}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00022}00022\ \ \ measureTemperature();}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00023}00023\ \ \ \textcolor{keywordflow}{return}\ m\_temp\_c;}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00024}00024\ \}}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00026}00026\ \textcolor{keywordtype}{void}\ TemperatureSensorDriver::startTemperatureRequest()\ \{}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00027}00027\ \ \ \textcolor{keywordflow}{if}\ (millis()\ -\/\ m\_last\_temp\_request\ <\ kRequestIntervalMs)}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00028}00028\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00029}00029\ \ \ \textcolor{keywordflow}{if}\ (m\_tempRequestPending)}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00030}00030\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00031}00031\ \ \ m\_sensorHardware.requestTemperatures();}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00032}00032\ \ \ m\_last\_temp\_request\ =\ millis();}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00033}00033\ \ \ m\_tempRequestPending\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00034}00034\ \}}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00036}00036\ \textcolor{keywordtype}{void}\ TemperatureSensorDriver::measureTemperature()\ \{}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00037}00037\ \ \ \textcolor{keywordflow}{if}\ (!m\_tempRequestPending)}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00038}00038\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00039}00039\ \ \ \textcolor{keywordflow}{if}\ (millis()\ -\/\ m\_last\_temp\_request\ <\ kConversionTimeMs)}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00040}00040\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00041}00041\ \ \ m\_temp\_c\ =\ m\_sensorHardware.getTempCByIndex(0);}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00042}00042\ \ \ m\_tempRequestPending\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00043}00043\ \};}
+\DoxyCodeLine{\Hypertarget{temperature__sensor__driver_8cpp_source_l00044}00044\ }
+
+\end{DoxyCode}

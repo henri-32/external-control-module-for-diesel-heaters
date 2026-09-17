@@ -1,0 +1,141 @@
+\chapter{Externe Steuerung für Dieselheizungen (LF Bros) }
+\hypertarget{index}{}\label{index}\index{Externe Steuerung für Dieselheizungen (LF Bros)@{Externe Steuerung für Dieselheizungen (LF Bros)}}
+\label{index_md_README}%
+\Hypertarget{index_md_README}%
+
+
+Minimal-\/invasive Zusatzsteuerung für Dieselheizungen:\+ Die proprietäre Steuerungssoftware bleibt unangetastet, nur der vorhandene An/\+\+Aus-\/\+Eingang wird überbrückt und mit diesem Controller und einem Relais betätigt. Damit wird temperaturabhängiges vollständiges Ein-\//\+\+Ausschalten ermöglicht.
+
+
+
+ 
+
+(Auf der linken Seite die originale Steuerung, auf der rechten Seite Controller und Display dieses Projekts)\hypertarget{index_autotoc_md1}{}\doxysection{\texorpdfstring{Projekt}{Projekt}}\label{index_autotoc_md1}
+\hypertarget{index_autotoc_md2}{}\doxysubsection{\texorpdfstring{Anforderungsbeschreibung}{Anforderungsbeschreibung}}\label{index_autotoc_md2}
+Ich nutze eine "{}\+LF Bros"{} Dieselheizung für den Innenraum meines Bootes. Viele günstige Dieselheizungen können die Heizleistung regeln, aber nicht selbstständig vollständig an-\/ und ausschalten, wenn die Solltemperatur über-\/ oder unterschritten wird.
+
+Ein hartes Abschalten über das Wegnehmen der Stromversorgung ist keine Option, weil die\+Heizung zum Schutz kontrolliert nachlüften und abkühlen muss.
+
+Die Funktionalität des originalen Steuergeräts bleibt erhalten. Ein-\/ und Ausschalten kann weiter manuell oder Temperaturgeregelt über den Arduino-\/\+Controller erfolgen.
+
+Um Entscheidungen über das Ein-\//\+\+Ausschalten zu ermöglichen, wird das Verhalten der originalen Steuerung emuliert.\hypertarget{index_autotoc_md3}{}\doxysubsection{\texorpdfstring{Annahmen}{Annahmen}}\label{index_autotoc_md3}
+
+\begin{DoxyItemize}
+\item Primär entwickelt für eine LF Bros Dieselheizung.
+\item Der Ansatz sollte auf ähnliche Heizungen übertragbar sein.
+\end{DoxyItemize}\hypertarget{index_autotoc_md4}{}\doxysubsection{\texorpdfstring{Hardware}{Hardware}}\label{index_autotoc_md4}
+
+\begin{DoxyItemize}
+\item Arduino UNO
+\item DS18\+B20 Temperatursensor
+\item Arduino-\/kompatibles Relais (AZDelivery KF-\/301)
+\item 20x4 I2\+C-\/fähiges LCD-\/\+Display (Arceli 20x4 2004 LCD Display Modul)
+\item 1x Encoder mit Push-\/\+Button (GIAK KY-\/040)
+\item 2x Kippschalter
+\item Netzteil 12V auf 5V für Arduino
+\end{DoxyItemize}\hypertarget{index_autotoc_md5}{}\doxysubsection{\texorpdfstring{Hardware-\/\+Eingriff}{Hardware-\/\+Eingriff}}\label{index_autotoc_md5}
+ 
+
+(Überbrücken des Druckknopfes am Encoder der originalen Steuerung. In Meinem Fall handelte es sich um einen normally closed Schalter, sodass ich zusätzlich die zwei Verbindungen vom Encoder auf die Platine auftrennen musste)\hypertarget{index_autotoc_md6}{}\doxysubsection{\texorpdfstring{Pin-\/\+Belegungen}{Pin-\/\+Belegungen}}\label{index_autotoc_md6}
+Aus {\ttfamily includes/\+config.\+h}:\+
+
+
+\begin{DoxyItemize}
+\item {\ttfamily D2}:\+ {\ttfamily k\+Power\+Switch\+Pin}
+\item {\ttfamily D3}:\+ {\ttfamily k\+Mode\+Switch\+Pin}
+\item {\ttfamily D4}:\+ {\ttfamily k\+Relais\+Pin}
+\item {\ttfamily D5}:\+ {\ttfamily k\+Temp\+Sensor\+Pin} (DS18\+B20 One\+Wire)
+\item {\ttfamily D6}:\+ Encoder A ({\ttfamily k\+Encoder\+PinA})
+\item {\ttfamily D7}:\+ Encoder B ({\ttfamily k\+Encoder\+PinB})
+\item {\ttfamily D8}:\+ {\ttfamily k\+Display\+Button\+Pin}
+\item {\ttfamily I2C (A4/\+\+A5 beim UNO)}:\+ LCD ({\ttfamily LCDAdapter\{0x27, 20, 4\}})
+\end{DoxyItemize}\hypertarget{index_autotoc_md7}{}\doxysubsection{\texorpdfstring{Setup}{Setup}}\label{index_autotoc_md7}
+{\ttfamily make \doxylink{main_8cpp_a4fc01d736fe50cf5b977f755b675f11d}{setup}} installiert das python venv und legt notwendige Ordner an.\hypertarget{index_autotoc_md8}{}\doxysubsection{\texorpdfstring{Build}{Build}}\label{index_autotoc_md8}
+{\ttfamily make targets} listet alle verfügbaren Make targets Wichtige Targets {\ttfamily make mcu} Firmware build {\ttfamily make test} Unit Tests {\ttfamily make run\+\_\+test} baut Unit Tests und führt den Testrunner aus (Nur fehlerhafte Tests erzeugen eine ausführliche Ausgabe) {\ttfamily make run\+\_\+integrationtest} entsprechend... {\ttfamily make mcu\+\_\+logged} logged die build Ausgabe {\ttfamily make test\+\_\+logged} entsprechend... {\ttfamily make integrationtest} Integrationstest (nativ mit Stubs) {\ttfamily make test\+\_\+debug} Unit-\/\+Tests mit Debug Symbolen ~\newline
+ {\ttfamily make integrationtest\+\_\+debug} entsprechend...\hypertarget{index_autotoc_md9}{}\doxysubsection{\texorpdfstring{Bedienung}{Bedienung}}\label{index_autotoc_md9}
+
+\begin{DoxyEnumerate}
+\item System einschalten und Startzustand am Display prüfen.
+\item Mit {\ttfamily Modeschalter} zwischen {\ttfamily POWER} und {\ttfamily TEMP} umschalten.
+\item Im {\ttfamily TEMP}-\/Modus mit dem Encoder die Solltemperatur einstellen.
+\item Mit gedrücktem {\ttfamily Display\+Button} und Encoder die LCD-\/\+Seiten wechseln (Ohne experimentelle Memoryfunctions irrelevant)
+\item Mit {\ttfamily Powerschalter} die Heizung manuell ein-\//\+ausschalten. Bei Betätigen des Schalters wird immer in den POWER Modus gewechselt und die Temperatur-\/ regelung außer Kraft gesetzt.
+\end{DoxyEnumerate}\hypertarget{index_autotoc_md10}{}\doxysubsection{\texorpdfstring{Steuerlogik}{Steuerlogik}}\label{index_autotoc_md10}
+Die Hauptschleife ruft pro Zyklus {\ttfamily \doxylink{controller__construction_8cpp_a5c59979ebe7366cb4538aec56142f481}{controller()}} auf. Intern passiert:\+
+
+
+\begin{DoxyEnumerate}
+\item Eingänge lesen ({\ttfamily input\+Devices.\+update()})
+\item Eingaben anwenden ({\ttfamily apply\+Inputdata()})
+\item Heizlogik ausführen ({\ttfamily apply\+Heating\+Logic()})
+\item Ausgabe-\/\+Intent schreiben ({\ttfamily write\+Output\+Intent()})
+\item Hardware aktualisieren ({\ttfamily output\+Devices.\+update()})
+\end{DoxyEnumerate}
+
+Steuerverhalten:\+
+
+
+\begin{DoxyItemize}
+\item {\ttfamily k\+Power\+Switch\+Pin} Änderung:\+
+\begin{DoxyItemize}
+\item Normal:\+ Relais {\ttfamily Long}-\/Puls (1500 ms), Heizungszustand toggeln ({\ttfamily ON/\+\+OFF})
+\item Bei gedrücktem {\ttfamily k\+Display\+Button\+Pin}:\+ nur internen Zustand toggeln, kein Relais
+\end{DoxyItemize}
+\item {\ttfamily k\+Mode\+Switch\+Pin} Änderung:\+
+\begin{DoxyItemize}
+\item Normal:\+ Relais {\ttfamily Short}-\/Puls (200 ms), Modus toggeln ({\ttfamily POWER/\+\+TEMP})
+\item Bei gedrücktem {\ttfamily k\+Display\+Button\+Pin}:\+ nur internen Modus toggeln, kein Relais
+\end{DoxyItemize}
+\item {\ttfamily k\+Display\+Button\+Pin} bei Loslassen:\+
+\begin{DoxyItemize}
+\item ohne Kombiaktion:\+ LCD zwischen {\ttfamily OFF} und {\ttfamily Page1} umschalten
+\item nach Kombiaktion:\+ keine zusätzliche Display-\/\+Umschaltung
+\end{DoxyItemize}
+\item Encoder drehen:\+
+\begin{DoxyItemize}
+\item ohne gedrückten {\ttfamily k\+Display\+Button\+Pin}:\+ Solltemperatur anpassen ({\ttfamily target\+\_\+tempC += encoder\+\_\+steps \texorpdfstring{$\ast$}{*} 0.\+5}, begrenzt auf 5..30 °C)
+\item mit gedrücktem {\ttfamily k\+Display\+Button\+Pin}:\+ LCD-\/\+Seiten zyklisch wechseln
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+Temperaturregelung ({\ttfamily TEMP}-\/Modus):\+
+
+
+\begin{DoxyItemize}
+\item Wenn {\ttfamily sensor\+\_\+tempC \texorpdfstring{$<$}{<}= target\+\_\+tempC -\/ tolerance} und Heizung {\ttfamily OFF}:\+ Relais {\ttfamily Long}-\/Puls, Zustand auf {\ttfamily ON}
+\item Wenn {\ttfamily sensor\+\_\+tempC \texorpdfstring{$>$}{>}= target\+\_\+tempC + tolerance} und Heizung {\ttfamily ON}:\+ Relais {\ttfamily Long}-\/Puls, Zustand auf {\ttfamily OFF}
+\end{DoxyItemize}
+
+Die Relais Pulse sind die tatsächliche Einwirkung auf den originalen Controller. In meinem Fall schaltet dort kurzes Drücken des Schalters den Modus um und langes Drücken die Heizung aus. Dementsprechend ist bei mir die Config gewählt.\hypertarget{index_autotoc_md11}{}\doxysubsection{\texorpdfstring{Konfigurationswerte}{Konfigurationswerte}}\label{index_autotoc_md11}
+Aus {\ttfamily includes/\+config.\+h}:\+
+
+
+\begin{DoxyTable}{3}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Parameter  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Defaultwert  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Bedeutung  \\
+{\ttfamily k\+Default\+TempC}  &{\ttfamily 15}  &Start-\/\+Solltemperatur in °C  \\
+{\ttfamily k\+Temp\+StepC}  &{\ttfamily 0.\+5}  &Schrittweite pro Encoder-\/\+Impuls in °C  \\
+{\ttfamily k\+Temp\+MinC}  &{\ttfamily 5}  &Untere Solltemperaturgrenze in °C  \\
+{\ttfamily k\+Temp\+MaxC}  &{\ttfamily 30}  &Obere Solltemperaturgrenze in °C  \\
+{\ttfamily k\+ToleranceC}  &{\ttfamily 1.\+5}  &Hysterese um die Solltemperatur in °C  \\
+{\ttfamily k\+Encoder\+Val\+Cutoff}  &{\ttfamily 6}  &Grenzwert zur Interpretation von Encoder-\/\+Schritten  \\
+{\ttfamily k\+Relais\+Long\+Pulse\+Ms}  &{\ttfamily 1500}  &Langer Relais-\/\+Puls (Power-\/\+Toggle)  \\
+{\ttfamily k\+Relais\+Short\+Pulse\+Ms}  &{\ttfamily 200}  &Kurzer Relais-\/\+Puls (Mode-\/\+Toggle)  \\
+\end{DoxyTable}
+\hypertarget{index_autotoc_md12}{}\doxysubsection{\texorpdfstring{Praktische Nutzung}{Praktische Nutzung}}\label{index_autotoc_md12}
+Hierdurch wird folgende praktische Nutzung ermöglicht:\+ Controller und Heizung können über eine Stromquelle versorgt werden. Bei Einschalten der Stromversorgung startet der Arduino-\/\+Controller und überwacht die Raumtemperatur. Weicht diese über die konfigurierte Toleranz hinaus von der Solltemperatur ab, hat der Arduinocontroller ohne weitere Eingriffe sofort die Möglichkeit, die Heizung über das Relais ein-\/ und auszuschalten.
+
+Mit dem Mode-\/\+Switch kann zwischen Temperaturregelung und Powerregelung gewechselt werden. Im {\ttfamily POWER}-\/Modus ist die Temperaturregelung nicht aktiv. Das ermöglicht unter anderem das Freibrennen der Heizung unabhängig vom Verhältnis Soll-\//\+\+Isttemperatur.
+
+Wird der Power-\/\+Switch betätigt, schaltet sich die Heizung manuell ein bzw. aus. Die Heizung wechselt automatisch in den {\ttfamily POWER}-\/Modus, um ein sofortiges Eingreifen der Temperaturregelung zu verhindern.
+
+Da der Zustand der originalen Steuerung (AN/\+\+AUS und POWER/\+\+TEMP) nur antizipiert wird, kann es (mehrfach im Entwicklungsprozess geschehen, mittlerweile hoffentlich nur noch theoretisch) passieren, dass der Zustand von Controller und originaler Steuerung nicht übereinstimmt. Deshalb kann bei gedrücktem Display-\/\+Knopf der Mode-\/ oder Power-\/\+Switch betätigt werden. Dann wird nur der interne Controllerzustand (je nach Schalter MODE oder POWER) ohne Relaisbetätigung geändert, was eine Synchronisation zwischen Heizung und Arduino\+Controller nach Fehlverhalten ermöglicht.\hypertarget{index_autotoc_md13}{}\doxysubsection{\texorpdfstring{Artefakte}{Artefakte}}\label{index_autotoc_md13}
+Die Memory-\/\+Funktionen sollten eine statistische Auswertung des Laufzeitverhaltens ermöglichen, um effiziente Konfigurationswerte zu ermitteln. Sie liefern keine sinnvollen Werte.\hypertarget{index_autotoc_md14}{}\doxysubsection{\texorpdfstring{Zukünftige Aufgaben}{Zukünftige Aufgaben}}\label{index_autotoc_md14}
+
+\begin{DoxyItemize}
+\item Korrektur der Memory Funktionen zur statistischen Auswertung
+\item Zusätzliche Anbindung an die Drehbetätigung des originalen Encoders, um vollständig über den eigenen Controller steuern zu können.
+\end{DoxyItemize}\hypertarget{index_autotoc_md15}{}\doxysubsection{\texorpdfstring{Hinweis}{Hinweis}}\label{index_autotoc_md15}
+Es handelt sich um ein Hobbyprojekt. Sollte jemand Teile des Projeks nutzen, dementsprechend kann die korrekte Funktionsfähigkeit nicht garantiert werden.\hypertarget{index_autotoc_md16}{}\doxysection{\texorpdfstring{Lizenz}{Lizenz}}\label{index_autotoc_md16}
+Der eigene Projektcode steht unter der MIT-\/\+Lizenz. Details siehe \+[{\ttfamily LICENSE}]\+(LICENSE).
+
+Dieses Repository enthält außerdem Drittanbieter-\/\+Bibliotheken mit eigenen Lizenzen. Details und Quellen siehe {\ttfamily THIRD\+\_\+\+PARTY\+\_\+\+NOTICES.md}. 

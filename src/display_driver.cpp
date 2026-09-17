@@ -1,10 +1,9 @@
 #include "display_driver.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-
-using ODI = OutputDevicesIntent; 
+using ODI = OutputDevicesIntent;
 using LCDIntent = OutputDevicesIntent::LcdStateIntent;
 
 #ifdef TEST_BUILD
@@ -57,7 +56,7 @@ void DisplayDriver::renderLines() {
   case LCDIntent::Page2:
     m_display.backlight();
     m_display.display();
-	#ifdef MEMORY_FUNCTIONS
+#ifdef MEMORY_FUNCTIONS
     snprintf(m_lineBuffer[0], 21, "DutyCycle: %u %%",
              m_displayContent.runtimeDisplayData.dutyCycle);
     snprintf(m_lineBuffer[1], 21, "Cycles:    %u",
@@ -65,34 +64,45 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[2], 21, "Avg Idle:  %lu m",
              m_displayContent.runtimeDisplayData.avgIdleTime_minutes);
     snprintf(m_lineBuffer[3], 21, "%s", "");
-	#endif
+#endif
     break;
   case LCDIntent::Page3:
     formatTempFloatsForDisplay();
     m_display.backlight();
     m_display.display();
-	#ifdef MEMORY_FUNCTIONS
+#ifdef MEMORY_FUNCTIONS
     snprintf(m_lineBuffer[0], 21, "Max Idle:  %lu m",
              m_displayContent.runtimeDisplayData.maxIdleTime_minutes);
     snprintf(m_lineBuffer[1], 21, "Min Idle:  %u m",
              m_displayContent.runtimeDisplayData.minIdleTime_minutes);
     snprintf(m_lineBuffer[2], 21, "Avg diff:  %d.%d C", diff_int, diff_frac);
     snprintf(m_lineBuffer[3], 21, "%s", "");
-	#endif
+#endif
     break;
   case LCDIntent::Page4:
     m_display.backlight();
     m_display.display();
 
-	#ifdef MEMORY_FUNCTIONS
+#ifdef MEMORY_FUNCTIONS
     snprintf(m_lineBuffer[0], 21, "All Time DC %u %%",
              m_displayContent.EEPROM_Values.dutyCycle);
     snprintf(m_lineBuffer[1], 21, "All Time IT %lu m",
              m_displayContent.EEPROM_Values.avgIdleTime);
     snprintf(m_lineBuffer[2], 21, "%s", "");
     snprintf(m_lineBuffer[3], 21, "%s", "");
-	#endif
+#endif
     break;
+
+  case LCDIntent::Page5:
+    m_display.backlight();
+    m_display.display();
+    snprintf(m_lineBuffer[0], 21, "Default Temp %.2f C",
+             m_displayContent.status.default_target_tempC);
+
+    snprintf(m_lineBuffer[1], 21, "Turn display button");
+	snprintf(m_lineBuffer[2], 32, "     to change      "); 
+	break;
+
   case LCDIntent::Off:
     m_display.noBacklight();
     m_display.noDisplay();
@@ -127,7 +137,8 @@ void DisplayDriver::formatTempFloatsForDisplay() {
     t_int = int(m_displayContent.temp_c);
     t_frac = abs(static_cast<int>(m_displayContent.temp_c * 10) % 10);
     s_int = int(m_displayContent.status.target_tempC);
-    s_frac = abs(static_cast<int>(m_displayContent.status.target_tempC * 10) % 10);
+    s_frac =
+        abs(static_cast<int>(m_displayContent.status.target_tempC * 10) % 10);
     break;
 
   case LCDIntent::Page2:

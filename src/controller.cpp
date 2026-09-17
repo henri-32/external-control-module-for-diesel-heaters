@@ -112,15 +112,15 @@ void SystemController::applyDisplayButtonInput() {
   if (!inputDevices.data.alternator.released) {
     return;
   }
-  // Path where alternator was used in combination with other Inputs.
-  // No toggling of display expected
+  // Path wo der alternator in Kombination genutzt wurde.
+  // Kein Toggle des Displays erwartet.
   if (inputDevices.data.alternator.used) {
     inputDevices.data.alternator.pressed = false;
     inputDevices.data.alternator.used = false;
     return;
 
-    // Path without alternator for toggling display. Action happens  on
-    // release of the button
+    // Path ohne alternator Kombination zum Display Toggle.
+    // Action on release
 
   } else {
     switch (outputDevices.intent.lcd_state) {
@@ -138,6 +138,10 @@ void SystemController::applyDisplayButtonInput() {
       break;
     case LCDIntent::Page4:
       outputDevices.intent.lcd_state = LCDIntent::Off;
+      break;
+    case LCDIntent::Page5:
+      outputDevices.intent.lcd_state = LCDIntent::Off;
+      break;
     }
   }
 }
@@ -165,10 +169,30 @@ void SystemController::applyEncoderInput() {
       return;
     }
   }
-  heaterStatus.target_tempC += val * Config::kTempStepC; // encoderVal ist signed
+  using LCDIntent = OutputDevicesIntent::LcdStateIntent;
+  switch (outputDevices.intent.lcd_state) {
+  case LCDIntent::Page1:
+    heaterStatus.target_tempC +=
+        val * Config::kTempStepC; // encoderVal ist signed
+    break;
+  case LCDIntent::Page2:
+    break;
+  case LCDIntent::Page3:
+    break;
+  case LCDIntent::Page4:
+    break;
+  case LCDIntent::Page5:
+    heaterStatus.default_target_tempC += val * Config::kTempStepC;
+    break;
+  case LCDIntent::Off:
+    break;
 
-  // Limits to Config.h struct limits
-  clampTargetTempC(heaterStatus.target_tempC);
+  default:
+    break;
+  };
+
+// Begrenzt auf in config.h festgelegte zulässige Werte
+clampTargetTempC(heaterStatus.target_tempC);
 }
 //}}}
 
@@ -255,6 +279,10 @@ void SystemController::cyclePages() {
       outputDevices.intent.lcd_state = LCDIntent::Page4;
       break;
     case LCDIntent::Page4:
+      outputDevices.intent.lcd_state = LCDIntent::Page5;
+      break;
+
+    case LCDIntent::Page5:
       outputDevices.intent.lcd_state = LCDIntent::Page1;
       break;
     }
@@ -266,7 +294,7 @@ void SystemController::cyclePages() {
     case LCDIntent::Off:
       return;
     case LCDIntent::Page1:
-      outputDevices.intent.lcd_state = LCDIntent::Page3;
+      outputDevices.intent.lcd_state = LCDIntent::Page5;
       break;
     case LCDIntent::Page2:
       outputDevices.intent.lcd_state = LCDIntent::Page1;
@@ -276,6 +304,9 @@ void SystemController::cyclePages() {
       break;
     case LCDIntent::Page4:
       outputDevices.intent.lcd_state = LCDIntent::Page3;
+      break;
+    case LCDIntent::Page5:
+      outputDevices.intent.lcd_state = LCDIntent::Page4;
       break;
     }
     return;

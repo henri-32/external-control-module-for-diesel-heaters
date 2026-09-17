@@ -1,0 +1,41 @@
+\doxysection{pushbuttons.\+cpp}
+\hypertarget{pushbuttons_8cpp_source}{}\label{pushbuttons_8cpp_source}\index{src/pushbuttons.cpp@{src/pushbuttons.cpp}}
+\doxymbox{\hyperlink{pushbuttons_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}pushbuttons.h"{}}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00003}00003\ \textcolor{preprocessor}{\#ifdef\ TEST\_BUILD}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00004}00004\ \textcolor{preprocessor}{\#include\ "{}ArduinoStubs.h"{}}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00005}00005\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00006}00006\ \textcolor{preprocessor}{\#include\ "{}Arduino.h"{}}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00007}00007\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00009}00009\ PushButton::PushButton(uint8\_t\ pin)\ :\ m\_pin(pin)\ \{\}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00011}00011\ \textcolor{keywordtype}{void}\ PushButton::init()\ \{}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00012}00012\ \ \ pinMode(m\_pin,\ INPUT\_PULLUP);}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00013}00013\ \ \ m\_stable\ =\ digitalRead(m\_pin);}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00014}00014\ \ \ m\_last\_read\ =\ m\_stable;}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00015}00015\ \}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00017}00017\ \textcolor{keywordtype}{bool}\ PushButton::pressed()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_stable\ ==\ LOW;\ \};}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00018}00018\ \textcolor{keywordtype}{bool}\ PushButton::released()\ \{}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00019}00019\ \ \ \textcolor{keywordtype}{bool}\ reading\ =\ digitalRead(m\_pin);}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00021}00021\ \ \ \textcolor{keywordflow}{if}\ (reading\ !=\ m\_last\_read)\ \{}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00022}00022\ \ \ \ \ m\_last\_debounce\_ms\ =\ millis();}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00023}00023\ \ \ \ \ m\_last\_read\ =\ reading;}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00024}00024\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00026}00026\ \ \ \textcolor{keywordflow}{if}\ (millis()\ -\/\ m\_last\_debounce\_ms\ <\ kDebounceDelayMs)}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00027}00027\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00029}00029\ \ \ \textcolor{keywordflow}{if}\ (m\_stable\ !=\ reading)\ \{}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00030}00030\ \ \ \ \ m\_stable\ =\ reading;}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00031}00031\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_stable\ ==\ HIGH;\ \textcolor{comment}{//\ nur\ bei\ stabilem\ LOW-\/>\ HIGH}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00032}00032\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00034}00034\ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{pushbuttons_8cpp_source_l00035}00035\ \}}
+
+\end{DoxyCode}

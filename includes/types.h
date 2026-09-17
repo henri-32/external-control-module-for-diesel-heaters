@@ -34,6 +34,7 @@ struct HeaterStatus {
   Mode mode = Mode::Temp;
 
   float target_tempC = Config::kDefaultTempC;
+  float default_target_tempC = Config::kDefaultTempC;
 };
 
 #ifdef MEMORY_FUNCTIONS
@@ -73,7 +74,7 @@ public:
   };
   DisplayContent displayContent;
 
-  enum class LcdStateIntent { Page1, Page2, Page3, Page4, Off };
+  enum class LcdStateIntent { Page1, Page2, Page3, Page4, Page5, Off };
   LcdStateIntent lcd_state = LcdStateIntent::Off;
 
   enum class LcdCycleDirection { None, Right, Left };
