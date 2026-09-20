@@ -46,7 +46,7 @@ void SystemController::applyPowerSwitchInput() {
     return;
   };
 
-  // Alternator Path switches only State, without relay action
+  // Pfad mit gedrücktem Modifier. Status ON/OFF wird gewechselt ohne Relaisbetätigung
   if (inputDevices.data.alternator.pressed) {
     //{{{
     if (heaterStatus.state == State::Off) {
@@ -81,7 +81,8 @@ void SystemController::applyModeSwitchInput() {
   if (!inputDevices.data.switchAction.mode) {
     return;
   }
-  // Alternator Path only switches Mode without Relay Action
+  // Bei gedrücktem Modifier wird nur der Modus gewechselt, ohne Betätigung des
+  // Relais
   if (inputDevices.data.alternator.pressed) {
     //{{{
     if (heaterStatus.mode == Mode::Power) {
@@ -95,12 +96,29 @@ void SystemController::applyModeSwitchInput() {
   }
   //}}}
 
-  if (heaterStatus.mode == Mode::Power) {
-    requestRelaisCommand(ODI::RelaisCommand::Short);
-    heaterStatus.mode = Mode::Temp;
-  } else {
-    requestRelaisCommand(ODI::RelaisCommand::Short);
-    heaterStatus.mode = Mode::Power;
+  switch (outputDevices.intent.lcd_state) {
+  case ODI::LcdStateIntent::Page1:
+    if (heaterStatus.mode == Mode::Power) {
+      requestRelaisCommand(ODI::RelaisCommand::Short);
+      heaterStatus.mode = Mode::Temp;
+    } else {
+      requestRelaisCommand(ODI::RelaisCommand::Short);
+      heaterStatus.mode = Mode::Power;
+    }
+    break;
+  case ODI::LcdStateIntent::Page2:
+    break;
+  case ODI::LcdStateIntent::Page3:
+    break;
+  case ODI::LcdStateIntent::Page4:
+    break;
+  case ODI::LcdStateIntent::Page5:
+	enter_default_temp_dialog();
+    break;
+  case ODI::LcdStateIntent::Off:
+    break;
+  default:
+    break;
   }
 }
 //}}}
@@ -191,8 +209,8 @@ void SystemController::applyEncoderInput() {
     break;
   };
 
-// Begrenzt auf in config.h festgelegte zulässige Werte
-clampTargetTempC(heaterStatus.target_tempC);
+  // Begrenzt auf in config.h festgelegte zulässige Werte
+  clampTargetTempC(heaterStatus.target_tempC);
 }
 //}}}
 

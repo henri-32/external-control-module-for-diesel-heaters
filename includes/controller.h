@@ -43,6 +43,8 @@ private:
   void cyclePages();
   void requestRelaisCommand(OutputDevicesIntent::RelaisCommand command);
 
+  void enter_default_temp_dialog();
+
   IInputDevices &inputDevices;
   HeaterStatus heaterStatus;
   IOutputDevices &outputDevices;
