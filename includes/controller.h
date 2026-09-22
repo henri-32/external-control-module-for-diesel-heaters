@@ -6,20 +6,20 @@
 #include "statistics.h"
 #endif
 
-class IInputDevices; 
-class IOutputDevices; 
+class IInputDevices;
+class IOutputDevices;
 
 class SystemController {
-//Diese Klasse ist der zentrale Top Level Controller, welcher die gesamte Systemkomposition
-//übernimmt
+  // Diese Klasse ist der zentrale Top Level Controller, welcher die gesamte
+  // Systemkomposition übernimmt
 public:
   SystemController(IInputDevices &i, IOutputDevices &o);
   void operator()();
   void init();
 
-// Fragwürdig, dass fürs Testen auf Interna zugegriffen werden muss. 
-// Da der Umfang des Projekts erstmal begrenzt ist und die Logik der privaten Funktionen
-// getestet werden soll, aktuell für mich akzeptiert. 
+// Fragwürdig, dass fürs Testen auf Interna zugegriffen werden muss.
+// Da der Umfang des Projekts erstmal begrenzt ist und die Logik der privaten
+// Funktionen getestet werden soll, aktuell für mich akzeptiert.
 #ifdef TEST_BUILD
 public:
 #else
@@ -48,6 +48,10 @@ private:
   IInputDevices &inputDevices;
   HeaterStatus heaterStatus;
   IOutputDevices &outputDevices;
+
+  struct DataBuffer {
+    float default_target_tempC;
+  } dataBuffer;
 
 #ifdef MEMORY_FUNCTIONS
   SystemStatistics systemStatistic;

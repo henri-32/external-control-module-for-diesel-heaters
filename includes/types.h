@@ -80,6 +80,7 @@ public:
     Page3,
     Page4,
     default_temp_page,
+	default_temp_dialog,
     Off
   };
   LcdStateIntent lcd_state = LcdStateIntent::Off;

@@ -100,8 +100,16 @@ void DisplayDriver::renderLines() {
              m_displayContent.status.default_target_tempC);
 
     snprintf(m_lineBuffer[1], 21, "Press Mode Button");
-    snprintf(m_lineBuffer[2], 32, "     to change      ");
+    snprintf(m_lineBuffer[2], 21, "     to change      ");
     break;
+
+  case LCDIntent::default_temp_dialog: 
+    m_display.backlight();
+	m_display.display(); 
+    snprintf(m_lineBuffer[0], 21, "Default Temp %.2f C",
+             m_displayContent.status.default_target_tempC);
+    snprintf(m_lineBuffer[1], 21, "Mode Button: OK");
+    snprintf(m_lineBuffer[2], 21, "Display Button: EXIT");
 
   case LCDIntent::Off:
     m_display.noBacklight();

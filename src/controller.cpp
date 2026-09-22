@@ -115,7 +115,11 @@ void SystemController::applyModeSwitchInput() {
   case ODI::LcdStateIntent::Page4:
     break;
   case ODI::LcdStateIntent::default_temp_page:
-    enter_default_temp_dialog();
+    outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_dialog;
+    dataBuffer.default_target_tempC = heaterStatus.default_target_tempC;
+    break;
+  case ODI::LcdStateIntent::default_temp_dialog:
+    outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_page;
     break;
   case ODI::LcdStateIntent::Off:
     break;
@@ -162,6 +166,11 @@ void SystemController::applyDisplayButtonInput() {
     case LCDIntent::default_temp_page:
       outputDevices.intent.lcd_state = LCDIntent::Off;
       break;
+
+    case LCDIntent::default_temp_dialog:
+      heaterStatus.default_target_tempC = dataBuffer.default_target_tempC;
+      outputDevices.intent.lcd_state = LCDIntent::default_temp_page;
+      break;
     }
   }
 }
@@ -189,7 +198,8 @@ void SystemController::applyEncoderInput() {
       return;
     }
   }
-  //val auf in Config vorgeschriebende Werte begrenzen 
+  // Pfad ohne Modifier
+  // val auf in Config vorgeschriebende Werte begrenzen
   if (val > Config::kEncoderValCutoff) {
     val = Config::kEncoderValCutoff;
   } else if (val < -Config::kEncoderValCutoff) {
@@ -209,6 +219,8 @@ void SystemController::applyEncoderInput() {
   case LCDIntent::Page4:
     break;
   case LCDIntent::default_temp_page:
+    break;
+  case LCDIntent::default_temp_dialog:
     heaterStatus.default_target_tempC += val * Config::kTempStepC;
     break;
   case LCDIntent::Off:
@@ -312,6 +324,11 @@ void SystemController::cyclePages() {
     case LCDIntent::default_temp_page:
       outputDevices.intent.lcd_state = LCDIntent::start_page;
       break;
+
+      // Die folgenden Seiten sind Dialoge, die nicht regulär mit durchcyclen
+      // erreicht werden können.
+    case LCDIntent::default_temp_dialog:
+      break;
     }
     return;
   }
@@ -335,6 +352,11 @@ void SystemController::cyclePages() {
     case LCDIntent::default_temp_page:
       outputDevices.intent.lcd_state = LCDIntent::Page4;
       break;
+
+      // Die folgenden Seiten sind Dialoge, die nicht regulär mit durchcyclen
+      // erreicht werden können.
+    case LCDIntent::default_temp_dialog:
+      break;
     }
     return;
   }
@@ -345,23 +367,3 @@ void SystemController::requestRelaisCommand(
   outputDevices.intent.relaisCommand = command;
 }
 //}}}
-
-void SystemController::enter_default_temp_dialog() {
-  // lokale Variable für display
-  float default_temp_buffer = heaterStatus.default_target_tempC;
-
-  while (true) {
-    char lines[4][21];
-    snprintf(lines[0], 21, "default temp %.2f", default_temp_buffer);
-    snprintf(lines[1], 21, "Display Button: OK");
-    snprintf(lines[2], 21, "Mode Button: EXIT");
-
-    // Encoder auswerten
-    const int val = inputDevices.data.encoder_val;
-    if (val == 0) {
-      continue;
-    }
-
-    default_temp_buffer += val * Config::kTempStepC; // val ist signed
-  }
-}
