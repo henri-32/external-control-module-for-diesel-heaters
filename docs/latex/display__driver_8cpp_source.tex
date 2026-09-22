@@ -46,7 +46,7 @@
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00042}00042\ \textcolor{keywordtype}{void}\ DisplayDriver::renderLines()\ \{}
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00043}00043\ \ \ \textcolor{comment}{//\{\{\{}}
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00044}00044\ \ \ \textcolor{keywordflow}{switch}\ (m\_displayState)\ \{}
-\DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00045}00045\ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page1:}
+\DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00045}00045\ \ \ \textcolor{keywordflow}{case}\ LCDIntent::start_page:}
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00046}00046\ \ \ \ \ formatTempFloatsForDisplay();}
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00047}00047\ \ \ \ \ createStateStringsForDisplay(m\_displayContent);}
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00048}00048\ \ \ \ \ m\_display.backlight();}
@@ -126,7 +126,7 @@
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00122}00122\ \textcolor{keywordtype}{void}\ DisplayDriver::formatTempFloatsForDisplay()\ \{}
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00123}00123\ \ \ \textcolor{comment}{//\{\{\{}}
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00124}00124\ \ \ \textcolor{keywordflow}{switch}\ (m\_displayState)\ \{}
-\DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00125}00125\ \ \ \textcolor{keywordflow}{case}\ LCDIntent::Page1:}
+\DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00125}00125\ \ \ \textcolor{keywordflow}{case}\ LCDIntent::start_page:}
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00126}00126\ }
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00127}00127\ \ \ \ \ t\_int\ =\ int(m\_displayContent.temp\_c);}
 \DoxyCodeLine{\Hypertarget{display__driver_8cpp_source_l00128}00128\ \ \ \ \ t\_frac\ =\ abs(\textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(m\_displayContent.temp\_c\ *\ 10)\ \%\ 10);}

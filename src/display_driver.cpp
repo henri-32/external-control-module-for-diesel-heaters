@@ -41,7 +41,7 @@ void DisplayDriver::update() {
 void DisplayDriver::renderLines() {
   //{{{
   switch (m_displayState) {
-  case LCDIntent::Page1:
+  case LCDIntent::start_page:
     formatTempFloatsForDisplay();
     createStateStringsForDisplay(m_displayContent);
     m_display.backlight();
@@ -93,15 +93,15 @@ void DisplayDriver::renderLines() {
 #endif
     break;
 
-  case LCDIntent::Page5:
+  case LCDIntent::default_temp_page:
     m_display.backlight();
     m_display.display();
     snprintf(m_lineBuffer[0], 21, "Default Temp %.2f C",
              m_displayContent.status.default_target_tempC);
 
-    snprintf(m_lineBuffer[1], 21, "Turn display button");
-	snprintf(m_lineBuffer[2], 32, "     to change      "); 
-	break;
+    snprintf(m_lineBuffer[1], 21, "Press Mode Button");
+    snprintf(m_lineBuffer[2], 32, "     to change      ");
+    break;
 
   case LCDIntent::Off:
     m_display.noBacklight();
@@ -132,7 +132,7 @@ void DisplayDriver::writeDisplay(char lines[4][21]) {
 void DisplayDriver::formatTempFloatsForDisplay() {
   //{{{
   switch (m_displayState) {
-  case LCDIntent::Page1:
+  case LCDIntent::start_page:
 
     t_int = int(m_displayContent.temp_c);
     t_frac = abs(static_cast<int>(m_displayContent.temp_c * 10) % 10);
@@ -145,7 +145,6 @@ void DisplayDriver::formatTempFloatsForDisplay() {
     break;
 
   case LCDIntent::Page3:
-
 #ifdef MEMORYFUNCTIONS
     diff_int = int(m_displayContent.runtimeDisplayData.mediumDiffTempToTarget);
     diff_frac = abs(
@@ -158,6 +157,8 @@ void DisplayDriver::formatTempFloatsForDisplay() {
   case LCDIntent::Page4:
     break;
 
+  case LCDIntent::default_temp_page:
+    break;
   case LCDIntent::Off:
     break;
   }

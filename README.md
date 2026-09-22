@@ -109,7 +109,7 @@ Steuerverhalten:
   - Normal: Relais `Short`-Puls (200 ms), Modus toggeln (`POWER/TEMP`)
   - Bei gedrücktem `kDisplayButtonPin`: nur internen Modus toggeln, kein Relais
 - `kDisplayButtonPin` bei Loslassen:
-  - ohne Kombiaktion: LCD zwischen `OFF` und `Page1` umschalten
+  - ohne Kombiaktion: LCD zwischen `OFF` und `start_page` umschalten
   - nach Kombiaktion: keine zusätzliche Display-Umschaltung
 - Encoder drehen:
   - ohne gedrückten `kDisplayButtonPin`: Solltemperatur anpassen

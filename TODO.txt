@@ -1,0 +1,10 @@
+Tests Grün bekommen bzw anpassen daran, dass nur noch bei Display off die heizung ausgeschaltet werden kann und der rest nur bei start_page
+
+
+1. Überlegen, wie ich write display sinnvoll öffentlich bekomme 
+2. Direkten write implementieren. 
+3. Encoder abfragen 
+4. buffer aktualisieren 
+5. Returnvarianten prüfen 
+6. timeout prüfen 
+7. tests hinzufügen. 

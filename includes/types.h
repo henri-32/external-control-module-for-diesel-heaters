@@ -1,11 +1,11 @@
 #pragma once
 #include "config.h"
-#include <stdint.h>
 #include <limits.h>
+#include <stdint.h>
 
 //=========================================
-//Hier werden die Ein-/ und Ausgabe Structs
-//des SystemControllers definiert
+// Hier werden die Ein-/ und Ausgabe Structs
+// des SystemControllers definiert
 //=========================================
 
 struct InputDevicesDataSet {
@@ -74,7 +74,14 @@ public:
   };
   DisplayContent displayContent;
 
-  enum class LcdStateIntent { Page1, Page2, Page3, Page4, Page5, Off };
+  enum class LcdStateIntent {
+    start_page,
+    Page2,
+    Page3,
+    Page4,
+    default_temp_page,
+    Off
+  };
   LcdStateIntent lcd_state = LcdStateIntent::Off;
 
   enum class LcdCycleDirection { None, Right, Left };

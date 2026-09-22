@@ -10,6 +10,7 @@ public:
 
   void init() override;
   void update() override;
+  void writeLine();
 
   void renderLines();
   void writeDisplay(char lines[4][21]);

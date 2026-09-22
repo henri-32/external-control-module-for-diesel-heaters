@@ -54,7 +54,7 @@ TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
 
 TEST_F(DisplayTest, update_page1_writes_expected_lines) {
   //{{{
-  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::Page1;
+  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::start_page;
   outputIntent.displayContent.temp_c = 21.3F;
   outputIntent.displayContent.status.target_tempC = 19.8F;
   outputIntent.displayContent.status.state = HeaterStatus::State::On;
@@ -74,7 +74,7 @@ TEST_F(DisplayTest, update_page1_writes_expected_lines) {
 
 TEST_F(DisplayTest, update_with_same_content_does_not_rewrite_lines) {
   //{{{
-  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::Page1;
+  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::start_page;
   outputIntent.displayContent.temp_c = 20.0F;
   outputIntent.displayContent.status.target_tempC = 18.5F;
   outputIntent.displayContent.status.state = HeaterStatus::State::Off;

@@ -218,9 +218,9 @@ $(function(){initNavTree('controller_8cpp_source.html','',''); });
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="keywordflow">switch</span> (outputDevices.intent.lcd_state) {</div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keywordflow">case</span> LCDIntent::Off:</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>      outputDevices.intent.lcd_state = LCDIntent::Page1;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>      outputDevices.intent.lcd_state = LCDIntent::start_page;</div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>      <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordflow">case</span> LCDIntent::Page1:</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordflow">case</span> LCDIntent::start_page:</div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>      outputDevices.intent.lcd_state = LCDIntent::Off;</div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keywordflow">case</span> LCDIntent::Page2:</div>
@@ -338,7 +338,7 @@ $(function(){initNavTree('controller_8cpp_source.html','',''); });
 <div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    <span class="keywordflow">switch</span> (outputDevices.intent.lcd_state) {</div>
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <span class="keywordflow">case</span> LCDIntent::Off:</div>
 <div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>      <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <span class="keywordflow">case</span> LCDIntent::Page1:</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <span class="keywordflow">case</span> LCDIntent::start_page:</div>
 <div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>      outputDevices.intent.lcd_state = LCDIntent::Page2;</div>
 <div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    <span class="keywordflow">case</span> LCDIntent::Page2:</div>
@@ -348,7 +348,7 @@ $(function(){initNavTree('controller_8cpp_source.html','',''); });
 <div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>      outputDevices.intent.lcd_state = LCDIntent::Page4;</div>
 <div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    <span class="keywordflow">case</span> LCDIntent::Page4:</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>      outputDevices.intent.lcd_state = LCDIntent::Page1;</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>      outputDevices.intent.lcd_state = LCDIntent::start_page;</div>
 <div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    }</div>
 <div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="keywordflow">return</span>;</div>
@@ -358,11 +358,11 @@ $(function(){initNavTree('controller_8cpp_source.html','',''); });
 <div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keywordflow">switch</span> (outputDevices.intent.lcd_state) {</div>
 <div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    <span class="keywordflow">case</span> LCDIntent::Off:</div>
 <div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>      <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    <span class="keywordflow">case</span> LCDIntent::Page1:</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    <span class="keywordflow">case</span> LCDIntent::start_page:</div>
 <div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>      outputDevices.intent.lcd_state = LCDIntent::Page3;</div>
 <div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    <span class="keywordflow">case</span> LCDIntent::Page2:</div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>      outputDevices.intent.lcd_state = LCDIntent::Page1;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>      outputDevices.intent.lcd_state = LCDIntent::start_page;</div>
 <div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    <span class="keywordflow">case</span> LCDIntent::Page3:</div>
 <div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>      outputDevices.intent.lcd_state = LCDIntent::Page2;</div>

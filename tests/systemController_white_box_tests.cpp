@@ -3,8 +3,8 @@
 #include "devicegroups.h"
 #include "display_driver.h"
 #include "encoder_driver.h"
-#include "test_devices.h"
 #include "temperature_sensor_driver.h"
+#include "test_devices.h"
 #include <gtest/gtest.h>
 
 class SystemControllerUnitTest : public ::testing::Test {
@@ -29,8 +29,8 @@ protected:
   TemperatureSensorDriver tempSensorDriver{tempSensorHardware};
 
   // Gerätegruppen
-  InputDevices inputDevices{inputDataBuffer, powerSwitch, modeSwitch,
-                            displayButton, encoderDriver, tempSensorDriver};
+  InputDevices inputDevices{inputDataBuffer, powerSwitch,   modeSwitch,
+                            displayButton,   encoderDriver, tempSensorDriver};
   OutputDevices outputDevices{outputIntentBuffer, displayDriver, testRelais};
 
   // Zu testendes System
@@ -39,12 +39,18 @@ protected:
   // Abkürzungen auf den vom Controller verwalteten Zustand
   InputDevicesDataSet &inputData = controller.inputDevices.data;
   OutputDevicesIntent &outputIntent = controller.outputDevices.intent;
+
+  void set_lcd_to_start_page() {
+    outputDevices.intent.lcd_state =
+        OutputDevicesIntent::LcdStateIntent::start_page;
+  }
 };
 
 // Verarbeitung des Power-Schalter-Inputs
 //{{{
-TEST_F(SystemControllerUnitTest,
-       apply_power_switch_input_path_with_alternator_off_to_on_no_relay_action) {
+TEST_F(
+    SystemControllerUnitTest,
+    apply_power_switch_input_path_with_alternator_off_to_on_no_relay_action) {
   //{{{
   using State = HeaterStatus::State;
   inputData.switchAction.power = true;
@@ -61,8 +67,9 @@ TEST_F(SystemControllerUnitTest,
 }
 //}}}
 
-TEST_F(SystemControllerUnitTest,
-       apply_power_switch_input_path_with_alternator_on_to_off_no_relay_action) {
+TEST_F(
+    SystemControllerUnitTest,
+    apply_power_switch_input_path_with_alternator_on_to_off_no_relay_action) {
   //{{{
   using State = HeaterStatus::State;
   inputData.switchAction.power = true;
@@ -106,8 +113,9 @@ TEST_F(SystemControllerUnitTest,
 }
 //}}}
 
-TEST_F(SystemControllerUnitTest,
-       apply_power_switch_input_path_with_alternator_unrelated_input_ignored_on_to_off) {
+TEST_F(
+    SystemControllerUnitTest,
+    apply_power_switch_input_path_with_alternator_unrelated_input_ignored_on_to_off) {
   //{{{
   using State = HeaterStatus::State;
   inputData.switchAction.power = true;
@@ -167,8 +175,9 @@ TEST_F(SystemControllerUnitTest,
 
 // Verarbeitung des Mode-Schalter-Inputs
 //{{{
-TEST_F(SystemControllerUnitTest,
-       apply_mode_switch_input_path_witch_alternator_power_to_temp_no_relay_action) {
+TEST_F(
+    SystemControllerUnitTest,
+    apply_mode_switch_input_path_witch_alternator_power_to_temp_no_relay_action) {
   //{{{
   inputData.switchAction.mode = true;
   inputData.alternator.pressed = true;
@@ -178,12 +187,14 @@ TEST_F(SystemControllerUnitTest,
   controller.applyModeSwitchInput();
 
   EXPECT_EQ(controller.heaterStatus.mode, HeaterStatus::Mode::Temp)
-      << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
+      << "mode=" << static_cast<int>(controller.heaterStatus.mode)
+      << "withAlternator";
 }
 //}}}
 
-TEST_F(SystemControllerUnitTest,
-       apply_mode_switch_input_path_with_alternator_temp_to_power_no_relay_action) {
+TEST_F(
+    SystemControllerUnitTest,
+    apply_mode_switch_input_path_with_alternator_temp_to_power_no_relay_action) {
   //{{{
   inputData.switchAction.mode = true;
   inputData.alternator.pressed = true;
@@ -193,13 +204,18 @@ TEST_F(SystemControllerUnitTest,
   controller.applyModeSwitchInput();
 
   EXPECT_EQ(controller.heaterStatus.mode, HeaterStatus::Mode::Power)
-      << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
+      << "mode=" << static_cast<int>(controller.heaterStatus.mode)
+      << "withAlternator";
 }
 //}}}
 
 TEST_F(SystemControllerUnitTest,
        apply_mode_switch_input_path_without_alternator_temp_to_power) {
   //{{{
+  // Nötig, da nur bei der start_page der modus auch gewechselt wird
+  outputIntentBuffer.lcd_state =
+      OutputDevicesIntent::LcdStateIntent::start_page;
+
   inputData.switchAction.mode = true;
   inputData.alternator.pressed = false;
   inputData.alternator.used = false;
@@ -208,7 +224,8 @@ TEST_F(SystemControllerUnitTest,
   controller.applyModeSwitchInput();
 
   EXPECT_EQ(controller.heaterStatus.mode, HeaterStatus::Mode::Power)
-      << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
+      << "mode=" << static_cast<int>(controller.heaterStatus.mode)
+      << "withAlternator";
 
   EXPECT_EQ(outputIntent.relaisCommand,
             OutputDevicesIntent::RelaisCommand::Short)
@@ -220,6 +237,10 @@ TEST_F(SystemControllerUnitTest,
 TEST_F(SystemControllerUnitTest,
        apply_mode_switch_input_path_without_alternator_power_to_temp) {
   //{{{
+  // Nötig, da nur bei der start_page der modus auch gewechselt wird
+  outputIntentBuffer.lcd_state =
+      OutputDevicesIntent::LcdStateIntent::start_page;
+
   inputData.switchAction.mode = true;
   inputData.alternator.pressed = false;
   inputData.alternator.used = false;
@@ -228,7 +249,8 @@ TEST_F(SystemControllerUnitTest,
   controller.applyModeSwitchInput();
 
   EXPECT_EQ(controller.heaterStatus.mode, HeaterStatus::Mode::Temp)
-      << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
+      << "mode=" << static_cast<int>(controller.heaterStatus.mode)
+      << "withAlternator";
 
   EXPECT_EQ(outputIntent.relaisCommand,
             OutputDevicesIntent::RelaisCommand::Short)
@@ -241,6 +263,10 @@ TEST_F(
     SystemControllerUnitTest,
     apply_mode_switch_input_path_without_alternator_power_to_temp_unrelated_input_ignored) {
   //{{{
+  // Nötig, da nur bei der start_page der modus auch gewechselt wird
+  outputIntentBuffer.lcd_state =
+      OutputDevicesIntent::LcdStateIntent::start_page;
+
   inputData.switchAction.mode = true;
   inputData.alternator.pressed = false;
   inputData.alternator.used = false;
@@ -249,14 +275,16 @@ TEST_F(
   // Nicht zusammenhängender Input
   inputData.switchAction.power = true;
   inputData.encoder_val = 20;
-  // Sollte keinen Unterschied machen, weil dies in einer separaten Funktion geprüft wird.
+  // Sollte keinen Unterschied machen, weil dies in einer separaten Funktion
+  // geprüft wird.
   inputData.alternator.used = true;
   inputData.alternator.released = true;
 
   controller.applyModeSwitchInput();
 
   EXPECT_EQ(controller.heaterStatus.mode, HeaterStatus::Mode::Temp)
-      << "mode=" << static_cast<int>(controller.heaterStatus.mode) << "withAlternator";
+      << "mode=" << static_cast<int>(controller.heaterStatus.mode)
+      << "withAlternator";
 
   EXPECT_EQ(outputIntent.relaisCommand,
             OutputDevicesIntent::RelaisCommand::Short)
@@ -279,14 +307,14 @@ TEST_F(SystemControllerUnitTest,
 
   controller.applyDisplayButtonInput();
 
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::Off);
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
   EXPECT_EQ(inputData.alternator.pressed, false);
   EXPECT_EQ(inputData.alternator.used, false);
 }
 //}}}
 
-TEST_F(SystemControllerUnitTest, apply_display_button_input_output_intent_sets) {
+TEST_F(SystemControllerUnitTest,
+       apply_display_button_input_output_intent_sets) {
   //{{{
   inputData.alternator.pressed = false;
   inputData.alternator.used = false;
@@ -296,11 +324,10 @@ TEST_F(SystemControllerUnitTest, apply_display_button_input_output_intent_sets) 
   controller.applyDisplayButtonInput();
 
   EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::Page1);
+            OutputDevicesIntent::LcdStateIntent::start_page);
 
   controller.applyDisplayButtonInput();
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::Off);
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
 }
 //}}}
 
@@ -323,7 +350,7 @@ TEST_F(SystemControllerUnitTest, apply_encoder_input_min_step) {
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::None;
-  outputIntent.lcd_state = LCDIntent::Page1;
+  outputIntent.lcd_state = LCDIntent::start_page;
 
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::Right);
@@ -365,7 +392,7 @@ TEST_F(SystemControllerUnitTest, apply_encoder_input_max_step) {
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::None;
-  outputIntent.lcd_state = LCDIntent::Page1;
+  outputIntent.lcd_state = LCDIntent::start_page;
 
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::Right);
@@ -426,7 +453,7 @@ TEST_F(SystemControllerUnitTest, apply_encoder_input_negative_max_step) {
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::None;
-  outputIntent.lcd_state = LCDIntent::Page1;
+  outputIntent.lcd_state = LCDIntent::start_page;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::Left);
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
@@ -470,14 +497,16 @@ TEST_F(SystemControllerUnitTest, apply_encoder_input_negative_min_step) {
   EXPECT_EQ(controller.heaterStatus.target_tempC, 10);
 
   outputIntent.lcd_cycleDirection = LCDDirection::None;
-  outputIntent.lcd_state = LCDIntent::Page1;
+  outputIntent.lcd_state = LCDIntent::start_page;
   controller.applyEncoderInput();
   EXPECT_EQ(outputIntent.lcd_cycleDirection, LCDDirection::Left);
 }
 //}}}
 
-TEST_F(SystemControllerUnitTest, apply_encoder_input_min_step_without_alternator) {
+TEST_F(SystemControllerUnitTest,
+       apply_encoder_input_min_step_without_alternator) {
   //{{{
+  set_lcd_to_start_page();
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = 1;
   inputData.alternator.pressed = false;
@@ -489,8 +518,10 @@ TEST_F(SystemControllerUnitTest, apply_encoder_input_min_step_without_alternator
 }
 //}}}
 
-TEST_F(SystemControllerUnitTest, apply_encoder_input_max_step_without_alternator) {
+TEST_F(SystemControllerUnitTest,
+       apply_encoder_input_max_step_without_alternator) {
   //{{{
+  set_lcd_to_start_page();
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = Config::kEncoderValCutoff;
   inputData.alternator.pressed = false;
@@ -505,6 +536,7 @@ TEST_F(SystemControllerUnitTest, apply_encoder_input_max_step_without_alternator
 TEST_F(SystemControllerUnitTest,
        apply_encoder_input_max_step_without_alternator_over_guard) {
   //{{{
+  set_lcd_to_start_page();
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = Config::kEncoderValCutoff;
   inputData.alternator.pressed = false;
@@ -519,6 +551,7 @@ TEST_F(SystemControllerUnitTest,
 TEST_F(SystemControllerUnitTest,
        apply_encoder_input_negative_max_step_without_alternator_below_guard) {
   //{{{
+  set_lcd_to_start_page();
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = -Config::kEncoderValCutoff;
   inputData.alternator.pressed = false;
@@ -533,6 +566,7 @@ TEST_F(SystemControllerUnitTest,
 TEST_F(SystemControllerUnitTest,
        apply_encoder_input_negative_min_step_without_alternator) {
   //{{{
+  set_lcd_to_start_page();
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = -1;
   inputData.alternator.pressed = false;
@@ -547,6 +581,7 @@ TEST_F(SystemControllerUnitTest,
 TEST_F(SystemControllerUnitTest,
        apply_encoder_input_negative_max_step_without_alternator) {
   //{{{
+  set_lcd_to_start_page();
   float &target = controller.heaterStatus.target_tempC;
   inputData.encoder_val = -Config::kEncoderValCutoff;
   inputData.alternator.pressed = false;
@@ -568,7 +603,8 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_off) {
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC + Config::kToleranceC + 0.1;
+  controller.heaterStatus.target_tempC =
+      inputData.sensor_tempC + Config::kToleranceC + 0.1;
   m_state = State::Off;
 
   controller.applyHeatingLogic();
@@ -585,7 +621,8 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_cold_and_state_on) {
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC + Config::kToleranceC + 0.1;
+  controller.heaterStatus.target_tempC =
+      inputData.sensor_tempC + Config::kToleranceC + 0.1;
   m_state = State::On;
 
   controller.applyHeatingLogic();
@@ -600,7 +637,8 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_on) {
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC - Config::kToleranceC - 0.1;
+  controller.heaterStatus.target_tempC =
+      inputData.sensor_tempC - Config::kToleranceC - 0.1;
   m_state = State::On;
 
   controller.applyHeatingLogic();
@@ -617,7 +655,8 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_off) {
   State &m_state = controller.heaterStatus.state;
 
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC - Config::kToleranceC - 0.1;
+  controller.heaterStatus.target_tempC =
+      inputData.sensor_tempC - Config::kToleranceC - 0.1;
   m_state = State::Off;
 
   controller.applyHeatingLogic();
@@ -626,13 +665,15 @@ TEST_F(SystemControllerUnitTest, apply_heating_logic_too_warm_and_state_off) {
 }
 //}}}
 
-TEST_F(SystemControllerUnitTest, apply_heating_logic_early_return_by_wrong_mode) {
+TEST_F(SystemControllerUnitTest,
+       apply_heating_logic_early_return_by_wrong_mode) {
   //{{{
   using State = HeaterStatus::State;
   State &m_state = controller.heaterStatus.state;
   controller.heaterStatus.mode = HeaterStatus::Mode::Power;
   inputData.sensor_tempC = 10;
-  controller.heaterStatus.target_tempC = inputData.sensor_tempC - Config::kToleranceC - 0.1;
+  controller.heaterStatus.target_tempC =
+      inputData.sensor_tempC - Config::kToleranceC - 0.1;
   m_state = State::On;
 
   controller.applyHeatingLogic();
@@ -651,9 +692,10 @@ TEST_F(SystemControllerUnitTest, cycle_pages_intent_reacts_to_cycling_right) {
   using LCDIntent = OutputDevicesIntent::LcdStateIntent;
   using LCDDirection = OutputDevicesIntent::LcdCycleDirection;
   LCDIntent &lcdIntent = controller.outputDevices.intent.lcd_state;
-  LCDDirection &lcdDirection = controller.outputDevices.intent.lcd_cycleDirection;
+  LCDDirection &lcdDirection =
+      controller.outputDevices.intent.lcd_cycleDirection;
 
-  lcdIntent = LCDIntent::Page1;
+  lcdIntent = LCDIntent::start_page;
   lcdDirection = LCDDirection::Right;
 
   controller.cyclePages();
@@ -675,7 +717,8 @@ TEST_F(SystemControllerUnitTest, cycle_pages_intent_reacts_to_cycling_left) {
   using LCDIntent = OutputDevicesIntent::LcdStateIntent;
   using LCDDirection = OutputDevicesIntent::LcdCycleDirection;
   LCDIntent &lcdIntent = controller.outputDevices.intent.lcd_state;
-  LCDDirection &lcdDirection = controller.outputDevices.intent.lcd_cycleDirection;
+  LCDDirection &lcdDirection =
+      controller.outputDevices.intent.lcd_cycleDirection;
 
   lcdIntent = LCDIntent::Page4;
   lcdDirection = LCDDirection::Left;
@@ -690,7 +733,7 @@ TEST_F(SystemControllerUnitTest, cycle_pages_intent_reacts_to_cycling_left) {
 
   controller.cyclePages();
 
-  EXPECT_EQ(lcdIntent, LCDIntent::Page1);
+  EXPECT_EQ(lcdIntent, LCDIntent::start_page);
 }
 //}}}
 //}}}

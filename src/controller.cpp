@@ -1,5 +1,6 @@
 #include "controller.h"
 #include "interfaces.h"
+#include <stdio.h>
 
 SystemController::SystemController(IInputDevices &i, IOutputDevices &o)
     : inputDevices(i), outputDevices(o) {}
@@ -46,7 +47,8 @@ void SystemController::applyPowerSwitchInput() {
     return;
   };
 
-  // Pfad mit gedrücktem Modifier. Status ON/OFF wird gewechselt ohne Relaisbetätigung
+  // Pfad mit gedrücktem Modifier. Status ON/OFF wird gewechselt ohne
+  // Relaisbetätigung
   if (inputDevices.data.alternator.pressed) {
     //{{{
     if (heaterStatus.state == State::Off) {
@@ -97,7 +99,7 @@ void SystemController::applyModeSwitchInput() {
   //}}}
 
   switch (outputDevices.intent.lcd_state) {
-  case ODI::LcdStateIntent::Page1:
+  case ODI::LcdStateIntent::start_page:
     if (heaterStatus.mode == Mode::Power) {
       requestRelaisCommand(ODI::RelaisCommand::Short);
       heaterStatus.mode = Mode::Temp;
@@ -112,8 +114,8 @@ void SystemController::applyModeSwitchInput() {
     break;
   case ODI::LcdStateIntent::Page4:
     break;
-  case ODI::LcdStateIntent::Page5:
-	enter_default_temp_dialog();
+  case ODI::LcdStateIntent::default_temp_page:
+    enter_default_temp_dialog();
     break;
   case ODI::LcdStateIntent::Off:
     break;
@@ -143,9 +145,9 @@ void SystemController::applyDisplayButtonInput() {
   } else {
     switch (outputDevices.intent.lcd_state) {
     case LCDIntent::Off:
-      outputDevices.intent.lcd_state = LCDIntent::Page1;
+      outputDevices.intent.lcd_state = LCDIntent::start_page;
       break;
-    case LCDIntent::Page1:
+    case LCDIntent::start_page:
       outputDevices.intent.lcd_state = LCDIntent::Off;
       break;
     case LCDIntent::Page2:
@@ -157,7 +159,7 @@ void SystemController::applyDisplayButtonInput() {
     case LCDIntent::Page4:
       outputDevices.intent.lcd_state = LCDIntent::Off;
       break;
-    case LCDIntent::Page5:
+    case LCDIntent::default_temp_page:
       outputDevices.intent.lcd_state = LCDIntent::Off;
       break;
     }
@@ -168,7 +170,7 @@ void SystemController::applyDisplayButtonInput() {
 void SystemController::applyEncoderInput() {
   //{{{
   using LCDDirection = OutputDevicesIntent::LcdCycleDirection;
-  const int val = inputDevices.data.encoder_val;
+  int val = inputDevices.data.encoder_val;
 
   if (val == 0)
     return;
@@ -187,9 +189,16 @@ void SystemController::applyEncoderInput() {
       return;
     }
   }
+  //val auf in Config vorgeschriebende Werte begrenzen 
+  if (val > Config::kEncoderValCutoff) {
+    val = Config::kEncoderValCutoff;
+  } else if (val < -Config::kEncoderValCutoff) {
+    val = -Config::kEncoderValCutoff;
+  }
+
   using LCDIntent = OutputDevicesIntent::LcdStateIntent;
   switch (outputDevices.intent.lcd_state) {
-  case LCDIntent::Page1:
+  case LCDIntent::start_page:
     heaterStatus.target_tempC +=
         val * Config::kTempStepC; // encoderVal ist signed
     break;
@@ -199,7 +208,7 @@ void SystemController::applyEncoderInput() {
     break;
   case LCDIntent::Page4:
     break;
-  case LCDIntent::Page5:
+  case LCDIntent::default_temp_page:
     heaterStatus.default_target_tempC += val * Config::kTempStepC;
     break;
   case LCDIntent::Off:
@@ -287,7 +296,7 @@ void SystemController::cyclePages() {
     switch (outputDevices.intent.lcd_state) {
     case LCDIntent::Off:
       return;
-    case LCDIntent::Page1:
+    case LCDIntent::start_page:
       outputDevices.intent.lcd_state = LCDIntent::Page2;
       break;
     case LCDIntent::Page2:
@@ -297,11 +306,11 @@ void SystemController::cyclePages() {
       outputDevices.intent.lcd_state = LCDIntent::Page4;
       break;
     case LCDIntent::Page4:
-      outputDevices.intent.lcd_state = LCDIntent::Page5;
+      outputDevices.intent.lcd_state = LCDIntent::default_temp_page;
       break;
 
-    case LCDIntent::Page5:
-      outputDevices.intent.lcd_state = LCDIntent::Page1;
+    case LCDIntent::default_temp_page:
+      outputDevices.intent.lcd_state = LCDIntent::start_page;
       break;
     }
     return;
@@ -311,11 +320,11 @@ void SystemController::cyclePages() {
     switch (outputDevices.intent.lcd_state) {
     case LCDIntent::Off:
       return;
-    case LCDIntent::Page1:
-      outputDevices.intent.lcd_state = LCDIntent::Page5;
+    case LCDIntent::start_page:
+      outputDevices.intent.lcd_state = LCDIntent::default_temp_page;
       break;
     case LCDIntent::Page2:
-      outputDevices.intent.lcd_state = LCDIntent::Page1;
+      outputDevices.intent.lcd_state = LCDIntent::start_page;
       break;
     case LCDIntent::Page3:
       outputDevices.intent.lcd_state = LCDIntent::Page2;
@@ -323,7 +332,7 @@ void SystemController::cyclePages() {
     case LCDIntent::Page4:
       outputDevices.intent.lcd_state = LCDIntent::Page3;
       break;
-    case LCDIntent::Page5:
+    case LCDIntent::default_temp_page:
       outputDevices.intent.lcd_state = LCDIntent::Page4;
       break;
     }
@@ -336,3 +345,23 @@ void SystemController::requestRelaisCommand(
   outputDevices.intent.relaisCommand = command;
 }
 //}}}
+
+void SystemController::enter_default_temp_dialog() {
+  // lokale Variable für display
+  float default_temp_buffer = heaterStatus.default_target_tempC;
+
+  while (true) {
+    char lines[4][21];
+    snprintf(lines[0], 21, "default temp %.2f", default_temp_buffer);
+    snprintf(lines[1], 21, "Display Button: OK");
+    snprintf(lines[2], 21, "Mode Button: EXIT");
+
+    // Encoder auswerten
+    const int val = inputDevices.data.encoder_val;
+    if (val == 0) {
+      continue;
+    }
+
+    default_temp_buffer += val * Config::kTempStepC; // val ist signed
+  }
+}
