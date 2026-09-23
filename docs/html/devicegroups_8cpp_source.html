@@ -110,10 +110,10 @@ $(function(){initNavTree('devicegroups_8cpp_source.html','',''); });
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>}</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keywordtype">void</span> InputDevices::update() {</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  data.alternator.pressed = m_displayButton.pressed();</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  data.modifier.pressed = m_displayButton.pressed();</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  data.switchAction.power = m_powerSwitch.changed();</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  data.switchAction.mode = m_modeSwitch.changed();</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  data.alternator.released = m_displayButton.released();</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  data.modifier.released = m_displayButton.released();</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  data.encoder_val = m_encoderDriver.readSteps();</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  data.sensor_tempC = m_tempSensorDriver.pollTemp();</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>}</div>

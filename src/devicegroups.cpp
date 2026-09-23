@@ -17,10 +17,10 @@ void InputDevices::init() {
 }
 
 void InputDevices::update() {
-  data.alternator.pressed = m_displayButton.pressed();
+  data.modifier.pressed = m_displayButton.pressed();
   data.switchAction.power = m_powerSwitch.changed();
   data.switchAction.mode = m_modeSwitch.changed();
-  data.alternator.released = m_displayButton.released();
+  data.modifier.released = m_displayButton.released();
   data.encoder_val = m_encoderDriver.readSteps();
   data.sensor_tempC = m_tempSensorDriver.pollTemp();
 }

@@ -110,6 +110,7 @@ void DisplayDriver::renderLines() {
              m_displayContent.status.default_target_tempC);
     snprintf(m_lineBuffer[1], 21, "Mode Button: OK");
     snprintf(m_lineBuffer[2], 21, "Display Button: EXIT");
+	break;
 
   case LCDIntent::Off:
     m_display.noBacklight();
@@ -166,6 +167,8 @@ void DisplayDriver::formatTempFloatsForDisplay() {
     break;
 
   case LCDIntent::default_temp_page:
+    break;
+  case LCDIntent::default_temp_dialog:
     break;
   case LCDIntent::Off:
     break;

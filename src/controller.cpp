@@ -49,7 +49,7 @@ void SystemController::applyPowerSwitchInput() {
 
   // Pfad mit gedrücktem Modifier. Status ON/OFF wird gewechselt ohne
   // Relaisbetätigung
-  if (inputDevices.data.alternator.pressed) {
+  if (inputDevices.data.modifier.pressed) {
     //{{{
     if (heaterStatus.state == State::Off) {
       heaterStatus.state = State::On;
@@ -57,7 +57,7 @@ void SystemController::applyPowerSwitchInput() {
       heaterStatus.state = State::Off;
     }
 
-    inputDevices.data.alternator.used = true;
+    inputDevices.data.modifier.used = true;
     return;
   }
   //}}}
@@ -85,7 +85,7 @@ void SystemController::applyModeSwitchInput() {
   }
   // Bei gedrücktem Modifier wird nur der Modus gewechselt, ohne Betätigung des
   // Relais
-  if (inputDevices.data.alternator.pressed) {
+  if (inputDevices.data.modifier.pressed) {
     //{{{
     if (heaterStatus.mode == Mode::Power) {
       heaterStatus.mode = Mode::Temp;
@@ -93,7 +93,7 @@ void SystemController::applyModeSwitchInput() {
       heaterStatus.mode = Mode::Power;
     }
 
-    inputDevices.data.alternator.used = true;
+    inputDevices.data.modifier.used = true;
     return;
   }
   //}}}
@@ -133,17 +133,17 @@ void SystemController::applyDisplayButtonInput() {
   //{{{
   using LCDIntent = OutputDevicesIntent::LcdStateIntent;
 
-  if (!inputDevices.data.alternator.released) {
+  if (!inputDevices.data.modifier.released) {
     return;
   }
-  // Path wo der alternator in Kombination genutzt wurde.
+  // Path wo der modifier in Kombination genutzt wurde.
   // Kein Toggle des Displays erwartet.
-  if (inputDevices.data.alternator.used) {
-    inputDevices.data.alternator.pressed = false;
-    inputDevices.data.alternator.used = false;
+  if (inputDevices.data.modifier.used) {
+    inputDevices.data.modifier.pressed = false;
+    inputDevices.data.modifier.used = false;
     return;
 
-    // Path ohne alternator Kombination zum Display Toggle.
+    // Path ohne modifier Kombination zum Display Toggle.
     // Action on release
 
   } else {
@@ -184,17 +184,17 @@ void SystemController::applyEncoderInput() {
   if (val == 0)
     return;
 
-  if (inputDevices.data.alternator.pressed) {
+  if (inputDevices.data.modifier.pressed) {
     if (val >= 1 && val <= Config::kEncoderValCutoff) {
       outputDevices.intent.lcd_cycleDirection = LCDDirection::Right;
       cyclePages();
-      inputDevices.data.alternator.used = true;
+      inputDevices.data.modifier.used = true;
       return;
     }
     if (val <= -1 && val >= -Config::kEncoderValCutoff) {
       outputDevices.intent.lcd_cycleDirection = LCDDirection::Left;
       cyclePages();
-      inputDevices.data.alternator.used = true;
+      inputDevices.data.modifier.used = true;
       return;
     }
   }

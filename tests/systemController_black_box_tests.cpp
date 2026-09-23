@@ -65,9 +65,9 @@ protected:
     inputData.switchAction.mode = false;
     inputData.switchAction.power = false;
     inputData.encoder_val = 0;
-    inputData.alternator.pressed = false;
-    inputData.alternator.released = false;
-    inputData.alternator.used = false;
+    inputData.modifier.pressed = false;
+    inputData.modifier.released = false;
+    inputData.modifier.used = false;
     outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::start_page;
     controller();
   };
@@ -179,15 +179,15 @@ TEST_F(SystemControllerBlackBox, display_button_turns_display_on_and_off) {
   EXPECT_EQ(outputIntent.lcd_state,
             OutputDevicesIntent::LcdStateIntent::start_page);
 
-  inputData.alternator.used = false;
-  inputData.alternator.released = true;
+  inputData.modifier.used = false;
+  inputData.modifier.released = true;
 
   controller();
 
   EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
 
-  inputData.alternator.used = false;
-  inputData.alternator.released = true;
+  inputData.modifier.used = false;
+  inputData.modifier.released = true;
 
   controller();
 
@@ -197,34 +197,34 @@ TEST_F(SystemControllerBlackBox, display_button_turns_display_on_and_off) {
 //}}}
 
 TEST_F(SystemControllerBlackBox,
-       encoder_and_alternator_cycle_pages_and_consumes_alternator) {
+       encoder_and_modifier_cycle_pages_and_consumes_modifier) {
   //{{{
 
   EXPECT_EQ(outputIntent.lcd_state,
             OutputDevicesIntent::LcdStateIntent::start_page);
 
   outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::Off;
-  inputData.alternator.used = false;
-  inputData.alternator.released = true;
+  inputData.modifier.used = false;
+  inputData.modifier.released = true;
 
   controller();
 
   EXPECT_EQ(outputIntent.lcd_state,
             OutputDevicesIntent::LcdStateIntent::start_page);
 
-  inputData.alternator.released = false;
-  inputData.alternator.pressed = true;
-  inputData.alternator.used = false;
+  inputData.modifier.released = false;
+  inputData.modifier.pressed = true;
+  inputData.modifier.used = false;
   inputData.encoder_val = 1;
 
   controller();
 
   EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Page2);
-  EXPECT_EQ(inputData.alternator.used, true);
+  EXPECT_EQ(inputData.modifier.used, true);
 
-  inputData.alternator.released = false;
-  inputData.alternator.pressed = true;
-  inputData.alternator.used = false;
+  inputData.modifier.released = false;
+  inputData.modifier.pressed = true;
+  inputData.modifier.used = false;
   inputData.encoder_val = -1;
 
   controller();
@@ -234,12 +234,12 @@ TEST_F(SystemControllerBlackBox,
 //}}}
 
 TEST_F(SystemControllerBlackBox,
-       modeSwitch_and_alternator_switches_only_state) {
+       modeSwitch_and_modifier_switches_only_state) {
   //{{{
   EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
-  inputData.alternator.released = false;
-  inputData.alternator.pressed = true;
-  inputData.alternator.used = false;
+  inputData.modifier.released = false;
+  inputData.modifier.pressed = true;
+  inputData.modifier.used = false;
   inputData.switchAction.mode = true;
 
   controller();
@@ -250,13 +250,13 @@ TEST_F(SystemControllerBlackBox,
 //}}}
 
 TEST_F(SystemControllerBlackBox,
-       powerSwitch_and_alternator_switches_only_state) {
+       powerSwitch_and_modifier_switches_only_state) {
   //{{{
   EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
 
-  inputData.alternator.released = false;
-  inputData.alternator.pressed = true;
-  inputData.alternator.used = false;
+  inputData.modifier.released = false;
+  inputData.modifier.pressed = true;
+  inputData.modifier.used = false;
   inputData.switchAction.power = true;
 
   controller();

@@ -18,18 +18,17 @@ struct InputDevicesDataSet {
   int8_t encoder_val = 0;
   float sensor_tempC = 0;
 
-  struct Alternator {
+  struct Modifier {
     bool pressed = false;
     bool released = false;
     bool used = false;
   };
-  Alternator alternator;
+  Modifier modifier;
 };
 
 struct HeaterStatus {
   enum class State { Off, On };
   State state = State::Off;
-
   enum class Mode { Temp, Power };
   Mode mode = Mode::Temp;
 

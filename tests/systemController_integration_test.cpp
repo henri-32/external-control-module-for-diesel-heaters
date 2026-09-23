@@ -247,7 +247,7 @@ TEST_F(SystemControllerIntegrationTest, display_button_turns_display_on_and_off)
 //}}}
 
 TEST_F(SystemControllerIntegrationTest,
-       encoder_and_alternator_cycle_pages_and_consumes_alternator) {
+       encoder_and_modifier_cycle_pages_and_consumes_modifier) {
   //{{{
   releaseDisplayButton();
   relais.reset();
@@ -271,7 +271,7 @@ TEST_F(SystemControllerIntegrationTest,
 //}}}
 
 TEST_F(SystemControllerIntegrationTest,
-       modeSwitch_and_alternator_switches_only_state) {
+       modeSwitch_and_modifier_switches_only_state) {
   //{{{
   releaseDisplayButton();
   relais.reset();
@@ -290,7 +290,7 @@ TEST_F(SystemControllerIntegrationTest,
 //}}}
 
 TEST_F(SystemControllerIntegrationTest,
-       powerSwitch_and_alternator_switches_only_state) {
+       powerSwitch_and_modifier_switches_only_state) {
   //{{{
   releaseDisplayButton();
   relais.reset();
