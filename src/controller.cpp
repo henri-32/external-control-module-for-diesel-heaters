@@ -115,8 +115,8 @@ void SystemController::applyModeSwitchInput() {
   case ODI::LcdStateIntent::Page4:
     break;
   case ODI::LcdStateIntent::default_temp_page:
-    outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_dialog;
     dataBuffer.default_target_tempC = heaterStatus.default_target_tempC;
+    outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_dialog;
     break;
   case ODI::LcdStateIntent::default_temp_dialog:
     outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_page;

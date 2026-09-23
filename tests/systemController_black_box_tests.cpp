@@ -233,8 +233,7 @@ TEST_F(SystemControllerBlackBox,
 }
 //}}}
 
-TEST_F(SystemControllerBlackBox,
-       modeSwitch_and_modifier_switches_only_state) {
+TEST_F(SystemControllerBlackBox, modeSwitch_and_modifier_switches_only_state) {
   //{{{
   EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
   inputData.modifier.released = false;
@@ -249,8 +248,7 @@ TEST_F(SystemControllerBlackBox,
 };
 //}}}
 
-TEST_F(SystemControllerBlackBox,
-       powerSwitch_and_modifier_switches_only_state) {
+TEST_F(SystemControllerBlackBox, powerSwitch_and_modifier_switches_only_state) {
   //{{{
   EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
 
@@ -381,3 +379,77 @@ TEST_F(
   EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
 };
 //}}}
+
+TEST_F(SystemControllerBlackBox,
+       default_temp_dialog_opens_changes_default_temp_and_sets_resets_accordingly) {
+{{{
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::start_page);
+  // sollte 4 Seiten nach rechts cyclen
+  inputData.modifier.pressed = true;
+  inputData.modifier.released = false;
+  inputData.encoder_val = 1;
+  controller();
+  inputData.encoder_val = 1;
+  controller();
+  inputData.encoder_val = 1;
+  controller();
+  inputData.encoder_val = 1;
+  controller();
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::default_temp_page);
+  //Reset
+  inputData.encoder_val = 0; 
+  inputData.modifier.pressed = false; 
+  inputData.modifier.released = false; 
+
+  // Drücken des Modusschalters um Dialog zu öffnen 
+  inputData.switchAction.mode = true;
+  controller();
+  inputData.switchAction.mode = false; 
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
+
+  //Encoder ändert default_target_tempC entsprechend
+  EXPECT_EQ(controller.heaterStatus.default_target_tempC, 15.0);
+  inputData.encoder_val = 4;
+  controller();
+  EXPECT_EQ(controller.heaterStatus.default_target_tempC,
+            15.0 + 4 * Config::kTempStepC);
+  //Reset
+  inputData.encoder_val = 0; 
+
+  //Drücken des Display/Modifier Schalters beendet den Dialog OHNE die neue default_temp zu übernehmen
+  inputData.modifier.released = true; 
+  inputData.modifier.used = false; 
+  controller();
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::default_temp_page);
+  EXPECT_EQ(controller.heaterStatus.default_target_tempC, 15.0);
+  //Reset
+  inputData.modifier.released = false; 
+
+  //Erneutes Öffnen des Dialogs mit Verstellen des defaults. 
+  inputData.switchAction.mode = true;
+  controller();
+  inputData.switchAction.mode = false; 
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
+  EXPECT_EQ(controller.heaterStatus.default_target_tempC, 15.0);
+  inputData.encoder_val = 4;
+  controller();
+  EXPECT_EQ(controller.heaterStatus.default_target_tempC,
+            15.0 + 4 * Config::kTempStepC);
+  //Reset
+  inputData.encoder_val = 0; 
+
+  //Drücken des Mode Schalters ÜBERNIMMT die neue default_temp
+  inputData.switchAction.mode = true; 
+  controller();
+  EXPECT_EQ(controller.heaterStatus.default_target_tempC, 15.0 + 4 * Config::kTempStepC);
+
+  //Reset
+  inputData.switchAction.mode = false; 
+  
+}
+}}}
