@@ -1,4 +1,5 @@
 #include "config.h"
+#include "interfaces.h"
 #include "controller.h"
 #include "devicegroups.h"
 #include "display_driver.h"
@@ -22,6 +23,9 @@ protected:
   TestEncoderHardware encoderHardware;
   TestTemperatureSensorHardware tempSensorHardware;
 
+  // Fake Config
+  TestModifiableConfig modifiableConfig;
+
   // Treiber
   DisplayDriver displayDriver{testDisplay, outputIntentBuffer.displayContent,
                               outputIntentBuffer.lcd_state};
@@ -34,7 +38,7 @@ protected:
   OutputDevices outputDevices{outputIntentBuffer, displayDriver, testRelais};
 
   // Zu testendes System
-  SystemController controller{inputDevices, outputDevices};
+  SystemController controller{modifiableConfig, inputDevices, outputDevices};
 
   // Abkürzungen auf den vom Controller verwalteten Zustand
   InputDevicesDataSet &inputData = controller.inputDevices.data;
@@ -48,9 +52,8 @@ protected:
 
 // Verarbeitung des Power-Schalter-Inputs
 //{{{
-TEST_F(
-    SystemControllerUnitTest,
-    apply_power_switch_input_path_with_modifier_off_to_on_no_relay_action) {
+TEST_F(SystemControllerUnitTest,
+       apply_power_switch_input_path_with_modifier_off_to_on_no_relay_action) {
   //{{{
   using State = HeaterStatus::State;
   inputData.switchAction.power = true;
@@ -67,9 +70,8 @@ TEST_F(
 }
 //}}}
 
-TEST_F(
-    SystemControllerUnitTest,
-    apply_power_switch_input_path_with_modifier_on_to_off_no_relay_action) {
+TEST_F(SystemControllerUnitTest,
+       apply_power_switch_input_path_with_modifier_on_to_off_no_relay_action) {
   //{{{
   using State = HeaterStatus::State;
   inputData.switchAction.power = true;

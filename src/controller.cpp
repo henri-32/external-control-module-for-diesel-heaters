@@ -2,8 +2,9 @@
 #include "interfaces.h"
 #include <stdio.h>
 
-SystemController::SystemController(IInputDevices &i, IOutputDevices &o)
-    : inputDevices(i), outputDevices(o) {}
+SystemController::SystemController(IModifiableConfig &c, IInputDevices &i,
+                                   IOutputDevices &o)
+    : modifiableConfig(c), inputDevices(i), outputDevices(o) {}
 
 void SystemController::operator()() {
   inputDevices.update();
@@ -19,6 +20,8 @@ void SystemController::operator()() {
 }
 
 void SystemController::init() {
+  modifiableConfig.load();
+  heaterStatus.default_target_tempC = modifiableConfig.get_default_tempC();
   inputDevices.init();
   outputDevices.init();
 }
@@ -119,6 +122,7 @@ void SystemController::applyModeSwitchInput() {
     outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_dialog;
     break;
   case ODI::LcdStateIntent::default_temp_dialog:
+    modifiableConfig.set_default_tempC(heaterStatus.default_target_tempC);
     outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_page;
     break;
   case ODI::LcdStateIntent::Off:

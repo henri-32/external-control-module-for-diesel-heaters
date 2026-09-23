@@ -6,6 +6,7 @@
 #include "statistics.h"
 #endif
 
+class IModifiableConfig;
 class IInputDevices;
 class IOutputDevices;
 
@@ -13,7 +14,7 @@ class SystemController {
   // Diese Klasse ist der zentrale Top Level Controller, welcher die gesamte
   // Systemkomposition übernimmt
 public:
-  SystemController(IInputDevices &i, IOutputDevices &o);
+  SystemController(IModifiableConfig&c, IInputDevices &i, IOutputDevices &o);
   void operator()();
   void init();
 
@@ -45,6 +46,7 @@ private:
 
   void enter_default_temp_dialog();
 
+  IModifiableConfig& modifiableConfig;
   IInputDevices &inputDevices;
   HeaterStatus heaterStatus;
   IOutputDevices &outputDevices;

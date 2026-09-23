@@ -1,16 +1,16 @@
 #pragma once
 #include "types.h"
 
-//Verschiedene abstrakte Interface Klassen 
-//Sie wurden nachträglich auf die Treiberklassen drauf gesetzt. 
-//Daher bestanden alle Methoden schon in den derived classes. 
-//Sie wurden ins Interface aufgenommen, um vollständige Implementierung 
-//der TestStubs sicherzustellen 
- 
+// Verschiedene abstrakte Interface Klassen
+// Sie wurden nachträglich auf die Treiberklassen drauf gesetzt.
+// Daher bestanden alle Methoden schon in den derived classes.
+// Sie wurden ins Interface aufgenommen, um vollständige Implementierung
+// der TestStubs sicherzustellen
+
 class IInputDevices {
   //{{{
 public:
-  IInputDevices(InputDevicesDataSet &inputData) : data(inputData){};
+  IInputDevices(InputDevicesDataSet &inputData) : data(inputData) {};
   virtual void init() = 0;
   virtual void update() = 0;
 
@@ -21,10 +21,17 @@ protected:
 };
 //}}}
 
+class IModifiableConfig {
+public: 
+  IModifiableConfig() = default; 
+  virtual void load() = 0;
+  virtual void set_default_tempC(float new_default) = 0;
+  virtual float get_default_tempC() const = 0;
+};
 class IOutputDevices {
   //{{{
 public:
-  IOutputDevices(OutputDevicesIntent &outputIntent) : intent(outputIntent){};
+  IOutputDevices(OutputDevicesIntent &outputIntent) : intent(outputIntent) {};
   virtual void init() = 0;
   virtual void update() = 0;
 
@@ -144,4 +151,3 @@ protected:
   ~IRelais() = default;
 };
 //}}}
-

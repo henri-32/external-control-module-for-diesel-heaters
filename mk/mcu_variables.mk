@@ -10,6 +10,7 @@ INCLUDES := \
 	-I$(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src \
 	-I$(LIBRARIES)/ArduinoCore-avr/libraries/Wire/src/utility \
 	-I$(LIBRARIES)/ArduinoCore-avr/libraries/SoftwareSerial/src \
+	-I$(LIBRARIES)/ArduinoCore-avr/libraries/EEPROM/src \
 	-I$(LIBRARIES) \
 	-Iincludes
 
@@ -48,7 +49,8 @@ APP_CPP_SRCS := \
 	src/toggle_switches.cpp \
 	src/encoder_driver.cpp \
 	src/temperature_sensor_driver.cpp \
-	src/library_adapter.cpp
+	src/library_adapter.cpp \
+	src/modifiable_config.cpp
 
 
 MCU_CPPFLAGS := -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO -DARDUINO_ARCH_AVR -DDECIMAL_DIG=__DECIMAL_DIG__
