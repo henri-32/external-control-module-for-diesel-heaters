@@ -385,9 +385,7 @@ TEST_F(
 TEST_F(
     SystemControllerBlackBox,
     default_temp_dialog_opens_changes_default_temp_and_sets_resets_accordingly) {
-  {
-    {
-      {
+{{{
         EXPECT_EQ(outputIntent.lcd_state,
                   OutputDevicesIntent::LcdStateIntent::start_page);
         // sollte 4 Seiten nach rechts cyclen
@@ -458,7 +456,5 @@ TEST_F(
 
         // Reset
         inputData.switchAction.mode = false;
-      }
-    }
-  }
 }
+}}}
