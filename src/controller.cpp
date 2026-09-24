@@ -21,7 +21,7 @@ void SystemController::operator()() {
 
 void SystemController::init() {
   modifiableConfig.load();
-  heaterStatus.default_target_tempC = modifiableConfig.get_default_tempC();
+  heaterStatus.target_tempC = modifiableConfig.get_default_tempC();
   inputDevices.init();
   outputDevices.init();
 }
@@ -118,11 +118,15 @@ void SystemController::applyModeSwitchInput() {
   case ODI::LcdStateIntent::Page4:
     break;
   case ODI::LcdStateIntent::default_temp_page:
-    dataBuffer.default_target_tempC = heaterStatus.default_target_tempC;
+    dataBuffer.current_default_target_tempC =
+        modifiableConfig.get_default_tempC();
+    dataBuffer.intended_default_target_tempC =
+        modifiableConfig.get_default_tempC();
     outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_dialog;
     break;
   case ODI::LcdStateIntent::default_temp_dialog:
-    modifiableConfig.set_default_tempC(heaterStatus.default_target_tempC);
+    modifiableConfig.set_default_tempC(
+        dataBuffer.intended_default_target_tempC);
     outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_page;
     break;
   case ODI::LcdStateIntent::Off:
@@ -172,7 +176,8 @@ void SystemController::applyDisplayButtonInput() {
       break;
 
     case LCDIntent::default_temp_dialog:
-      heaterStatus.default_target_tempC = dataBuffer.default_target_tempC;
+      modifiableConfig.set_default_tempC(
+          dataBuffer.current_default_target_tempC);
       outputDevices.intent.lcd_state = LCDIntent::default_temp_page;
       break;
     }
@@ -225,7 +230,7 @@ void SystemController::applyEncoderInput() {
   case LCDIntent::default_temp_page:
     break;
   case LCDIntent::default_temp_dialog:
-    heaterStatus.default_target_tempC += val * Config::kTempStepC;
+    dataBuffer.intended_default_target_tempC += val * Config::kTempStepC;
     break;
   case LCDIntent::Off:
     break;

@@ -7,6 +7,17 @@
 // Sie wurden ins Interface aufgenommen, um vollständige Implementierung
 // der TestStubs sicherzustellen
 
+
+class IModifiableConfig {
+public: 
+  IModifiableConfig() = default; 
+  virtual void load() = 0;
+  virtual void set_default_tempC(float new_default) = 0;
+  virtual float get_default_tempC() const = 0;
+
+  ModifiableConfigData data;
+
+};
 class IInputDevices {
   //{{{
 public:
@@ -20,14 +31,6 @@ protected:
   ~IInputDevices() = default;
 };
 //}}}
-
-class IModifiableConfig {
-public: 
-  IModifiableConfig() = default; 
-  virtual void load() = 0;
-  virtual void set_default_tempC(float new_default) = 0;
-  virtual float get_default_tempC() const = 0;
-};
 class IOutputDevices {
   //{{{
 public:

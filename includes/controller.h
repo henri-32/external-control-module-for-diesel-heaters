@@ -52,7 +52,8 @@ private:
   IOutputDevices &outputDevices;
 
   struct DataBuffer {
-    float default_target_tempC;
+    float current_default_target_tempC;
+	float intended_default_target_tempC;
   } dataBuffer;
 
 #ifdef MEMORY_FUNCTIONS

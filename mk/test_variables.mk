@@ -51,7 +51,7 @@ INTEGRATIONTEST_DEBUG_OBJS := $(addprefix $(INTEGRATIONTEST_DEBUG_BUILD_DIR)/,$(
 INTEGRATIONTEST_DEBUG_DEPS := $(INTEGRATIONTEST_DEBUG_OBJS:.o=.d)
 
 TEST_CPPFLAGS := -DTEST_BUILD
-TEST_CXXFLAGS := -std=c++20 -Wall -Wextra -pthread 
+TEST_CXXFLAGS := -std=c++20 -Wall -Wextra -pthread -MMD -MP
 TEST_DEBUGFLAGS := -g -MMD -MP -fsanitize=address,undefined
 
 TEST_PCH := includes/pch_test.h

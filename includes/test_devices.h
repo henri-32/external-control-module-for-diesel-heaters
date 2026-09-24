@@ -11,8 +11,11 @@
 class TestModifiableConfig : public IModifiableConfig {
 public:
   void load() override {}; 
-  void set_default_tempC(float new_default) override {}; 
-  float get_default_tempC() const override{};
+  void set_default_tempC(float new_default) override ; 
+  float get_default_tempC() const override;
+
+private: 
+	ModifiableConfigData data; 
 };
 
 class TestInputDevices : public IInputDevices {

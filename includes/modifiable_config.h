@@ -1,11 +1,6 @@
 #include "interfaces.h"
 
 class ModifiableConfig : public IModifiableConfig {
-private:
-  struct Data {
-    float default_tempC = 0;
-  } data;
-
 public:
   ModifiableConfig() = default;
   void load();

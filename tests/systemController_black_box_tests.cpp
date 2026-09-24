@@ -415,11 +415,11 @@ TEST_F(
         EXPECT_EQ(outputIntent.lcd_state,
                   OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
 
-        // Encoder ändert default_target_tempC entsprechend
-        EXPECT_EQ(controller.heaterStatus.default_target_tempC, 15.0);
+        // Encoder ändert intendet_default_target_tempC entsprechend
+        EXPECT_EQ(controller.dataBuffer.intended_default_target_tempC, 15.0);
         inputData.encoder_val = 4;
         controller();
-        EXPECT_EQ(controller.heaterStatus.default_target_tempC,
+        EXPECT_EQ(controller.dataBuffer.intended_default_target_tempC,
                   15.0 + 4 * Config::kTempStepC);
         // Reset
         inputData.encoder_val = 0;
@@ -431,7 +431,7 @@ TEST_F(
         controller();
         EXPECT_EQ(outputIntent.lcd_state,
                   OutputDevicesIntent::LcdStateIntent::default_temp_page);
-        EXPECT_EQ(controller.heaterStatus.default_target_tempC, 15.0);
+        EXPECT_EQ(controller.modifiableConfig.get_default_tempC(), 15.0);
         // Reset
         inputData.modifier.released = false;
 
@@ -441,10 +441,11 @@ TEST_F(
         inputData.switchAction.mode = false;
         EXPECT_EQ(outputIntent.lcd_state,
                   OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
-        EXPECT_EQ(controller.heaterStatus.default_target_tempC, 15.0);
+        EXPECT_EQ(controller.modifiableConfig.get_default_tempC(), 15.0);
         inputData.encoder_val = 4;
         controller();
-        EXPECT_EQ(controller.heaterStatus.default_target_tempC,
+		EXPECT_EQ(controller.dataBuffer.current_default_target_tempC, 15.0);
+        EXPECT_EQ(controller.dataBuffer.intended_default_target_tempC,
                   15.0 + 4 * Config::kTempStepC);
         // Reset
         inputData.encoder_val = 0;
@@ -452,7 +453,7 @@ TEST_F(
         // Drücken des Mode Schalters ÜBERNIMMT die neue default_temp
         inputData.switchAction.mode = true;
         controller();
-        EXPECT_EQ(controller.heaterStatus.default_target_tempC,
+        EXPECT_EQ(controller.modifiableConfig.get_default_tempC(),
                   15.0 + 4 * Config::kTempStepC);
 
         // Reset

@@ -1,5 +1,13 @@
 #include "test_devices.h"
 
+float TestModifiableConfig::get_default_tempC() const {
+  return data.default_tempC;
+}
+
+void TestModifiableConfig::set_default_tempC(float new_default){
+	data.default_tempC = new_default; 
+}
+
 void TestOutputDevices::update() {
   //{{{
   // Simuliert das Verhalten der echten Klasse.
@@ -24,9 +32,10 @@ OutputDevicesIntent::RelaisCommand TestRelais::receivedCommand() {
   return lc;
 };
 //}}}
+
 void TestRelais::reset() {
-//{{{
- lastCommand = OutputDevicesIntent::RelaisCommand::None;  
+  //{{{
+  lastCommand = OutputDevicesIntent::RelaisCommand::None;
 }
 //}}}
 
@@ -61,7 +70,7 @@ void TestTemperatureSensorHardware::resetTestCounter() {
 };
 //}}}
 
-void TestToggleSwitch::setNextChangedReturn(bool nr) {nextReturn = nr;}
+void TestToggleSwitch::setNextChangedReturn(bool nr) { nextReturn = nr; }
 
 void TestPushButton::setNextPressedReturn(bool nr) { nextPressed = nr; }
 

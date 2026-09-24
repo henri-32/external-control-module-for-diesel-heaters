@@ -33,7 +33,6 @@ struct HeaterStatus {
   Mode mode = Mode::Temp;
 
   float target_tempC = Config::kDefaultTempC;
-  float default_target_tempC = Config::kDefaultTempC;
 };
 
 #ifdef MEMORY_FUNCTIONS
@@ -61,11 +60,16 @@ struct CalculationData {
 };
 #endif
 
+struct ModifiableConfigData {
+  float default_tempC = 15.0;
+};
+
 struct OutputDevicesIntent {
 public:
   struct DisplayContent {
     float temp_c;
     HeaterStatus status;
+	ModifiableConfigData modifiableConfigData; 
 #ifdef MEMORY_FUNCTIONS
     RuntimeData runtimeDisplayData;
     LongtimeData EEPROM_Values;
@@ -79,7 +83,7 @@ public:
     Page3,
     Page4,
     default_temp_page,
-	default_temp_dialog,
+    default_temp_dialog,
     Off
   };
   LcdStateIntent lcd_state = LcdStateIntent::Off;
