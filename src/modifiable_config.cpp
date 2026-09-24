@@ -16,6 +16,7 @@ void ModifiableConfig::set_default_tempC(float new_default) {
   }
 
   EEPROM.put(default_tempC_addr, new_default);
+  data.default_tempC = new_default; 
 }
 
 float ModifiableConfig::get_default_tempC() const{

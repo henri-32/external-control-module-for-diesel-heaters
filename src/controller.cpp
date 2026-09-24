@@ -220,6 +220,7 @@ void SystemController::applyEncoderInput() {
   case LCDIntent::start_page:
     heaterStatus.target_tempC +=
         val * Config::kTempStepC; // encoderVal ist signed
+    clampTargetTempC(heaterStatus.target_tempC);
     break;
   case LCDIntent::Page2:
     break;
@@ -231,6 +232,7 @@ void SystemController::applyEncoderInput() {
     break;
   case LCDIntent::default_temp_dialog:
     dataBuffer.intended_default_target_tempC += val * Config::kTempStepC;
+    clampTargetTempC(dataBuffer.intended_default_target_tempC);
     break;
   case LCDIntent::Off:
     break;
@@ -239,8 +241,6 @@ void SystemController::applyEncoderInput() {
     break;
   };
 
-  // Begrenzt auf in config.h festgelegte zulässige Werte
-  clampTargetTempC(heaterStatus.target_tempC);
 }
 //}}}
 
@@ -278,6 +278,14 @@ void SystemController::writeOutputIntent() {
       heaterStatus.target_tempC;
   outputDevices.intent.displayContent.status.state = heaterStatus.state;
   outputDevices.intent.displayContent.status.mode = heaterStatus.mode;
+  if (outputDevices.intent.lcd_state ==
+      OutputDevicesIntent::LcdStateIntent::default_temp_dialog) {
+    outputDevices.intent.displayContent.modifiableConfigData.default_tempC =
+        dataBuffer.intended_default_target_tempC;
+  } else {
+    outputDevices.intent.displayContent.modifiableConfigData.default_tempC =
+        modifiableConfig.get_default_tempC();
+  }
 #ifdef MEMORY_FUNCTIONS
   outputDevices.intent.displayContent.runtimeDisplayData =
       systemStatistic.getRuntimeDate();
