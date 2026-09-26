@@ -75,6 +75,7 @@ public:
     LongtimeData EEPROM_Values;
 #endif
   };
+
   DisplayContent displayContent;
 
   enum class LcdStateIntent {

@@ -14,7 +14,7 @@ class SystemController {
   // Diese Klasse ist der zentrale Top Level Controller, welcher die gesamte
   // Systemkomposition übernimmt
 public:
-  SystemController(IModifiableConfig&c, IInputDevices &i, IOutputDevices &o);
+  SystemController(IModifiableConfig &c, IInputDevices &i, IOutputDevices &o);
   void operator()();
   void init();
 
@@ -40,21 +40,20 @@ private:
   void updateMemory();
 
   // Helper
+  void apply_config_data();
   void clampTargetTempC(float &target);
   void cyclePages();
   void requestRelaisCommand(OutputDevicesIntent::RelaisCommand command);
 
+  void DisplayButtonForDisplayOff();
   void enter_default_temp_dialog();
 
-  IModifiableConfig& modifiableConfig;
+  IModifiableConfig &modifiableConfig;
   IInputDevices &inputDevices;
   HeaterStatus heaterStatus;
   IOutputDevices &outputDevices;
 
-  struct DataBuffer {
-    float current_default_target_tempC;
-	float intended_default_target_tempC;
-  } dataBuffer;
+  float pendingDefaultTempC = 0;
 
 #ifdef MEMORY_FUNCTIONS
   SystemStatistics systemStatistic;

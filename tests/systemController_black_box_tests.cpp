@@ -414,10 +414,10 @@ TEST_F(
                   OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
 
         // Encoder ändert intendet_default_target_tempC entsprechend
-        EXPECT_EQ(controller.dataBuffer.intended_default_target_tempC, 15.0);
+        EXPECT_EQ(controller.pendingDefaultTempC, 15.0);
         inputData.encoder_val = 4;
         controller();
-        EXPECT_EQ(controller.dataBuffer.intended_default_target_tempC,
+        EXPECT_EQ(controller.pendingDefaultTempC,
                   15.0 + 4 * Config::kTempStepC);
         // Reset
         inputData.encoder_val = 0;
@@ -442,8 +442,7 @@ TEST_F(
         EXPECT_EQ(controller.modifiableConfig.get_default_tempC(), 15.0);
         inputData.encoder_val = 4;
         controller();
-		EXPECT_EQ(controller.dataBuffer.current_default_target_tempC, 15.0);
-        EXPECT_EQ(controller.dataBuffer.intended_default_target_tempC,
+        EXPECT_EQ(controller.pendingDefaultTempC,
                   15.0 + 4 * Config::kTempStepC);
         // Reset
         inputData.encoder_val = 0;
