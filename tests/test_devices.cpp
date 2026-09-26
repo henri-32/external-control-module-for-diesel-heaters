@@ -1,10 +1,10 @@
 #include "test_devices.h"
 
-float TestModifiableConfig::get_default_tempC() const {
+float TestRuntimeConfig::get_default_tempC() const {
   return data.default_tempC;
 }
 
-void TestModifiableConfig::set_default_tempC(float new_default){
+void TestRuntimeConfig::set_default_tempC(float new_default){
 	data.default_tempC = new_default; 
 }
 

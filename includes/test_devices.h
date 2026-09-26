@@ -8,14 +8,14 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-class TestModifiableConfig : public IModifiableConfig {
+class TestRuntimeConfig : public IRuntimeConfig {
 public:
   void load() override { data.default_tempC = 15.0; };
   void set_default_tempC(float new_default) override;
   float get_default_tempC() const override;
 
 private:
-  ModifiableConfigData data;
+  RuntimeConfigData data;
 };
 
 class TestInputDevices : public IInputDevices {

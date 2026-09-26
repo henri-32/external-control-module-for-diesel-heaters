@@ -97,7 +97,7 @@ void DisplayDriver::renderLines() {
     m_display.backlight();
     m_display.display();
     snprintf(m_lineBuffer[0], 21, "Default Temp %.2f C",
-             m_displayContent.modifiableConfigData.default_tempC);
+             m_displayContent.runtimeConfigData.default_tempC);
 
     snprintf(m_lineBuffer[1], 21, "Press Mode Button");
     snprintf(m_lineBuffer[2], 21, "     to change      ");
@@ -107,7 +107,7 @@ void DisplayDriver::renderLines() {
     m_display.backlight();
 	m_display.display(); 
     snprintf(m_lineBuffer[0], 21, "Default Temp %.2f C",
-             m_displayContent.modifiableConfigData.default_tempC);
+             m_displayContent.runtimeConfigData.default_tempC);
     snprintf(m_lineBuffer[1], 21, "Mode Button: OK");
     snprintf(m_lineBuffer[2], 21, "Display Button: EXIT");
 	break;

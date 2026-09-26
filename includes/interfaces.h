@@ -8,14 +8,14 @@
 // der TestStubs sicherzustellen
 
 
-class IModifiableConfig {
+class IRuntimeConfig {
 public: 
-  IModifiableConfig() = default; 
+  IRuntimeConfig() = default; 
   virtual void load() = 0;
   virtual void set_default_tempC(float new_default) = 0;
   virtual float get_default_tempC() const = 0;
 
-  ModifiableConfigData data;
+  RuntimeConfigData data;
 
 };
 class IInputDevices {

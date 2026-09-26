@@ -24,7 +24,7 @@ protected:
   TestTemperatureSensorHardware tempSensorHardware;
 
   // Fake Config
-  TestModifiableConfig modifiableConfig;
+  TestRuntimeConfig runtimeConfig;
 
   // Treiber
   DisplayDriver displayDriver{testDisplay, outputIntentBuffer.displayContent,
@@ -38,7 +38,7 @@ protected:
   OutputDevices outputDevices{outputIntentBuffer, displayDriver, testRelais};
 
   // Zu testendes System
-  SystemController controller{modifiableConfig, inputDevices, outputDevices};
+  SystemController controller{runtimeConfig, inputDevices, outputDevices};
 
   // Abkürzungen auf den vom Controller verwalteten Zustand
   InputDevicesDataSet &inputData = controller.inputDevices.data;

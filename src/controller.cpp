@@ -1,9 +1,9 @@
 #include "controller.h"
 #include "interfaces.h"
 
-SystemController::SystemController(IModifiableConfig &c, IInputDevices &i,
+SystemController::SystemController(IRuntimeConfig &c, IInputDevices &i,
                                    IOutputDevices &o)
-    : modifiableConfig(c), inputDevices(i), outputDevices(o) {}
+    : runtimeConfig(c), inputDevices(i), outputDevices(o) {}
 
 void SystemController::operator()() {
   inputDevices.update();
@@ -19,7 +19,7 @@ void SystemController::operator()() {
 }
 
 void SystemController::init() {
-  modifiableConfig.load();
+  runtimeConfig.load();
   apply_config_data();
   inputDevices.init();
   outputDevices.init();
@@ -28,7 +28,7 @@ void SystemController::init() {
 void SystemController::apply_config_data() {
   // {{{
 
-  heaterStatus.target_tempC = modifiableConfig.get_default_tempC();
+  heaterStatus.target_tempC = runtimeConfig.get_default_tempC();
 };
 //}}}
 
@@ -146,7 +146,7 @@ void SystemController::applyInputdata() {
     break;
   case State::default_temp_page:
     if (inputDevices.data.switchAction.mode) {
-      pendingDefaultTempC = modifiableConfig.get_default_tempC();
+      pendingDefaultTempC = runtimeConfig.get_default_tempC();
       state = State::default_temp_dialog;
       return;
     }
@@ -158,7 +158,7 @@ void SystemController::applyInputdata() {
   case State::default_temp_dialog:
     // Modusschalter übernimmt den neuen default Wert
     if (inputDevices.data.switchAction.mode) {
-      modifiableConfig.set_default_tempC(pendingDefaultTempC);
+      runtimeConfig.set_default_tempC(pendingDefaultTempC);
       state = State::default_temp_page;
       return;
     }
@@ -286,13 +286,13 @@ void SystemController::applyModeSwitchInput() {
     break;
   case ODI::LcdStateIntent::default_temp_page:
     dataBuffer.current_default_target_tempC =
-        modifiableConfig.get_default_tempC();
+        runtimeConfig.get_default_tempC();
     dataBuffer.intended_default_target_tempC =
-        modifiableConfig.get_default_tempC();
+        runtimeConfig.get_default_tempC();
     outputDevices.intent.lcd_state =
 ODI::LcdStateIntent::default_temp_dialog; break; case
 ODI::LcdStateIntent::default_temp_dialog:
-    modifiableConfig.set_default_tempC(
+    runtimeConfig.set_default_tempC(
         dataBuffer.intended_default_target_tempC);
     outputDevices.intent.lcd_state = ODI::LcdStateIntent::default_temp_page;
     break;
@@ -343,7 +343,7 @@ void SystemController::applyDisplayButtonInput() {
       break;
 
     case LCDIntent::default_temp_dialog:
-      modifiableConfig.set_default_tempC(
+      runtimeConfig.set_default_tempC(
           dataBuffer.current_default_target_tempC);
       outputDevices.intent.lcd_state = LCDIntent::default_temp_page;
       break;
@@ -448,11 +448,11 @@ void SystemController::writeOutputIntent() {
   outputDevices.intent.displayContent.status.mode = heaterStatus.mode;
   if (outputDevices.intent.lcd_state ==
       OutputDevicesIntent::LcdStateIntent::default_temp_dialog) {
-    outputDevices.intent.displayContent.modifiableConfigData.default_tempC =
+    outputDevices.intent.displayContent.runtimeConfigData.default_tempC =
         pendingDefaultTempC;
   } else {
-    outputDevices.intent.displayContent.modifiableConfigData.default_tempC =
-        modifiableConfig.get_default_tempC();
+    outputDevices.intent.displayContent.runtimeConfigData.default_tempC =
+        runtimeConfig.get_default_tempC();
   }
 #ifdef MEMORY_FUNCTIONS
   outputDevices.intent.displayContent.runtimeDisplayData =

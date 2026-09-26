@@ -60,7 +60,7 @@ struct CalculationData {
 };
 #endif
 
-struct ModifiableConfigData {
+struct RuntimeConfigData {
   float default_tempC = 15.0;
 };
 
@@ -69,7 +69,7 @@ public:
   struct DisplayContent {
     float temp_c;
     HeaterStatus status;
-	ModifiableConfigData modifiableConfigData; 
+	RuntimeConfigData runtimeConfigData; 
 #ifdef MEMORY_FUNCTIONS
     RuntimeData runtimeDisplayData;
     LongtimeData EEPROM_Values;

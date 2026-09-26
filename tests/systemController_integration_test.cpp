@@ -32,7 +32,7 @@ public:
   //=============================================================
 
 private:
-  TestModifiableConfig modifiableConfig; 
+  TestRuntimeConfig runtimeConfig; 
   EncoderDriver encoderDriver{encoderHardware};
   DisplayDriver displayDriver{displayHardware, outputIntent.displayContent,
                               outputIntent.lcd_state};
@@ -47,7 +47,7 @@ private:
 
 public:
   // Nur für die Verwendung des controller()-Operators in Tests, um die Ticks zu steuern.
-  SystemController controller{modifiableConfig, inputDevices, outputDevices};
+  SystemController controller{runtimeConfig, inputDevices, outputDevices};
 
 protected:
   void SetUp() override {

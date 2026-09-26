@@ -50,7 +50,7 @@ APP_CPP_SRCS := \
 	src/encoder_driver.cpp \
 	src/temperature_sensor_driver.cpp \
 	src/library_adapter.cpp \
-	src/modifiable_config.cpp
+	src/runtime_config.cpp
 
 
 MCU_CPPFLAGS := -DF_CPU=$(F_CPU) -DARDUINO=10800 -DARDUINO_AVR_UNO -DARDUINO_ARCH_AVR -DDECIMAL_DIG=__DECIMAL_DIG__

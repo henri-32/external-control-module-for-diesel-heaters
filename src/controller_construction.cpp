@@ -9,10 +9,10 @@
 #include "toggle_switches.h"
 #include "relais.h"
 #include "types.h"
-#include "modifiable_config.h"
+#include "runtime_config.h"
 
 namespace {
-ModifiableConfig modifiableConfig; 
+RuntimeConfig runtimeConfig; 
 // Structs für die Schnittstelle des Controllers nach außen
 InputDevicesDataSet inputData;
 OutputDevicesIntent outputIntent;
@@ -42,5 +42,5 @@ InputDevices inputDevices{inputData, powerSwitch, modeSwitch, displayButton,
 OutputDevices outputDevices{outputIntent, displayDriver, relais};
 }
 
-SystemController controller{modifiableConfig, inputDevices, outputDevices};
+SystemController controller{runtimeConfig, inputDevices, outputDevices};
 

@@ -1,8 +1,8 @@
-#include "modifiable_config.h"
+#include "runtime_config.h"
 #include "config.h"
 #include <EEPROM.h>
 
-void ModifiableConfig::load() {
+void RuntimeConfig::load() {
   EEPROM.get(default_tempC_addr, data.default_tempC);
   if (data.default_tempC <= 5 || data.default_tempC >= 30) {
     data.default_tempC = Config::kDefaultTempC;
@@ -10,7 +10,7 @@ void ModifiableConfig::load() {
 
 }
 
-void ModifiableConfig::set_default_tempC(float new_default) {
+void RuntimeConfig::set_default_tempC(float new_default) {
   if (new_default == data.default_tempC) {
     return;
   }
@@ -19,6 +19,6 @@ void ModifiableConfig::set_default_tempC(float new_default) {
   data.default_tempC = new_default; 
 }
 
-float ModifiableConfig::get_default_tempC() const{
+float RuntimeConfig::get_default_tempC() const{
 	return data.default_tempC;
 }

@@ -1,8 +1,8 @@
 #include "interfaces.h"
 
-class ModifiableConfig : public IModifiableConfig {
+class RuntimeConfig : public IRuntimeConfig {
 public:
-  ModifiableConfig() = default;
+  RuntimeConfig() = default;
   void load();
   void set_default_tempC(float new_default);
   float get_default_tempC() const;
