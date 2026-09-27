@@ -8,3 +8,67 @@ Möglicherweise naming des lcd_states ändern, wenn es jetzt eher ein zentraler 
 
 Data Buffer überdenken.  
 
+SystemController-Black-Box-Tests ergänzen
+===========================================
+
+3. Modifier-Kombinationen bis zum Loslassen testen
+   - DisplayButton gedrückt halten und Mode-, Power- oder Encoderaktion
+     ausführen.
+   - Beim Loslassen darf das Display nicht zusätzlich ausgeschaltet werden.
+   - Anschließend muss ein alleiniger DisplayButton-Klick wieder normal
+     funktionieren (`modifier.used` muss korrekt zurückgesetzt werden).
+
+4. DisplayButton auf jeder Seite testen
+   - Ausschalten von `start_page`, `Page2`, `Page3`, `Page4` und
+     `default_temp_page`.
+
+5. Vollständigen Seitenring in beide Richtungen testen
+   - Rechts: `start_page -> Page2 -> Page3 -> Page4 -> default_temp_page ->
+     start_page`.
+   - Links: dieselben Übergänge in umgekehrter Richtung.
+   - Bei ausgeschaltetem Display und im Default-Temperatur-Dialog darf keine
+     normale Seitennavigation stattfinden.
+
+6. Mode-Wechsel und Temperaturregelung im selben Tick testen
+   - Im Power-Modus bei deutlich zu niedriger Temperatur in den Temp-Modus
+     wechseln.
+   - Festlegen, ob zuerst der kurze Mode-Puls sicher ausgeführt werden muss
+     oder die Temperaturregelung sofort einen langen Puls anfordern darf.
+   - Sicherstellen, dass ein Relaiskommando nicht unbeabsichtigt durch ein
+     zweites Kommando im selben Tick überschrieben wird.
+
+7. Priorität gleichzeitiger Eingaben testen
+   - Power + Mode, Power + Encoder, Mode + Encoder, Display-Release + Mode
+     sowie Power während einer Dialogseite.
+   - Das gewünschte Prioritätsverhalten ausdrücklich festlegen und absichern.
+
+8. Default-Temperatur-Dialog als echte Black Box testen
+   - Nur Ein- und Ausgaben beobachten, nicht `pendingDefaultTempC` oder andere
+     Controller-Interna.
+   - Im Dialog wird der Entwurf angezeigt.
+   - Abbruch verwirft die Änderung.
+   - Bestätigung speichert und zeigt den neuen Wert.
+   - Festlegen und testen, ob eine bestätigte Default-Temperatur die aktive
+     Solltemperatur sofort oder erst beim nächsten Start beeinflusst.
+
+9. Laden der Runtime-Konfiguration testen
+   - Mit einem Stub einen vom Compile-Time-Default abweichenden Wert laden und
+     prüfen, dass der erste Controller-Tick diesen als Solltemperatur ausgibt.
+   - Prüfen, dass `load()` bei der Initialisierung aufgerufen wird.
+   - Das Laden aus dem EEPROM muss validieren, ob die gelesenen Bytes einen
+     gültigen Float ergeben: mindestens `std::isfinite()` prüfen und zusätzlich
+     den erlaubten Temperaturbereich validieren. Bei NaN, +/-Inf oder einem
+     Wert außerhalb des zulässigen Bereichs auf einen sicheren Defaultwert
+     zurückfallen und diesen Fall testen.
+
+10. Ungültige Temperatursensorwerte sicher behandeln
+    - NaN, den typischen DS18B20-Fehlerwert `-127 °C` und unrealistisch hohe
+      Werte testen.
+    - Ein ungültiger Messwert darf keinen unbeabsichtigten Einschaltpuls
+      auslösen.
+
+Vorgeschlagene erste Testfälle:
+
+- `target_temperature_is_clamped_at_configured_limits`
+- `modifier_combination_does_not_toggle_display_on_release_and_is_reset_afterwards`
+- `switching_from_power_to_temp_while_cold_does_not_overwrite_required_mode_command`

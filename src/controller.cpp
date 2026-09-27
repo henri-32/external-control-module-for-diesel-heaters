@@ -130,11 +130,12 @@ void SystemController::applyInputdata() {
     DisplayButtonForDisplayOff();
 
     // Encoder auswerten
-    if (val == 0 || val >= Config::kEncoderValCutoff) {
+    if (val == 0 || val >= Config::kEncoderValCutoff || val <= - Config::kEncoderValCutoff) {
       return;
     }
     // val ist signed
     heaterStatus.target_tempC += val * Config::kTempStepC;
+    clampTargetTempC(heaterStatus.target_tempC);
 
     break;
 
@@ -170,7 +171,8 @@ void SystemController::applyInputdata() {
     }
 
     // Bei gültigen Encoderbefehlen pending Value anpassen
-    if (val == 0 || val >= Config::kEncoderValCutoff) {
+    if (val == 0 || val >= Config::kEncoderValCutoff ||
+        val <= -Config::kEncoderValCutoff) {
       return;
     }
     pendingDefaultTempC += val * Config::kTempStepC;

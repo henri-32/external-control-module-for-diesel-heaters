@@ -162,6 +162,43 @@ TEST_F(SystemControllerBlackBox, encoder_steps_change_target_temp) {
 }
 //}}}
 
+TEST_F(SystemControllerBlackBox, encoder_cutoff_test) {
+  //{{{
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, 15.0);
+  inputData.encoder_val = Config::kEncoderValCutoff + 1;
+  controller();
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, 15.0);
+  inputData.encoder_val = Config::kEncoderValCutoff;
+  controller();
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, 15.0);
+  inputData.encoder_val = -Config::kEncoderValCutoff - 1;
+  controller();
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, 15.0);
+  inputData.encoder_val = -Config::kEncoderValCutoff;
+  controller();
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, 15.0);
+}
+//}}}
+
+TEST_F(SystemControllerBlackBox,
+       target_temp_and_default_target_temp_clamp_correctly) {
+  //{{{
+
+  for (int i = 0; i < 1000; i++) {
+    inputData.encoder_val = 1;
+    controller();
+  }
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, Config::kTempMaxC);
+
+  outputIntent.displayContent.status.target_tempC = 15.0;
+  for (int i = 0; i < 1000; i++) {
+    inputData.encoder_val = -1;
+    controller();
+  }
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, Config::kTempMinC);
+}
+//}}}
+
 TEST_F(SystemControllerBlackBox, encoder_negative_steps_change_target_temp) {
   //{{{
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
@@ -263,6 +300,16 @@ TEST_F(SystemControllerBlackBox, powerSwitch_and_modifier_switches_only_state) {
 
   EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
   EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
+
+  // normaler Klick schaltet Bildschirm aus
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::start_page);
+  inputData.modifier.pressed = false; 
+  inputData.switchAction.power = false; 
+  controller(); 
+  inputData.modifier.released = true; 
+  controller(); 
+  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
 };
 //}}}
 
@@ -385,75 +432,70 @@ TEST_F(
 TEST_F(
     SystemControllerBlackBox,
     default_temp_dialog_opens_changes_default_temp_and_sets_resets_accordingly) {
-{{{
-        EXPECT_EQ(outputIntent.lcd_state,
-                  OutputDevicesIntent::LcdStateIntent::start_page);
-        // sollte 4 Seiten nach rechts cyclen
-        inputData.modifier.pressed = true;
-        inputData.modifier.released = false;
-        inputData.encoder_val = 1;
-        controller();
-        inputData.encoder_val = 1;
-        controller();
-        inputData.encoder_val = 1;
-        controller();
-        inputData.encoder_val = 1;
-        controller();
-        EXPECT_EQ(outputIntent.lcd_state,
-                  OutputDevicesIntent::LcdStateIntent::default_temp_page);
-        // Reset
-        inputData.encoder_val = 0;
-        inputData.modifier.pressed = false;
-        inputData.modifier.released = false;
+  //{{{
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::start_page);
+  // sollte 4 Seiten nach rechts cyclen
+  inputData.modifier.pressed = true;
+  inputData.modifier.released = false;
+  inputData.encoder_val = 1;
+  controller();
+  inputData.encoder_val = 1;
+  controller();
+  inputData.encoder_val = 1;
+  controller();
+  inputData.encoder_val = 1;
+  controller();
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::default_temp_page);
+  // Reset
+  inputData.encoder_val = 0;
+  inputData.modifier.pressed = false;
+  inputData.modifier.released = false;
 
-        // Drücken des Modusschalters um Dialog zu öffnen
-        inputData.switchAction.mode = true;
-        controller();
-        inputData.switchAction.mode = false;
-        EXPECT_EQ(outputIntent.lcd_state,
-                  OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
+  // Drücken des Modusschalters um Dialog zu öffnen
+  inputData.switchAction.mode = true;
+  controller();
+  inputData.switchAction.mode = false;
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
 
-        // Encoder ändert intendet_default_target_tempC entsprechend
-        EXPECT_EQ(controller.pendingDefaultTempC, 15.0);
-        inputData.encoder_val = 4;
-        controller();
-        EXPECT_EQ(controller.pendingDefaultTempC,
-                  15.0 + 4 * Config::kTempStepC);
-        // Reset
-        inputData.encoder_val = 0;
+  // Diese Eingabe müsste auf die interne Implementierung wirken und im Dialog die aktuelle pending Temperatur anzeigen
+  inputData.encoder_val = 4;
+  controller();
+  inputData.encoder_val = 0;
 
-        // Drücken des Display/Modifier Schalters beendet den Dialog OHNE die
-        // neue default_temp zu übernehmen
-        inputData.modifier.released = true;
-        inputData.modifier.used = false;
-        controller();
-        EXPECT_EQ(outputIntent.lcd_state,
-                  OutputDevicesIntent::LcdStateIntent::default_temp_page);
-        EXPECT_EQ(controller.runtimeConfig.get_default_tempC(), 15.0);
-        // Reset
-        inputData.modifier.released = false;
+  // Drücken des Display/Modifier Schalters beendet den Dialog OHNE die
+  // neue default_temp zu übernehmen
+  inputData.modifier.released = true;
+  inputData.modifier.used = false;
+  controller();
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::default_temp_page);
+  EXPECT_EQ(controller.runtimeConfig.get_default_tempC(), 15.0);
+  // Reset
+  inputData.modifier.released = false;
 
-        // Erneutes Öffnen des Dialogs mit Verstellen des defaults.
-        inputData.switchAction.mode = true;
-        controller();
-        inputData.switchAction.mode = false;
-        EXPECT_EQ(outputIntent.lcd_state,
-                  OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
-        EXPECT_EQ(controller.runtimeConfig.get_default_tempC(), 15.0);
-        inputData.encoder_val = 4;
-        controller();
-        EXPECT_EQ(controller.pendingDefaultTempC,
-                  15.0 + 4 * Config::kTempStepC);
-        // Reset
-        inputData.encoder_val = 0;
+  // Erneutes Öffnen des Dialogs mit Verstellen des defaults.
+  inputData.switchAction.mode = true;
+  controller();
+  inputData.switchAction.mode = false;
+  EXPECT_EQ(outputIntent.lcd_state,
+            OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
+  EXPECT_EQ(controller.runtimeConfig.get_default_tempC(), 15.0);
+  inputData.encoder_val = 4;
+  controller();
+  EXPECT_EQ(controller.pendingDefaultTempC, 15.0 + 4 * Config::kTempStepC);
+  // Reset
+  inputData.encoder_val = 0;
 
-        // Drücken des Mode Schalters ÜBERNIMMT die neue default_temp
-        inputData.switchAction.mode = true;
-        controller();
-        EXPECT_EQ(controller.runtimeConfig.get_default_tempC(),
-                  15.0 + 4 * Config::kTempStepC);
+  // Drücken des Mode Schalters ÜBERNIMMT die neue default_temp
+  inputData.switchAction.mode = true;
+  controller();
+  EXPECT_EQ(controller.runtimeConfig.get_default_tempC(),
+            15.0 + 4 * Config::kTempStepC);
 
-        // Reset
-        inputData.switchAction.mode = false;
+  // Reset
+  inputData.switchAction.mode = false;
 }
-}}}
+//}}}
