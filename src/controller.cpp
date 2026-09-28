@@ -27,7 +27,6 @@ void SystemController::init() {
 
 void SystemController::apply_config_data() {
   // {{{
-
   heaterStatus.target_tempC = runtimeConfig.get_default_tempC();
 };
 //}}}
