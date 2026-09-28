@@ -53,22 +53,6 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[3], 21, "Mode:      %.9s", string_of_states[1]);
     break;
 
-  case LCDIntent::Page2:
-    m_display.backlight();
-    m_display.display();
-
-    break;
-  case LCDIntent::Page3:
-    formatTempFloatsForDisplay();
-    m_display.backlight();
-    m_display.display();
-   break;
-  case LCDIntent::Page4:
-    m_display.backlight();
-    m_display.display();
-
-   break;
-
   case LCDIntent::default_temp_page:
     m_display.backlight();
     m_display.display();
@@ -79,14 +63,14 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[2], 21, "     to change      ");
     break;
 
-  case LCDIntent::default_temp_dialog: 
+  case LCDIntent::default_temp_dialog:
     m_display.backlight();
-	m_display.display(); 
+    m_display.display();
     snprintf(m_lineBuffer[0], 21, "Default Temp %.2f C",
              m_displayContent.runtimeConfigData.default_tempC);
     snprintf(m_lineBuffer[1], 21, "Mode Button: OK");
     snprintf(m_lineBuffer[2], 21, "Display Button: EXIT");
-	break;
+    break;
 
   case LCDIntent::Off:
     m_display.noBacklight();
@@ -124,22 +108,6 @@ void DisplayDriver::formatTempFloatsForDisplay() {
     s_int = int(m_displayContent.status.target_tempC);
     s_frac =
         abs(static_cast<int>(m_displayContent.status.target_tempC * 10) % 10);
-    break;
-
-  case LCDIntent::Page2:
-    break;
-
-  case LCDIntent::Page3:
-#ifdef MEMORYFUNCTIONS
-    diff_int = int(m_displayContent.runtimeDisplayData.mediumDiffTempToTarget);
-    diff_frac = abs(
-        static_cast<int>(
-            m_displayContent.runtimeDisplayData.mediumDiffTempToTarget * 10) %
-        10);
-#endif
-    break;
-
-  case LCDIntent::Page4:
     break;
 
   case LCDIntent::default_temp_page:

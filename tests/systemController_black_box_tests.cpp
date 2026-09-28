@@ -279,25 +279,6 @@ TEST_F(SystemControllerBlackBox,
 
   EXPECT_EQ(outputIntent.lcd_state,
             OutputDevicesIntent::LcdStateIntent::start_page);
-
-  inputData.modifier.released = false;
-  inputData.modifier.pressed = true;
-  inputData.modifier.used = false;
-  inputData.encoder_val = 1;
-
-  controller();
-
-  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Page2);
-  EXPECT_EQ(inputData.modifier.used, true);
-
-  inputData.modifier.released = false;
-  inputData.modifier.pressed = true;
-  inputData.modifier.used = false;
-  inputData.encoder_val = -1;
-
-  controller();
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::start_page);
 }
 //}}}
 

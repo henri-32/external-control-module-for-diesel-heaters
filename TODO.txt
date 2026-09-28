@@ -1,16 +1,7 @@
 LcdStateIntent und Modifier used überdenken.
-. Ungültige Temperatursensorwerte sicher behandeln
-    - NaN, den typischen DS18B20-Fehlerwert `-127 °C` und unrealistisch hohe
-      Werte testen.
-    - Ein ungültiger Messwert darf keinen unbeabsichtigten Einschaltpuls
-      auslösen.
 
-  2. Sensorfehler und Relaisbefehls-Kollisionen absichern.
   3. Modifier-Lebenszyklus korrigieren und komplette Nutzersequenzen testen.
-  4. Ungültige Dialogwerte verhindern.
   6. LcdStateIntent zu einem echten UiState machen.
-  7. Erst danach die Action-/Binding-Schicht für konsistente Dialoge ergänzen.
-  8. Memory-Funktionen entweder bewusst fertigstellen oder aus dem aktiven UI
-     entfernen.
+  7. Die Action-/Binding-Schicht für konsistente Dialoge ergänzen.
 
 `

@@ -51,9 +51,6 @@ public:
 
   enum class LcdStateIntent {
     start_page,
-    Page2,
-    Page3,
-    Page4,
     default_temp_page,
     default_temp_dialog,
     Off

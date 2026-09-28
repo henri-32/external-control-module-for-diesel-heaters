@@ -145,12 +145,6 @@ void SystemController::applyInputdata() {
 
     break;
 
-  case State::Page2:
-    break;
-  case State::Page3:
-    break;
-  case State::Page4:
-    break;
   case State::default_temp_page:
     if (inputDevices.data.switchAction.mode) {
       pendingDefaultTempC = runtimeConfig.get_default_tempC();
@@ -182,6 +176,7 @@ void SystemController::applyInputdata() {
       return;
     }
     pendingDefaultTempC += val * Config::kTempStepC;
+    clampTargetTempC(pendingDefaultTempC);
     break;
 
   case State::Off:
@@ -215,7 +210,12 @@ void SystemController::applyHeatingLogic() {
   using State = HeaterStatus::State;
   using Command = OutputDevicesIntent::RelaisCommand;
 
-  if (heaterStatus.mode != HeaterStatus::Mode::Temp)
+  // Heizungslogik greift nur im Temperaturmodus.
+  // -127 und 85 sind Fehler bzw. uninitialisierte Startwerte des DS18B20
+  // Sensors und sollen keine Heizimpulse auslösen
+  if (heaterStatus.mode != HeaterStatus::Mode::Temp ||
+      inputDevices.data.sensor_tempC == -127.0 ||
+      inputDevices.data.sensor_tempC == 85.0)
     return;
 
   if (inputDevices.data.sensor_tempC <=
@@ -277,15 +277,6 @@ void SystemController::cyclePages() {
     case LCDIntent::Off:
       return;
     case LCDIntent::start_page:
-      outputDevices.intent.lcd_state = LCDIntent::Page2;
-      break;
-    case LCDIntent::Page2:
-      outputDevices.intent.lcd_state = LCDIntent::Page3;
-      break;
-    case LCDIntent::Page3:
-      outputDevices.intent.lcd_state = LCDIntent::Page4;
-      break;
-    case LCDIntent::Page4:
       outputDevices.intent.lcd_state = LCDIntent::default_temp_page;
       break;
 
@@ -308,17 +299,8 @@ void SystemController::cyclePages() {
     case LCDIntent::start_page:
       outputDevices.intent.lcd_state = LCDIntent::default_temp_page;
       break;
-    case LCDIntent::Page2:
-      outputDevices.intent.lcd_state = LCDIntent::start_page;
-      break;
-    case LCDIntent::Page3:
-      outputDevices.intent.lcd_state = LCDIntent::Page2;
-      break;
-    case LCDIntent::Page4:
-      outputDevices.intent.lcd_state = LCDIntent::Page3;
-      break;
     case LCDIntent::default_temp_page:
-      outputDevices.intent.lcd_state = LCDIntent::Page4;
+      outputDevices.intent.lcd_state = LCDIntent::start_page;
       break;
 
       // Die folgenden Seiten sind Dialoge, die nicht regulär mit
