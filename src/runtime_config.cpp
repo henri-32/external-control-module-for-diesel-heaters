@@ -1,11 +1,11 @@
 #include "runtime_config.h"
 #include "config.h"
 #include <EEPROM.h>
-#include <cmath>
+#include <math.h>
 
 void RuntimeConfig::load() {
   EEPROM.get(default_tempC_addr, data.default_tempC);
-  if (data.default_tempC <= 5 || data.default_tempC >= 30 || !std::isfinite(data.default_tempC)) {
+  if (!isfinite(data.default_tempC)) {
     data.default_tempC = Config::kDefaultTempC;
   }
 

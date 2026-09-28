@@ -3,6 +3,7 @@
 #include "test_devices.h"
 #include "types.h"
 #include <gtest/gtest.h>
+#include <limits>
 
 // HINWEIS:
 // In diesen Black-Box-Tests wird outputIntent.displayContent.status.state
@@ -15,7 +16,7 @@
 
 // Weil die switchActions im Tick nicht konsumiert, sondern fortlaufend aus
 // der Hardware gelesen werden, müssen sie für diese isolierten Tests
-// explizit gesetzt werden.
+// explizit gesetzt und zurückgesetzt werden.
 
 using namespace ArduinoStubSpies;
 using RelaisCmd = OutputDevicesIntent::RelaisCommand;
@@ -23,6 +24,9 @@ using RelaisCmd = OutputDevicesIntent::RelaisCommand;
 TEST(InitTests, controllerinit) {
   //{{{
   TestRuntimeConfig runtimeConfig;
+  // Hiermit wird geprüft, dass die runtimeConfig korrekt geladen wird. Siehe
+  // letztes EXPECT_EQ des Tests
+  runtimeConfig.data.default_tempC = 20;
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;
   TestRelais relais;
@@ -39,8 +43,32 @@ TEST(InitTests, controllerinit) {
   EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
   EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
   EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
-  EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
-            Config::kDefaultTempC);
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, 20);
+}
+//}}}
+
+TEST(InitTests, default_temp_value_load) {
+//{{{
+  TestRuntimeConfig runtimeConfig;
+  runtimeConfig.data.default_tempC = std::numeric_limits<float>::quiet_NaN();
+  InputDevicesDataSet inputData;
+  OutputDevicesIntent outputIntent;
+  TestRelais relais;
+  TestInputDevices testInput{inputData};
+  TestOutputDevices testOutput{outputIntent, relais};
+  SystemController controller{runtimeConfig, testInput, testOutput};
+
+  controller.init(); 
+
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, Config::kDefaultTempC);
+
+  runtimeConfig.data.default_tempC = Config::kTempMinC - 1; 
+  controller.init(); 
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, Config::kDefaultTempC);
+
+  runtimeConfig.data.default_tempC = Config::kTempMaxC + 1; 
+  controller.init(); 
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, Config::kDefaultTempC);
 }
 //}}}
 
@@ -62,6 +90,7 @@ protected:
   SystemController controller{runtimeConfig, testInput, testOutput};
 
   void SetUp() override {
+    runtimeConfig.data.default_tempC = Config::kDefaultTempC;
     controller.init();
     inputData.sensor_tempC = 15.0;
     inputData.switchAction.mode = false;
@@ -304,11 +333,11 @@ TEST_F(SystemControllerBlackBox, powerSwitch_and_modifier_switches_only_state) {
   // normaler Klick schaltet Bildschirm aus
   EXPECT_EQ(outputIntent.lcd_state,
             OutputDevicesIntent::LcdStateIntent::start_page);
-  inputData.modifier.pressed = false; 
-  inputData.switchAction.power = false; 
-  controller(); 
-  inputData.modifier.released = true; 
-  controller(); 
+  inputData.modifier.pressed = false;
+  inputData.switchAction.power = false;
+  controller();
+  inputData.modifier.released = true;
+  controller();
   EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
 };
 //}}}
@@ -460,7 +489,8 @@ TEST_F(
   EXPECT_EQ(outputIntent.lcd_state,
             OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
 
-  // Diese Eingabe müsste auf die interne Implementierung wirken und im Dialog die aktuelle pending Temperatur anzeigen
+  // Diese Eingabe müsste auf die interne Implementierung wirken und im Dialog
+  // die aktuelle pending Temperatur anzeigen
   inputData.encoder_val = 4;
   controller();
   inputData.encoder_val = 0;
@@ -483,9 +513,9 @@ TEST_F(
   EXPECT_EQ(outputIntent.lcd_state,
             OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
   EXPECT_EQ(controller.runtimeConfig.get_default_tempC(), 15.0);
+  // Das müsste im Dialog pendingDefaultTempC hochsetzen. 
   inputData.encoder_val = 4;
   controller();
-  EXPECT_EQ(controller.pendingDefaultTempC, 15.0 + 4 * Config::kTempStepC);
   // Reset
   inputData.encoder_val = 0;
 

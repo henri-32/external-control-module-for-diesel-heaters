@@ -1,11 +1,19 @@
 #include "test_devices.h"
 
+void TestRuntimeConfig::load() {
+  // Dieselbe Iplementierung wie im Produktionscode, nur ohne
+  // EEPROM read, da erwartet wird, dass in den tests die data Werte direkt
+  // gesetzt werden
+  if (!std::isfinite(data.default_tempC)) {
+    data.default_tempC = Config::kDefaultTempC;
+  }
+};
 float TestRuntimeConfig::get_default_tempC() const {
   return data.default_tempC;
 }
 
-void TestRuntimeConfig::set_default_tempC(float new_default){
-	data.default_tempC = new_default; 
+void TestRuntimeConfig::set_default_tempC(float new_default) {
+  data.default_tempC = new_default;
 }
 
 void TestOutputDevices::update() {

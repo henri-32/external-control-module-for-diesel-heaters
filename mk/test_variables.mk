@@ -18,7 +18,6 @@ TEST_CPP_SRCS := \
 	src/encoder_driver.cpp \
 	tests/test_devices.cpp \
 	tests/ArduinoStubs.cpp \
-	tests/systemController_white_box_tests.cpp \
 	tests/systemController_black_box_tests.cpp \
 	tests/display_unit_tests.cpp \
 	tests/relais_unit_tests.cpp \

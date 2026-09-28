@@ -1,5 +1,6 @@
 #pragma once
 #include "interfaces.h"
+#include <cmath>
 #include <string>
 #include <utility>
 #include <vector>
@@ -10,12 +11,10 @@
 
 class TestRuntimeConfig : public IRuntimeConfig {
 public:
-  void load() override { data.default_tempC = 15.0; };
+  void load() override;
   void set_default_tempC(float new_default) override;
   float get_default_tempC() const override;
 
-private:
-  RuntimeConfigData data;
 };
 
 class TestInputDevices : public IInputDevices {

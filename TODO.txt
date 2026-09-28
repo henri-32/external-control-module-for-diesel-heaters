@@ -1,34 +1,16 @@
-Tests für Verhalten des Dialogs schreiben. Kommentare für die verteilte logik und neue "Architektur" verwertung der Eingaben je nach Page, Displays je nach page im driver festgelegt. 
-
-Möglicherweise naming des lcd_states ändern, wenn es jetzt eher ein zentraler Zustand ist, von dem controller steuerung auch ahängt. 
-
-Data Buffer überdenken.Tests für Verhalten des Dialogs schreiben. Kommentare für die verteilte logik und neue "Architektur" verwertung der Eingaben je nach Page, Displays je nach page im driver festgelegt. 
-
-Möglicherweise naming des lcd_states ändern, wenn es jetzt eher ein zentraler Zustand ist, von dem controller steuerung auch ahängt. 
-
-Data Buffer überdenken.  
-
-SystemController-Black-Box-Tests ergänzen
-===========================================
-
-9. Laden der Runtime-Konfiguration testen
-   - Mit einem Stub einen vom Compile-Time-Default abweichenden Wert laden und
-     prüfen, dass der erste Controller-Tick diesen als Solltemperatur ausgibt.
-   - Prüfen, dass `load()` bei der Initialisierung aufgerufen wird.
-   - Das Laden aus dem EEPROM muss validieren, ob die gelesenen Bytes einen
-     gültigen Float ergeben: mindestens `std::isfinite()` prüfen und zusätzlich
-     den erlaubten Temperaturbereich validieren. Bei NaN, +/-Inf oder einem
-     Wert außerhalb des zulässigen Bereichs auf einen sicheren Defaultwert
-     zurückfallen und diesen Fall testen.
-
-10. Ungültige Temperatursensorwerte sicher behandeln
+LcdStateIntent und Modifier used überdenken.
+. Ungültige Temperatursensorwerte sicher behandeln
     - NaN, den typischen DS18B20-Fehlerwert `-127 °C` und unrealistisch hohe
       Werte testen.
     - Ein ungültiger Messwert darf keinen unbeabsichtigten Einschaltpuls
       auslösen.
 
-Vorgeschlagene erste Testfälle:
+  2. Sensorfehler und Relaisbefehls-Kollisionen absichern.
+  3. Modifier-Lebenszyklus korrigieren und komplette Nutzersequenzen testen.
+  4. Ungültige Dialogwerte verhindern.
+  6. LcdStateIntent zu einem echten UiState machen.
+  7. Erst danach die Action-/Binding-Schicht für konsistente Dialoge ergänzen.
+  8. Memory-Funktionen entweder bewusst fertigstellen oder aus dem aktiven UI
+     entfernen.
 
-- `target_temperature_is_clamped_at_configured_limits`
-- `modifier_combination_does_not_toggle_display_on_release_and_is_reset_afterwards`
-- `switching_from_power_to_temp_while_cold_does_not_overwrite_required_mode_command`
+`

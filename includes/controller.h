@@ -17,16 +17,6 @@ public:
   SystemController(IRuntimeConfig &c, IInputDevices &i, IOutputDevices &o);
   void operator()();
   void init();
-
-// Fragwürdig, dass fürs Testen auf Interna zugegriffen werden muss.
-// Da der Umfang des Projekts erstmal begrenzt ist und die Logik der privaten
-// Funktionen getestet werden soll, aktuell für mich akzeptiert.
-#ifdef TEST_BUILD
-public:
-#else
-private:
-#endif
-
   void applyInputdata();
   void applyPowerSwitchInput();
   void applyModeSwitchInput();
