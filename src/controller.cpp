@@ -11,11 +11,6 @@ void SystemController::operator()() {
   applyHeatingLogic();
   writeOutputIntent();
   outputDevices.update();
-
-#ifdef MEMORY_FUNCTIONS
-  systemStatistic.update(inputDevices.data, heaterStatus);
-  updateMemory();
-#endif
 }
 
 void SystemController::init() {
@@ -137,7 +132,7 @@ void SystemController::applyInputdata() {
     }
 
     // Drücken des Display Schalters
-    DisplayButtonForDisplayOff();
+    DisplayButtonTurnsDisplayOff();
 
     // Encoder auswerten
     if (val == 0 || val >= Config::kEncoderValCutoff ||
@@ -163,7 +158,7 @@ void SystemController::applyInputdata() {
       return;
     }
 
-    DisplayButtonForDisplayOff();
+    DisplayButtonTurnsDisplayOff();
     // Encoder hat auf dieser Keine Bedeutung
     break;
 
@@ -206,7 +201,7 @@ void SystemController::applyInputdata() {
 };
 //}}}
 
-void SystemController::DisplayButtonForDisplayOff() {
+void SystemController::DisplayButtonTurnsDisplayOff() {
   //{{{
   if (inputDevices.data.modifier.released && !inputDevices.data.modifier.used) {
     outputDevices.intent.lcd_state = OutputDevicesIntent::LcdStateIntent::Off;
@@ -259,24 +254,7 @@ void SystemController::writeOutputIntent() {
     outputDevices.intent.displayContent.runtimeConfigData.default_tempC =
         runtimeConfig.get_default_tempC();
   }
-#ifdef MEMORY_FUNCTIONS
-  outputDevices.intent.displayContent.runtimeDisplayData =
-      systemStatistic.getRuntimeDate();
-  outputDevices.intent.displayContent.EEPROM_Values =
-      memoryController.getFinalAverages();
-#endif
 }
-//}}}
-
-void SystemController::updateMemory() {
-//{{{
-#ifdef MEMORY_FUNCTIONS
-  LongtimeData newLongtimeData;
-  if (systemStatistic.takeLongTimeData(newLongtimeData)) {
-    memoryController.update(newLongtimeData);
-  }
-#endif
-};
 //}}}
 
 // =============Helper Functions

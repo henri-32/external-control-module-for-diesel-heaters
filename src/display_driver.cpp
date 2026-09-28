@@ -56,42 +56,18 @@ void DisplayDriver::renderLines() {
   case LCDIntent::Page2:
     m_display.backlight();
     m_display.display();
-#ifdef MEMORY_FUNCTIONS
-    snprintf(m_lineBuffer[0], 21, "DutyCycle: %u %%",
-             m_displayContent.runtimeDisplayData.dutyCycle);
-    snprintf(m_lineBuffer[1], 21, "Cycles:    %u",
-             m_displayContent.runtimeDisplayData.cycleCounter);
-    snprintf(m_lineBuffer[2], 21, "Avg Idle:  %lu m",
-             m_displayContent.runtimeDisplayData.avgIdleTime_minutes);
-    snprintf(m_lineBuffer[3], 21, "%s", "");
-#endif
+
     break;
   case LCDIntent::Page3:
     formatTempFloatsForDisplay();
     m_display.backlight();
     m_display.display();
-#ifdef MEMORY_FUNCTIONS
-    snprintf(m_lineBuffer[0], 21, "Max Idle:  %lu m",
-             m_displayContent.runtimeDisplayData.maxIdleTime_minutes);
-    snprintf(m_lineBuffer[1], 21, "Min Idle:  %u m",
-             m_displayContent.runtimeDisplayData.minIdleTime_minutes);
-    snprintf(m_lineBuffer[2], 21, "Avg diff:  %d.%d C", diff_int, diff_frac);
-    snprintf(m_lineBuffer[3], 21, "%s", "");
-#endif
-    break;
+   break;
   case LCDIntent::Page4:
     m_display.backlight();
     m_display.display();
 
-#ifdef MEMORY_FUNCTIONS
-    snprintf(m_lineBuffer[0], 21, "All Time DC %u %%",
-             m_displayContent.EEPROM_Values.dutyCycle);
-    snprintf(m_lineBuffer[1], 21, "All Time IT %lu m",
-             m_displayContent.EEPROM_Values.avgIdleTime);
-    snprintf(m_lineBuffer[2], 21, "%s", "");
-    snprintf(m_lineBuffer[3], 21, "%s", "");
-#endif
-    break;
+   break;
 
   case LCDIntent::default_temp_page:
     m_display.backlight();

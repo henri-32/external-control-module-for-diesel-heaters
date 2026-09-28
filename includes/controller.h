@@ -1,11 +1,6 @@
 #pragma once
 #include "types.h"
 
-#ifdef MEMORY_FUNCTIONS
-#include "memory.h"
-#include "statistics.h"
-#endif
-
 class IRuntimeConfig;
 class IInputDevices;
 class IOutputDevices;
@@ -23,11 +18,8 @@ public:
   void applyEncoderInput();
   void applyDisplayButtonInput();
   void applyHeatingLogic();
+  void writeOutputIntent(); 
 
-  // Nur implementiert bei ifdef MEMORY_FUNCTIONS
-  //  Für stabile API immer deklariert.
-  void writeOutputIntent();
-  void updateMemory();
 
   // Helper
   void apply_config_data();
@@ -35,7 +27,7 @@ public:
   void cyclePages();
   void requestRelaisCommand(OutputDevicesIntent::RelaisCommand command);
 
-  void DisplayButtonForDisplayOff();
+  void DisplayButtonTurnsDisplayOff();
   void enter_default_temp_dialog();
 
   IRuntimeConfig &runtimeConfig;
@@ -45,8 +37,4 @@ public:
 
   float pendingDefaultTempC = 0;
 
-#ifdef MEMORY_FUNCTIONS
-  SystemStatistics systemStatistic;
-  StatisticMemoryController memoryController;
-#endif
 };

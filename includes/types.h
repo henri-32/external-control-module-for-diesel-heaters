@@ -35,31 +35,6 @@ struct HeaterStatus {
   float target_tempC = Config::kDefaultTempC;
 };
 
-#ifdef MEMORY_FUNCTIONS
-struct LongtimeData {
-  int dutyCycle = 0;
-  int avgIdleTime = 0;
-};
-struct RuntimeData {
-  unsigned int dutyCycle = 0;
-  unsigned long avgIdleTime_minutes = 0;
-  unsigned long maxIdleTime_minutes = 0;
-  unsigned int minIdleTime_minutes = UINT_MAX;
-  unsigned int cycleCounter = 0;
-  float mediumDiffTempToTarget = 0.0;
-};
-
-struct CalculationData {
-  uint16_t updateCounter = 0;
-  float tempDiffAccumulator = 0.0;
-  unsigned long lastON = 0;
-  unsigned long lastOFF = 0;
-  unsigned long accumulatedTimeOFF = 0;
-  unsigned long accumulatedTimeON = 0;
-  unsigned long lastOFFperiodeLength = 0;
-};
-#endif
-
 struct RuntimeConfigData {
   float default_tempC = 15.0;
 };
@@ -70,10 +45,6 @@ public:
     float temp_c;
     HeaterStatus status;
 	RuntimeConfigData runtimeConfigData; 
-#ifdef MEMORY_FUNCTIONS
-    RuntimeData runtimeDisplayData;
-    LongtimeData EEPROM_Values;
-#endif
   };
 
   DisplayContent displayContent;
