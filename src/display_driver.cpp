@@ -4,7 +4,7 @@
 #include <string.h>
 
 using ODI = OutputDevicesIntent;
-using LCDIntent = OutputDevicesIntent::LcdStateIntent;
+using LCDIntent = UiState;
 
 #ifdef TEST_BUILD
 #include "ArduinoStubs.h"
@@ -13,9 +13,7 @@ using LCDIntent = OutputDevicesIntent::LcdStateIntent;
 #include <Arduino.h>
 #endif
 
-DisplayDriver::DisplayDriver(IDisplayHardware &display, ODI::DisplayContent &dc,
-                             LCDIntent &ds)
-    : m_display(display), m_displayContent(dc), m_displayState(ds) {}
+DisplayDriver::DisplayDriver(IDisplayHardware &display) : m_display(display) {}
 
 void DisplayDriver::init() {
   //{{{
@@ -26,13 +24,14 @@ void DisplayDriver::init() {
 }
 //}}}
 
-void DisplayDriver::update() {
+void DisplayDriver::update(OutputDevicesIntent::DisplayContent content) {
   //{{{
-  if (m_displayState == LCDIntent::Off) {
+  if (content.status.uiState == LCDIntent::Off) {
     m_display.noBacklight();
     m_display.noDisplay();
     return;
   }
+  m_displayContent = content;
   renderLines();
   writeDisplay(m_lineBuffer);
 }
@@ -40,7 +39,7 @@ void DisplayDriver::update() {
 
 void DisplayDriver::renderLines() {
   //{{{
-  switch (m_displayState) {
+  switch (m_displayContent.status.uiState) {
   case LCDIntent::start_page:
     formatTempFloatsForDisplay();
     createStateStringsForDisplay(m_displayContent);
@@ -100,25 +99,12 @@ void DisplayDriver::writeDisplay(char lines[4][21]) {
 
 void DisplayDriver::formatTempFloatsForDisplay() {
   //{{{
-  switch (m_displayState) {
-  case LCDIntent::start_page:
-
-    t_int = int(m_displayContent.temp_c);
-    t_frac = abs(static_cast<int>(m_displayContent.temp_c * 10) % 10);
-    s_int = int(m_displayContent.status.target_tempC);
-    s_frac =
-        abs(static_cast<int>(m_displayContent.status.target_tempC * 10) % 10);
-    break;
-
-  case LCDIntent::default_temp_page:
-    break;
-  case LCDIntent::default_temp_dialog:
-    break;
-  case LCDIntent::Off:
-    break;
-  }
+  t_int = int(m_displayContent.temp_c);
+  t_frac = abs(static_cast<int>(m_displayContent.temp_c * 10) % 10);
+  s_int = int(m_displayContent.status.target_tempC);
+  s_frac =
+      abs(static_cast<int>(m_displayContent.status.target_tempC * 10) % 10);
 }
-//}}}
 
 void DisplayDriver::createStateStringsForDisplay(
     const ODI::DisplayContent &content) {

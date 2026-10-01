@@ -14,7 +14,6 @@ public:
   void load() override;
   void set_default_tempC(float new_default) override;
   float get_default_tempC() const override;
-
 };
 
 class TestInputDevices : public IInputDevices {
@@ -39,15 +38,24 @@ class TestOutputDevices : public IOutputDevices {
   //{{{
   // Siehe Kommentar TestInputDevices
 public:
-  TestOutputDevices(OutputDevicesIntent &outputIntent, IRelais &relais)
-      : IOutputDevices(outputIntent), m_relais(relais) {}
+  TestOutputDevices(OutputDevicesIntent &outputIntent, IRelais &relais,
+                    IDisplayDriver &display)
+      : IOutputDevices(outputIntent), m_relais(relais), m_display(display) {}
   void init() override {};
   void update() override;
 
 private:
   IRelais &m_relais;
+  IDisplayDriver &m_display;
 };
 //}}}
+
+class TestDisplayDriver : public IDisplayDriver {
+  void update(OutputDevicesIntent::DisplayContent content) override {
+    m_displayContent = content;
+  }
+  void init() override {}
+};
 
 //==================================================================
 // Die folgenden Klassen sind die jeweiligen Test-Stubs zu den Geräten

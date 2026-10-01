@@ -58,7 +58,11 @@ protected:
 class IDisplayDriver : public IDriver {
   //{{{
 public:
-  virtual void update() = 0;
+  virtual void update(OutputDevicesIntent::DisplayContent content) = 0;
+
+  // Dieses Struct ist public, weil es die für Tests nach außen beobachtbare
+  // Schnittstelle des ganzen Systems darstellt
+  OutputDevicesIntent::DisplayContent m_displayContent;
 
 protected:
   ~IDisplayDriver() = default;

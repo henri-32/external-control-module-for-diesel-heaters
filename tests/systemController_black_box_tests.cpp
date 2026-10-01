@@ -17,6 +17,7 @@
 // Weil die switchActions im Tick nicht konsumiert, sondern fortlaufend aus
 // der Hardware gelesen werden, müssen sie für diese isolierten Tests
 // explizit gesetzt und zurückgesetzt werden.
+//
 
 using namespace ArduinoStubSpies;
 using RelaisCmd = OutputDevicesIntent::RelaisCommand;
@@ -30,8 +31,9 @@ TEST(InitTests, controllerinit) {
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;
   TestRelais relais;
+  TestDisplayDriver display;
   TestInputDevices testInput{inputData};
-  TestOutputDevices testOutput{outputIntent, relais};
+  TestOutputDevices testOutput{outputIntent, relais, display};
   SystemController controller{runtimeConfig, testInput, testOutput};
 
   controller.init();
@@ -41,34 +43,38 @@ TEST(InitTests, controllerinit) {
   EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::Off);
   EXPECT_EQ(outputIntent.relaisCommand, RelaisCmd::None);
   EXPECT_EQ(relais.receivedCommand(), RelaisCmd::None);
-  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState, UiState::Off);
   EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC, 20);
 }
 //}}}
 
 TEST(InitTests, default_temp_value_load) {
-//{{{
+  //{{{
   TestRuntimeConfig runtimeConfig;
   runtimeConfig.data.default_tempC = std::numeric_limits<float>::quiet_NaN();
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;
   TestRelais relais;
+  TestDisplayDriver display;
   TestInputDevices testInput{inputData};
-  TestOutputDevices testOutput{outputIntent, relais};
+  TestOutputDevices testOutput{outputIntent, relais, display};
   SystemController controller{runtimeConfig, testInput, testOutput};
 
-  controller.init(); 
+  controller.init();
 
-  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, Config::kDefaultTempC);
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
+            Config::kDefaultTempC);
 
-  runtimeConfig.data.default_tempC = Config::kTempMinC - 1; 
-  controller.init(); 
-  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, Config::kDefaultTempC);
+  runtimeConfig.data.default_tempC = Config::kTempMinC - 1;
+  controller.init();
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
+            Config::kDefaultTempC);
 
-  runtimeConfig.data.default_tempC = Config::kTempMaxC + 1; 
-  controller.init(); 
-  EXPECT_EQ(outputIntent.displayContent.status.target_tempC, Config::kDefaultTempC);
+  runtimeConfig.data.default_tempC = Config::kTempMaxC + 1;
+  controller.init();
+  EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
+            Config::kDefaultTempC);
 }
 //}}}
 
@@ -85,8 +91,9 @@ protected:
   // konsumiert, sodass outputIntent.relaisCommand nach jedem Tick None ist.
 
   TestRelais relais;
+  TestDisplayDriver display;
   TestInputDevices testInput{inputData};
-  TestOutputDevices testOutput{outputIntent, relais};
+  TestOutputDevices testOutput{outputIntent, relais, display};
   SystemController controller{runtimeConfig, testInput, testOutput};
 
   void SetUp() override {
@@ -98,10 +105,41 @@ protected:
     inputData.encoder_val = 0;
     inputData.modifier.pressed = false;
     inputData.modifier.released = false;
-    inputData.modifier.used = false;
-    outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::start_page;
+    cycle_until_state(UiState::start_page);
     controller();
   };
+
+  void cycle_until_state(UiState state) {
+    if (state == outputIntent.displayContent.status.uiState) {
+      return;
+    }
+
+    if (state == UiState::Off) {
+      // Display ausschalten
+      inputData.modifier.released = true;
+      controller();
+      inputData.modifier.released = false;
+    }
+
+    if (outputIntent.displayContent.status.uiState == UiState::Off) {
+      // Display anschalten
+      inputData.modifier.released = true;
+      controller();
+      inputData.modifier.released = false;
+    }
+
+    for (int i = 0; i < 50; i++) {
+      inputData.modifier.pressed = true;
+      inputData.modifier.released = false;
+      inputData.encoder_val = 1;
+      controller();
+      if (outputIntent.displayContent.status.uiState == state) {
+        inputData.modifier.pressed = false;
+        inputData.encoder_val = 0;
+        break;
+      }
+    }
+  }
 };
 //}}}
 
@@ -113,6 +151,7 @@ TEST_F(
 
   controller();
   EXPECT_EQ(relais.receivedCommand(), RelaisCmd::Long);
+  controller(); 
   EXPECT_EQ(outputIntent.relaisCommand, RelaisCmd::None);
 }
 //}}}
@@ -244,23 +283,21 @@ TEST_F(SystemControllerBlackBox, encoder_negative_steps_change_target_temp) {
 
 TEST_F(SystemControllerBlackBox, display_button_turns_display_on_and_off) {
   //{{{
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::start_page);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::start_page);
 
-  inputData.modifier.used = false;
   inputData.modifier.released = true;
 
   controller();
 
-  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState, UiState::Off);
 
-  inputData.modifier.used = false;
   inputData.modifier.released = true;
 
   controller();
 
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::start_page);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::start_page);
 }
 //}}}
 
@@ -268,17 +305,19 @@ TEST_F(SystemControllerBlackBox,
        encoder_and_modifier_cycle_pages_and_consumes_modifier) {
   //{{{
 
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::start_page);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::start_page);
 
-  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::Off;
-  inputData.modifier.used = false;
-  inputData.modifier.released = true;
+  inputData.modifier.pressed = true; 
+  inputData.modifier.released = false;
+  inputData.encoder_val = 1; 
 
   controller();
 
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::start_page);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::default_temp_page);
+  inputData.encoder_val = 0; 
+  inputData.modifier.pressed = false; 
 }
 //}}}
 
@@ -287,7 +326,6 @@ TEST_F(SystemControllerBlackBox, modeSwitch_and_modifier_switches_only_state) {
   EXPECT_EQ(outputIntent.displayContent.status.mode, HeaterStatus::Mode::Temp);
   inputData.modifier.released = false;
   inputData.modifier.pressed = true;
-  inputData.modifier.used = false;
   inputData.switchAction.mode = true;
 
   controller();
@@ -303,7 +341,6 @@ TEST_F(SystemControllerBlackBox, powerSwitch_and_modifier_switches_only_state) {
 
   inputData.modifier.released = false;
   inputData.modifier.pressed = true;
-  inputData.modifier.used = false;
   inputData.switchAction.power = true;
 
   controller();
@@ -312,14 +349,13 @@ TEST_F(SystemControllerBlackBox, powerSwitch_and_modifier_switches_only_state) {
   EXPECT_EQ(outputIntent.displayContent.status.state, HeaterStatus::State::On);
 
   // normaler Klick schaltet Bildschirm aus
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::start_page);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::start_page);
   inputData.modifier.pressed = false;
   inputData.switchAction.power = false;
-  controller();
   inputData.modifier.released = true;
   controller();
-  EXPECT_EQ(outputIntent.lcd_state, OutputDevicesIntent::LcdStateIntent::Off);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState, UiState::Off);
 };
 //}}}
 
@@ -443,21 +479,11 @@ TEST_F(
     SystemControllerBlackBox,
     default_temp_dialog_opens_changes_default_temp_and_sets_resets_accordingly) {
   //{{{
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::start_page);
-  // sollte 4 Seiten nach rechts cyclen
-  inputData.modifier.pressed = true;
-  inputData.modifier.released = false;
-  inputData.encoder_val = 1;
-  controller();
-  inputData.encoder_val = 1;
-  controller();
-  inputData.encoder_val = 1;
-  controller();
-  inputData.encoder_val = 1;
-  controller();
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::default_temp_page);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::start_page);
+  cycle_until_state(UiState::default_temp_page);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::default_temp_page);
   // Reset
   inputData.encoder_val = 0;
   inputData.modifier.pressed = false;
@@ -467,8 +493,8 @@ TEST_F(
   inputData.switchAction.mode = true;
   controller();
   inputData.switchAction.mode = false;
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::default_temp_dialog);
 
   // Diese Eingabe müsste auf die interne Implementierung wirken und im Dialog
   // die aktuelle pending Temperatur anzeigen
@@ -479,10 +505,9 @@ TEST_F(
   // Drücken des Display/Modifier Schalters beendet den Dialog OHNE die
   // neue default_temp zu übernehmen
   inputData.modifier.released = true;
-  inputData.modifier.used = false;
   controller();
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::default_temp_page);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::default_temp_page);
   EXPECT_EQ(controller.runtimeConfig.get_default_tempC(), 15.0);
   // Reset
   inputData.modifier.released = false;
@@ -491,10 +516,10 @@ TEST_F(
   inputData.switchAction.mode = true;
   controller();
   inputData.switchAction.mode = false;
-  EXPECT_EQ(outputIntent.lcd_state,
-            OutputDevicesIntent::LcdStateIntent::default_temp_dialog);
+  EXPECT_EQ(outputIntent.displayContent.status.uiState,
+            UiState::default_temp_dialog);
   EXPECT_EQ(controller.runtimeConfig.get_default_tempC(), 15.0);
-  // Das müsste im Dialog pendingDefaultTempC hochsetzen. 
+  // Das müsste im Dialog pendingDefaultTempC hochsetzen.
   inputData.encoder_val = 4;
   controller();
   // Reset

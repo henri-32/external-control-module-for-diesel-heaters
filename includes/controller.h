@@ -23,7 +23,7 @@ public:
 
   // Helper
   void apply_config_data();
-  void clampTargetTempC(float &target);
+  void clampTempToConfigVals(float &target);
   void cyclePages();
   void requestRelaisCommand(OutputDevicesIntent::RelaisCommand command);
 

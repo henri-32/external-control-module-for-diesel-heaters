@@ -38,5 +38,5 @@ void OutputDevices::init() {
 void OutputDevices::update() {
   m_relais.update(intent.relaisCommand);
   intent.relaisCommand = OutputDevicesIntent::RelaisCommand::None;
-  m_displayDriver.update();
+  m_displayDriver.update(intent.displayContent);
 }

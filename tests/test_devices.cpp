@@ -21,6 +21,7 @@ void TestOutputDevices::update() {
   // Simuliert das Verhalten der echten Klasse.
   m_relais.update(intent.relaisCommand);
   intent.relaisCommand = OutputDevicesIntent::RelaisCommand::None;
+  m_display.update(intent.displayContent); 
 }
 //}}}
 

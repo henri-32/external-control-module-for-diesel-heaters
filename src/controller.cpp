@@ -39,20 +39,29 @@ void SystemController::apply_config_data() {
 
 void SystemController::applyInputdata() {
   //{{{
-  using State = OutputDevicesIntent::LcdStateIntent;
+  using State = UiState;
   using Mode = HeaterStatus::Mode;
   using Command = OutputDevicesIntent::RelaisCommand;
   using LCDDirection = OutputDevicesIntent::LcdCycleDirection;
-  auto &state = outputDevices.intent.lcd_state;
+  auto &id = inputDevices.data;
+  auto &oi = outputDevices.intent;
+  auto &state = heaterStatus.uiState;
   auto &val = inputDevices.data.encoder_val;
+
+  /* Die Bedienlogik liegt hier implizit in der Platzierung der Returns und der
+   * Priorisierung der Funktionen. Gleichzeitige Eingaben mehrerer Schalter
+   * werden so implizit, aber "durchdacht" priorisiert.  Zum jetzigen Zeitpunkt
+   * rechtfertigt der begrenzte UI Funktionsumfang keine eigene
+   * Abstraktionsebene bzw. ein unabhängiges Input Modell.
+   */
 
   //====================================================================================
   // UIState unabhängige Eingaben
   //====================================================================================
+
   // Ohne gedrückten Modifier wird bei Drücken des PowerSwitches neben dem
   // Statuswechsel das Relais angefordert.
-  if (inputDevices.data.switchAction.power &&
-      !inputDevices.data.modifier.pressed) {
+  if (id.switchAction.power && !id.modifier.pressed) {
     if (heaterStatus.state == HeaterStatus::State::On) {
       heaterStatus.state = HeaterStatus::State::Off;
       heaterStatus.mode = Mode::Power;
@@ -68,9 +77,7 @@ void SystemController::applyInputdata() {
 
   // Bei gedrücktem Modifier wird nur der Status gewechselt ohne
   // RelaisBetätigung
-  if (inputDevices.data.switchAction.power &&
-      inputDevices.data.modifier.pressed &&
-      !inputDevices.data.modifier.released) {
+  if (id.switchAction.power && id.modifier.pressed && !id.modifier.released) {
     if (heaterStatus.state == HeaterStatus::State::On) {
       heaterStatus.state = HeaterStatus::State::Off;
     } else if (heaterStatus.state == HeaterStatus::State::Off) {
@@ -81,12 +88,10 @@ void SystemController::applyInputdata() {
 
   // Äquivalent dazu führt das drücken des ModeSwitches bei gedrücktem
   // Modifier zum Wechsel des Modus ohne Relaisanforderung.
+
   // Architekturentscheidung: Das ist hier vom UIState unabhängig, da es
-  // sich um eine Taste zur Fehlerbehanldung handelt und somit außerdem
-  // die Switches der UI States unabhängig vom Modifier hält.
-  if (inputDevices.data.switchAction.mode &&
-      inputDevices.data.modifier.pressed &&
-      !inputDevices.data.modifier.released) {
+  // sich um eine Taste zur Fehlerbehandlung handelt
+  if (id.switchAction.mode && id.modifier.pressed && !id.modifier.released) {
     if (heaterStatus.mode == Mode::Power) {
       heaterStatus.mode = Mode::Temp;
     } else if (heaterStatus.mode == Mode::Temp) {
@@ -96,31 +101,31 @@ void SystemController::applyInputdata() {
   }
 
   // Gedrückter Modifier und Encoder wechseln die UIStates, vorausgesetzt
-  // der Bildschirm ist an
-  if (inputDevices.data.modifier.pressed &&
-      !inputDevices.data.modifier.released && val != 0 && state != State::Off) {
+  // der Bildschirm ist angeschaltet
+  if (id.modifier.pressed && !id.modifier.released && val != 0 &&
+      state != State::Off) {
     if (val >= 1 && val <= Config::kEncoderValCutoff) {
-      outputDevices.intent.lcd_cycleDirection = LCDDirection::Right;
+      oi.lcd_cycleDirection = LCDDirection::Right;
       cyclePages();
-      inputDevices.data.modifier.used = true;
       return;
     }
     if (val <= -1 && val >= -Config::kEncoderValCutoff) {
-      outputDevices.intent.lcd_cycleDirection = LCDDirection::Left;
+      oi.lcd_cycleDirection = LCDDirection::Left;
       cyclePages();
-      inputDevices.data.modifier.used = true;
       return;
     }
   }
 
   //====================================================================================
-  // UI Abhängige Eingaben von ModeSwitch, DisplayButton und Encoder ohne
+  // UIState abhängige Eingaben von ModeSwitch, DisplayButton und Encoder ohne
   // Modifier
   //====================================================================================
   switch (state) {
   case State::start_page:
-    // Drücken des Modusschalters
-    if (inputDevices.data.switchAction.mode) {
+
+    // Auf der Startseite wechselt der Modusschalter den Temperaturmodus der
+    // Heizung
+    if (id.switchAction.mode) {
       if (heaterStatus.mode == Mode::Power) {
         requestRelaisCommand(Command::Short);
         heaterStatus.mode = Mode::Temp;
@@ -131,42 +136,52 @@ void SystemController::applyInputdata() {
       return;
     }
 
-    // Drücken des Display Schalters
+    // Drücken des Display Schalters schaltet das Display Aus
     DisplayButtonTurnsDisplayOff();
 
-    // Encoder auswerten
+    // Der Encoder verstellt die Solltemperatur
     if (val == 0 || val >= Config::kEncoderValCutoff ||
         val <= -Config::kEncoderValCutoff) {
       return;
     }
     // val ist signed
     heaterStatus.target_tempC += val * Config::kTempStepC;
-    clampTargetTempC(heaterStatus.target_tempC);
+    clampTempToConfigVals(heaterStatus.target_tempC);
 
     break;
 
   case State::default_temp_page:
-    if (inputDevices.data.switchAction.mode) {
+    // Die Seite für die default_temp bietet einen Dialog an, welcher durch
+    // drücken des Modusschalters geöffnet wir (anderer UIState)
+    if (id.switchAction.mode) {
       pendingDefaultTempC = runtimeConfig.get_default_tempC();
       state = State::default_temp_dialog;
       return;
     }
 
+    // Ansonsten schaltet der DisplayButton das Display aus
     DisplayButtonTurnsDisplayOff();
-    // Encoder hat auf dieser Keine Bedeutung
     break;
 
+    // Der Encoder wird bewusst nicht behandelt, da auf dieser Seite ohne
+    // Funktion
+
   case State::default_temp_dialog:
-    // Modusschalter übernimmt den neuen default Wert
-    if (inputDevices.data.switchAction.mode) {
+    /*Im geöffneten default_temp Dialog wird durch den Encoder ein
+     * pendingDefault Wert verstellt. Der Modusschalter übernimmt diesen, der
+     * DisplayButton verwirft ihn und kehrt zum vorherigen default_temp UIState
+     * zurück.
+     */
+
+    // Übernahme des pendingDefault Werts
+    if (id.switchAction.mode) {
       runtimeConfig.set_default_tempC(pendingDefaultTempC);
       state = State::default_temp_page;
       return;
     }
 
-    // Displayschalter übernimmt den neuen default Wert nicht
-    if (inputDevices.data.modifier.released &&
-        !inputDevices.data.modifier.used) {
+    // Keine Übernahme
+    if (id.modifier.released) {
       state = State::default_temp_page;
     }
 
@@ -176,30 +191,24 @@ void SystemController::applyInputdata() {
       return;
     }
     pendingDefaultTempC += val * Config::kTempStepC;
-    clampTargetTempC(pendingDefaultTempC);
+    clampTempToConfigVals(pendingDefaultTempC);
     break;
 
   case State::Off:
-    if (inputDevices.data.modifier.released &&
-        !inputDevices.data.modifier.pressed) {
+    // Bei ausgeschaltetem Display hat nur der DisplayButton Funtion und
+    // schaltet das Display ein.
+    if (id.modifier.released && !id.modifier.pressed) {
       state = State::start_page;
     }
     break;
-
-    /*
-     * Deprecated
-        applyModeSwitchInput();
-        applyDisplayButtonInput();
-        applyEncoderInput();
-    */
   }
 };
 //}}}
 
 void SystemController::DisplayButtonTurnsDisplayOff() {
   //{{{
-  if (inputDevices.data.modifier.released && !inputDevices.data.modifier.used) {
-    outputDevices.intent.lcd_state = OutputDevicesIntent::LcdStateIntent::Off;
+  if (inputDevices.data.modifier.released) {
+    heaterStatus.uiState = UiState::Off;
     return;
   }
 }
@@ -240,14 +249,10 @@ void SystemController::applyHeatingLogic() {
 void SystemController::writeOutputIntent() {
   //{{{
   outputDevices.intent.displayContent.temp_c = inputDevices.data.sensor_tempC;
-  outputDevices.intent.displayContent.status.target_tempC =
-      heaterStatus.target_tempC;
-  outputDevices.intent.displayContent.status.state = heaterStatus.state;
-  outputDevices.intent.displayContent.status.mode = heaterStatus.mode;
+  outputDevices.intent.displayContent.status = heaterStatus;
 
   // Im Dialog wird die pendingDefaultTempC angezeigt
-  if (outputDevices.intent.lcd_state ==
-      OutputDevicesIntent::LcdStateIntent::default_temp_dialog) {
+  if (heaterStatus.uiState == UiState::default_temp_dialog) {
     outputDevices.intent.displayContent.runtimeConfigData.default_tempC =
         pendingDefaultTempC;
   } else {
@@ -258,7 +263,7 @@ void SystemController::writeOutputIntent() {
 //}}}
 
 // =============Helper Functions
-void SystemController::clampTargetTempC(float &target) {
+void SystemController::clampTempToConfigVals(float &target) {
   //{{{
   if (target > Config::kTempMaxC)
     target = Config::kTempMaxC;
@@ -269,19 +274,19 @@ void SystemController::clampTargetTempC(float &target) {
 
 void SystemController::cyclePages() {
   //{{{
-  using LCDIntent = OutputDevicesIntent::LcdStateIntent;
+  using LCDIntent = UiState;
 
   if (outputDevices.intent.lcd_cycleDirection ==
       OutputDevicesIntent::LcdCycleDirection::Right) {
-    switch (outputDevices.intent.lcd_state) {
+    switch (heaterStatus.uiState) {
     case LCDIntent::Off:
       return;
     case LCDIntent::start_page:
-      outputDevices.intent.lcd_state = LCDIntent::default_temp_page;
+      heaterStatus.uiState = LCDIntent::default_temp_page;
       break;
 
     case LCDIntent::default_temp_page:
-      outputDevices.intent.lcd_state = LCDIntent::start_page;
+      heaterStatus.uiState = LCDIntent::start_page;
       break;
 
       // Die folgenden Seiten sind Dialoge, die nicht regulär mit
@@ -293,14 +298,14 @@ void SystemController::cyclePages() {
   }
   if (outputDevices.intent.lcd_cycleDirection ==
       OutputDevicesIntent::LcdCycleDirection::Left) {
-    switch (outputDevices.intent.lcd_state) {
+    switch (heaterStatus.uiState) {
     case LCDIntent::Off:
       return;
     case LCDIntent::start_page:
-      outputDevices.intent.lcd_state = LCDIntent::default_temp_page;
+      heaterStatus.uiState = LCDIntent::default_temp_page;
       break;
     case LCDIntent::default_temp_page:
-      outputDevices.intent.lcd_state = LCDIntent::start_page;
+      heaterStatus.uiState = LCDIntent::start_page;
       break;
 
       // Die folgenden Seiten sind Dialoge, die nicht regulär mit

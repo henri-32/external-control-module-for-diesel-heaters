@@ -2,14 +2,13 @@
 #include "interfaces.h"
 
 class DisplayDriver : public IDisplayDriver {
-//Treiberklasse für das I2C Display. Enthält auch Rendering und Berechnung 
-//der darzustellenden Informationen
+  // Treiberklasse für das I2C Display. Enthält auch Rendering und Berechnung
+  // der darzustellenden Informationen
 public:
-  DisplayDriver(IDisplayHardware &display, OutputDevicesIntent::DisplayContent &dc,
-                OutputDevicesIntent::LcdStateIntent &ds);
+  DisplayDriver(IDisplayHardware &display);
 
   void init() override;
-  void update() override;
+  void update(OutputDevicesIntent::DisplayContent content) override;
   void writeLine();
 
   void renderLines();
@@ -20,15 +19,14 @@ public:
       const OutputDevicesIntent::DisplayContent &content);
   void clearLine(uint8_t line);
 
+
+private:
   IDisplayHardware &m_display;
   static constexpr uint8_t kRows = 4;
   static constexpr uint8_t kCols = 21;
   char m_lineBuffer[kRows][kCols] = {};
   char string_of_states[kRows][kCols] = {};
   char lastLine[4][21] = {"", "", "", ""};
-  // States
-  OutputDevicesIntent::DisplayContent &m_displayContent;
-  OutputDevicesIntent::LcdStateIntent &m_displayState;
   // Formatting in Helperfunktion
   int t_int;
   int t_frac;
@@ -38,5 +36,6 @@ public:
   int diff_frac;
   // Timing
   unsigned long last_update_ms = 0;
-  static constexpr uint8_t kMinUpdateIntervalMs = Config::kMinLcdUpdateIntervalMs;
+  static constexpr uint8_t kMinUpdateIntervalMs =
+      Config::kMinLcdUpdateIntervalMs;
 };

@@ -8,14 +8,13 @@ TEST(InitTests, displayInit) {
   // Ziemlich sinnloser init()-Test, aber jetzt ist er geschrieben.
   OutputDevicesIntent outputIntent;
   TestDisplayHardware m_display;
-  DisplayDriver display{m_display, outputIntent.displayContent,
-                        outputIntent.lcd_state};
+  DisplayDriver display{m_display};
   display.init();
 
   EXPECT_EQ(m_display.m_init_called, 1);
-  EXPECT_EQ(m_display.no_backlight_calls, 1); 
-  EXPECT_EQ(m_display.no_display_calls, 1); 
-  EXPECT_EQ(m_display.clear_calls, 1); 
+  EXPECT_EQ(m_display.no_backlight_calls, 1);
+  EXPECT_EQ(m_display.no_display_calls, 1);
+  EXPECT_EQ(m_display.clear_calls, 1);
 };
 //}}}
 class DisplayTest : public ::testing::Test {
@@ -23,8 +22,7 @@ protected:
   OutputDevicesIntent outputIntent;
   TestDisplayHardware display;
 
-  DisplayDriver driver{display, outputIntent.displayContent,
-                       outputIntent.lcd_state};
+  DisplayDriver driver{display};
 
   void SetUp() override { ArduinoStubSpies::setMillis(100); }
 };
@@ -42,9 +40,9 @@ TEST_F(DisplayTest, init_gets_called) {
 
 TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
   //{{{
-  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::Off;
+  outputIntent.displayContent.status.uiState = UiState::Off;
 
-  driver.update();
+  driver.update(outputIntent.displayContent);
 
   EXPECT_EQ(display.no_backlight_calls, 1);
   EXPECT_EQ(display.no_display_calls, 1);
@@ -54,13 +52,13 @@ TEST_F(DisplayTest, update_off_turns_display_off_without_writing) {
 
 TEST_F(DisplayTest, update_page1_writes_expected_lines) {
   //{{{
-  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::start_page;
+  outputIntent.displayContent.status.uiState = UiState::start_page;
   outputIntent.displayContent.temp_c = 21.3F;
   outputIntent.displayContent.status.target_tempC = 19.8F;
   outputIntent.displayContent.status.state = HeaterStatus::State::On;
   outputIntent.displayContent.status.mode = HeaterStatus::Mode::Power;
 
-  driver.update();
+  driver.update(outputIntent.displayContent);
 
   EXPECT_EQ(display.backlight_calls, 1);
   EXPECT_EQ(display.display_calls, 1);
@@ -74,16 +72,16 @@ TEST_F(DisplayTest, update_page1_writes_expected_lines) {
 
 TEST_F(DisplayTest, update_with_same_content_does_not_rewrite_lines) {
   //{{{
-  outputIntent.lcd_state = OutputDevicesIntent::LcdStateIntent::start_page;
+  outputIntent.displayContent.status.uiState = UiState::start_page;
   outputIntent.displayContent.temp_c = 20.0F;
   outputIntent.displayContent.status.target_tempC = 18.5F;
   outputIntent.displayContent.status.state = HeaterStatus::State::Off;
   outputIntent.displayContent.status.mode = HeaterStatus::Mode::Temp;
 
-  driver.update();
+  driver.update(outputIntent.displayContent);
   const size_t printed_after_first_update = display.printed_lines.size();
 
-  driver.update();
+  driver.update(outputIntent.displayContent);
 
   EXPECT_EQ(display.printed_lines.size(), printed_after_first_update);
 }

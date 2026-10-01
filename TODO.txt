@@ -1,7 +1,6 @@
-LcdStateIntent und Modifier used überdenken.
+UiState und Modifier used überdenken.
 
-  3. Modifier-Lebenszyklus korrigieren und komplette Nutzersequenzen testen.
-  6. LcdStateIntent zu einem echten UiState machen.
+  6. UiState zu einem echten UiState machen.
   7. Die Action-/Binding-Schicht für konsistente Dialoge ergänzen.
 
 `
