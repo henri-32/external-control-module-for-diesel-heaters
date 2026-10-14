@@ -34,8 +34,7 @@ public:
 private:
   TestRuntimeConfig runtimeConfig; 
   EncoderDriver encoderDriver{encoderHardware};
-  DisplayDriver displayDriver{displayHardware, outputIntent.displayContent,
-                              outputIntent.lcd_state};
+  DisplayDriver displayDriver{displayHardware};
 
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;

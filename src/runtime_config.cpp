@@ -3,23 +3,44 @@
 #include <EEPROM.h>
 #include <math.h>
 
-void RuntimeConfig::load() {
-  EEPROM.get(default_tempC_addr, data.default_tempC);
-  if (!isfinite(data.default_tempC)) {
-    data.default_tempC = Config::kDefaultTempC;
-  }
+namespace {
 
-}
-
-void RuntimeConfig::set_default_tempC(float new_default) {
-  if (new_default == data.default_tempC) {
+template <typename T>
+void store_config_value(T value, ConfigMember<T> &config) {
+  if (value == config.value) {
     return;
   }
 
-  EEPROM.put(default_tempC_addr, new_default);
-  data.default_tempC = new_default; 
+  EEPROM.put(config.addr, value);
+  config.value = value;
 }
 
-float RuntimeConfig::get_default_tempC() const{
-	return data.default_tempC;
+} // namespace
+
+void RuntimeConfig::load() {
+  EEPROM.get(data.default_tempC.addr, data.default_tempC.value);
+  if (!isfinite(data.default_tempC.value)) {
+    data.default_tempC.value = Config::kDefaultTempC;
+  }
+
+  EEPROM.get(data.RelaisPulseShortMs.addr, data.RelaisPulseShortMs.value);
+  if (!isfinite(data.RelaisPulseShortMs.value)) {
+    data.RelaisPulseShortMs.value = Config::kRelaisShortPulseMs;
+  }
+}
+
+void RuntimeConfig::set_default_tempC(float value) {
+  store_config_value(value, data.default_tempC);
+}
+
+float RuntimeConfig::get_default_tempC() const {
+  return data.default_tempC.value;
+}
+
+void RuntimeConfig::set_relais_pulse_short_ms(uint8_t value) {
+  store_config_value(value, data.RelaisPulseShortMs);
+}
+
+uint8_t RuntimeConfig::get_relais_pulse_short_ms() const {
+  return data.RelaisPulseShortMs.value;
 }

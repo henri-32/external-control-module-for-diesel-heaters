@@ -7,16 +7,14 @@
 // Sie wurden ins Interface aufgenommen, um vollständige Implementierung
 // der TestStubs sicherzustellen
 
-
 class IRuntimeConfig {
-public: 
-  IRuntimeConfig() = default; 
+public:
+  IRuntimeConfig() = default;
   virtual void load() = 0;
-  virtual void set_default_tempC(float new_default) = 0;
+  virtual void set_default_tempC(float value) = 0;
   virtual float get_default_tempC() const = 0;
-
-  RuntimeConfigData data;
-
+  virtual void set_relais_pulse_short_ms(uint8_t value) = 0;
+  virtual uint8_t get_relais_pulse_short_ms() const = 0;
 };
 class IInputDevices {
   //{{{

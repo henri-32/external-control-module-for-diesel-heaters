@@ -39,6 +39,9 @@ void SystemController::apply_config_data() {
 
 void SystemController::applyInputdata() {
   //{{{
+  // Für jeden Tick lokal in dieser Funktion zurücksetzen
+  modifier_used_ = false; 
+
   using State = UiState;
   using Mode = HeaterStatus::Mode;
   using Command = OutputDevicesIntent::RelaisCommand;
@@ -83,6 +86,7 @@ void SystemController::applyInputdata() {
     } else if (heaterStatus.state == HeaterStatus::State::Off) {
       heaterStatus.state = HeaterStatus::State::On;
     }
+    modifier_used_ = true;
     return;
   }
 
@@ -97,6 +101,7 @@ void SystemController::applyInputdata() {
     } else if (heaterStatus.mode == Mode::Temp) {
       heaterStatus.mode = Mode::Power;
     }
+    modifier_used_ = true;
     return;
   }
 
@@ -107,11 +112,13 @@ void SystemController::applyInputdata() {
     if (val >= 1 && val <= Config::kEncoderValCutoff) {
       oi.lcd_cycleDirection = LCDDirection::Right;
       cyclePages();
+      modifier_used_ = true;
       return;
     }
     if (val <= -1 && val >= -Config::kEncoderValCutoff) {
       oi.lcd_cycleDirection = LCDDirection::Left;
       cyclePages();
+      modifier_used_ = true;
       return;
     }
   }
@@ -136,8 +143,10 @@ void SystemController::applyInputdata() {
       return;
     }
 
-    // Drücken des Display Schalters schaltet das Display Aus
-    DisplayButtonTurnsDisplayOff();
+	//DisplayButton schaltet Display aus.
+    if (displayButtonAction()) {
+      state = State::Off;
+    }
 
     // Der Encoder verstellt die Solltemperatur
     if (val == 0 || val >= Config::kEncoderValCutoff ||
@@ -147,72 +156,92 @@ void SystemController::applyInputdata() {
     // val ist signed
     heaterStatus.target_tempC += val * Config::kTempStepC;
     clampTempToConfigVals(heaterStatus.target_tempC);
-
     break;
 
-  case State::default_temp_page:
-    // Die Seite für die default_temp bietet einen Dialog an, welcher durch
-    // drücken des Modusschalters geöffnet wir (anderer UIState)
+  case State::menu_page:
     if (id.switchAction.mode) {
-      pendingDefaultTempC = runtimeConfig.get_default_tempC();
+      state = State::default_temp_menu;
+      return;
+    }
+    break;
+
+  case State::default_temp_menu:
+    // Die Seite für die default_temp bietet einen Dialog an, welcher durch
+    // drücken des Modusschalters geöffnet wird (anderer UIState)
+    if (id.switchAction.mode) {
+      pendingDefaultTempC_ = runtimeConfig.get_default_tempC();
       state = State::default_temp_dialog;
       return;
+
+      // Der Display Button geht zurück zur Menü Seite
+      if (displayButtonAction()) {
+        state = State::menu_page;
+      }
+
+      if (id.encoder_val < 0) { // TODO Cycle Menu Pages}
+        if (id.encoder_val > 0) {
+        }
+        break;
+
+      case State::short_relais_impulse_menu:
+        if (id.switchAction.mode) {
+          state = State::pulse_dialog;
+        }
+
+        if (displayButtonAction()) {
+          state = State::menu_page;
+        }
+
+        if (id.encoder_val < 0) {
+        }
+        if (id.encoder_val > 0) {
+        }
+        break;
+
+      case State::default_temp_dialog:
+        /*Im geöffneten default_temp Dialog wird durch den Encoder ein
+         * pendingDefault Wert verstellt. Der Modusschalter übernimmt diesen,
+         * der DisplayButton verwirft ihn und kehrt zum vorherigen default_temp
+         * UIState zurück.
+         */
+
+        // Übernahme des pendingDefault Werts
+        if (id.switchAction.mode) {
+          runtimeConfig.set_default_tempC(pendingDefaultTempC_);
+          state = State::menu_page;
+          return;
+        }
+
+        // Keine Übernahme
+        if (id.modifier.released) {
+          state = State::default_temp_menu;
+        }
+
+        // Bei gültigen Encoderbefehlen pending Value anpassen
+        if (val == 0 || val >= Config::kEncoderValCutoff ||
+            val <= -Config::kEncoderValCutoff) {
+          return;
+        }
+        pendingDefaultTempC_ += val * Config::kTempStepC;
+        clampTempToConfigVals(pendingDefaultTempC_);
+        break;
+
+      case State::pulse_dialog:
+        break;
+
+      case State::Off:
+        // Bei ausgeschaltetem Display hat nur der DisplayButton Funtion und
+        // schaltet das Display ein.
+        if (id.modifier.released && !id.modifier.pressed) {
+          state = State::start_page;
+        }
+        break;
+      }
     }
-
-    // Ansonsten schaltet der DisplayButton das Display aus
-    DisplayButtonTurnsDisplayOff();
-    break;
-
-    // Der Encoder wird bewusst nicht behandelt, da auf dieser Seite ohne
-    // Funktion
-
-  case State::default_temp_dialog:
-    /*Im geöffneten default_temp Dialog wird durch den Encoder ein
-     * pendingDefault Wert verstellt. Der Modusschalter übernimmt diesen, der
-     * DisplayButton verwirft ihn und kehrt zum vorherigen default_temp UIState
-     * zurück.
-     */
-
-    // Übernahme des pendingDefault Werts
-    if (id.switchAction.mode) {
-      runtimeConfig.set_default_tempC(pendingDefaultTempC);
-      state = State::default_temp_page;
-      return;
-    }
-
-    // Keine Übernahme
-    if (id.modifier.released) {
-      state = State::default_temp_page;
-    }
-
-    // Bei gültigen Encoderbefehlen pending Value anpassen
-    if (val == 0 || val >= Config::kEncoderValCutoff ||
-        val <= -Config::kEncoderValCutoff) {
-      return;
-    }
-    pendingDefaultTempC += val * Config::kTempStepC;
-    clampTempToConfigVals(pendingDefaultTempC);
-    break;
-
-  case State::Off:
-    // Bei ausgeschaltetem Display hat nur der DisplayButton Funtion und
-    // schaltet das Display ein.
-    if (id.modifier.released && !id.modifier.pressed) {
-      state = State::start_page;
-    }
-    break;
   }
 };
 //}}}
 
-void SystemController::DisplayButtonTurnsDisplayOff() {
-  //{{{
-  if (inputDevices.data.modifier.released) {
-    heaterStatus.uiState = UiState::Off;
-    return;
-  }
-}
-//}}}
 
 void SystemController::applyHeatingLogic() {
   //{{{
@@ -253,16 +282,15 @@ void SystemController::writeOutputIntent() {
 
   // Im Dialog wird die pendingDefaultTempC angezeigt
   if (heaterStatus.uiState == UiState::default_temp_dialog) {
-    outputDevices.intent.displayContent.runtimeConfigData.default_tempC =
-        pendingDefaultTempC;
+    outputDevices.intent.displayContent.runtimeConfigData.default_tempC.value =
+        pendingDefaultTempC_;
   } else {
-    outputDevices.intent.displayContent.runtimeConfigData.default_tempC =
+    outputDevices.intent.displayContent.runtimeConfigData.default_tempC.value =
         runtimeConfig.get_default_tempC();
   }
 }
 //}}}
 
-// =============Helper Functions
 void SystemController::clampTempToConfigVals(float &target) {
   //{{{
   if (target > Config::kTempMaxC)
@@ -282,16 +310,25 @@ void SystemController::cyclePages() {
     case LCDIntent::Off:
       return;
     case LCDIntent::start_page:
-      heaterStatus.uiState = LCDIntent::default_temp_page;
+      heaterStatus.uiState = LCDIntent::menu_page;
       break;
 
-    case LCDIntent::default_temp_page:
+    case LCDIntent::menu_page:
       heaterStatus.uiState = LCDIntent::start_page;
       break;
 
       // Die folgenden Seiten sind Dialoge, die nicht regulär mit
       // durchcyclen erreicht werden können.
     case LCDIntent::default_temp_dialog:
+      break;
+
+    case LCDIntent::default_temp_menu:
+      break;
+
+    case LCDIntent::short_relais_impulse_menu:
+      break;
+
+    case LCDIntent::pulse_dialog:
       break;
     }
     return;
@@ -302,9 +339,9 @@ void SystemController::cyclePages() {
     case LCDIntent::Off:
       return;
     case LCDIntent::start_page:
-      heaterStatus.uiState = LCDIntent::default_temp_page;
+      heaterStatus.uiState = LCDIntent::menu_page;
       break;
-    case LCDIntent::default_temp_page:
+    case LCDIntent::menu_page:
       heaterStatus.uiState = LCDIntent::start_page;
       break;
 
@@ -312,10 +349,26 @@ void SystemController::cyclePages() {
       // durchcyclen erreicht werden können.
     case LCDIntent::default_temp_dialog:
       break;
+
+    case LCDIntent::default_temp_menu:
+      break;
+
+    case LCDIntent::short_relais_impulse_menu:
+      break;
+
+    case LCDIntent::pulse_dialog:
+      break;
     }
     return;
   }
 }
+//}}}
+
+inline bool SystemController::displayButtonAction() {
+  return inputDevices.data.modifier.released && !modifier_used_;
+}
+
+void SystemController::cycleMenuPages() {}
 
 void SystemController::requestRelaisCommand(
     OutputDevicesIntent::RelaisCommand command) {

@@ -13,10 +13,6 @@ public:
   void operator()();
   void init();
   void applyInputdata();
-  void applyPowerSwitchInput();
-  void applyModeSwitchInput();
-  void applyEncoderInput();
-  void applyDisplayButtonInput();
   void applyHeatingLogic();
   void writeOutputIntent(); 
 
@@ -25,9 +21,10 @@ public:
   void apply_config_data();
   void clampTempToConfigVals(float &target);
   void cyclePages();
+  void cycleMenuPages();
   void requestRelaisCommand(OutputDevicesIntent::RelaisCommand command);
 
-  void DisplayButtonTurnsDisplayOff();
+  bool displayButtonAction(); 
   void enter_default_temp_dialog();
 
   IRuntimeConfig &runtimeConfig;
@@ -35,6 +32,7 @@ public:
   HeaterStatus heaterStatus;
   IOutputDevices &outputDevices;
 
-  float pendingDefaultTempC = 0;
+  float pendingDefaultTempC_ = 0;
+  bool modifier_used_ = false; 
 
 };

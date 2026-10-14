@@ -27,7 +27,7 @@ TEST(InitTests, controllerinit) {
   TestRuntimeConfig runtimeConfig;
   // Hiermit wird geprüft, dass die runtimeConfig korrekt geladen wird. Siehe
   // letztes EXPECT_EQ des Tests
-  runtimeConfig.data.default_tempC = 20;
+  runtimeConfig.set_default_tempC(20.0);
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;
   TestRelais relais;
@@ -52,7 +52,7 @@ TEST(InitTests, controllerinit) {
 TEST(InitTests, default_temp_value_load) {
   //{{{
   TestRuntimeConfig runtimeConfig;
-  runtimeConfig.data.default_tempC = std::numeric_limits<float>::quiet_NaN();
+  runtimeConfig.set_default_tempC(std::numeric_limits<float>::quiet_NaN());
   InputDevicesDataSet inputData;
   OutputDevicesIntent outputIntent;
   TestRelais relais;
@@ -66,12 +66,12 @@ TEST(InitTests, default_temp_value_load) {
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
             Config::kDefaultTempC);
 
-  runtimeConfig.data.default_tempC = Config::kTempMinC - 1;
+  runtimeConfig.set_default_tempC(Config::kTempMinC - 1);
   controller.init();
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
             Config::kDefaultTempC);
 
-  runtimeConfig.data.default_tempC = Config::kTempMaxC + 1;
+  runtimeConfig.set_default_tempC(Config::kTempMaxC + 1);
   controller.init();
   EXPECT_EQ(outputIntent.displayContent.status.target_tempC,
             Config::kDefaultTempC);
@@ -97,7 +97,7 @@ protected:
   SystemController controller{runtimeConfig, testInput, testOutput};
 
   void SetUp() override {
-    runtimeConfig.data.default_tempC = Config::kDefaultTempC;
+    runtimeConfig.set_default_tempC(Config::kDefaultTempC);
     controller.init();
     inputData.sensor_tempC = 15.0;
     inputData.switchAction.mode = false;
@@ -315,7 +315,7 @@ TEST_F(SystemControllerBlackBox,
   controller();
 
   EXPECT_EQ(outputIntent.displayContent.status.uiState,
-            UiState::default_temp_page);
+            UiState::menu_page);
   inputData.encoder_val = 0; 
   inputData.modifier.pressed = false; 
 }
@@ -481,9 +481,12 @@ TEST_F(
   //{{{
   EXPECT_EQ(outputIntent.displayContent.status.uiState,
             UiState::start_page);
-  cycle_until_state(UiState::default_temp_page);
+  cycle_until_state(UiState::menu_page);
+  inputData.switchAction.mode = true; 
+  controller();
+  inputData.switchAction.mode = false; 
   EXPECT_EQ(outputIntent.displayContent.status.uiState,
-            UiState::default_temp_page);
+            UiState::default_temp_menu);
   // Reset
   inputData.encoder_val = 0;
   inputData.modifier.pressed = false;
@@ -507,7 +510,7 @@ TEST_F(
   inputData.modifier.released = true;
   controller();
   EXPECT_EQ(outputIntent.displayContent.status.uiState,
-            UiState::default_temp_page);
+            UiState::default_temp_menu);
   EXPECT_EQ(controller.runtimeConfig.get_default_tempC(), 15.0);
   // Reset
   inputData.modifier.released = false;

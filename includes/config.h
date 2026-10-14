@@ -27,3 +27,4 @@ struct Config {
   static constexpr int kRelaisShortPulseMs = 200;
   static constexpr int kMinLcdUpdateIntervalMs = 100;
 };
+

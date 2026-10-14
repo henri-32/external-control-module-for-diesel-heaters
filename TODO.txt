@@ -1,6 +1,2 @@
-UiState und Modifier used überdenken.
-
-  6. UiState zu einem echten UiState machen.
-  7. Die Action-/Binding-Schicht für konsistente Dialoge ergänzen.
-
-`
+Cycle Pages und Cycle menu pages ist völlig falsche verantwortung. 
+angefangenen Prozess von anderen UI states und die änderung des short pulses in der hotconfig fortsetzen. 

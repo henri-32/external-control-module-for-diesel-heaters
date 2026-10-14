@@ -12,8 +12,7 @@ struct InputDevicesDataSet {
   struct SwitchAction {
     bool power = false;
     bool mode = false;
-  };
-  SwitchAction switchAction;
+  } switchAction;
 
   int8_t encoder_val = 0;
   float sensor_tempC = 0;
@@ -21,27 +20,37 @@ struct InputDevicesDataSet {
   struct Modifier {
     bool pressed = false;
     bool released = false;
-  };
-  Modifier modifier;
+  } modifier;
 };
 
 enum class UiState {
   start_page,
-  default_temp_page,
+  menu_page,
+  default_temp_menu,
   default_temp_dialog,
+  short_relais_impulse_menu,
+  pulse_dialog,
   Off
 };
 
 struct HeaterStatus {
   enum class State { Off, On } state = State::Off;
   enum class Mode { Temp, Power } mode = Mode::Temp;
-  UiState uiState = UiState::Off; 
+  UiState uiState = UiState::Off;
 
   float target_tempC = Config::kDefaultTempC;
 };
 
+template <typename T> struct ConfigMember {
+  ConfigMember(T val, uint32_t ad) : value(val), addr(ad) {};
+  T value;
+  uint32_t addr;
+};
+
 struct RuntimeConfigData {
-  float default_tempC = 15.0;
+  ConfigMember<float> default_tempC{0.0, 0};
+  ConfigMember<uint8_t> RelaisPulseShortMs{200,
+                                           0 + sizeof(default_tempC.value)};
 };
 
 struct OutputDevicesIntent {

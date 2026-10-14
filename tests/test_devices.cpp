@@ -2,18 +2,25 @@
 
 void TestRuntimeConfig::load() {
   // Dieselbe Iplementierung wie im Produktionscode, nur ohne
-  // EEPROM read, da erwartet wird, dass in den tests die data Werte direkt
-  // gesetzt werden
-  if (!std::isfinite(data.default_tempC)) {
-    data.default_tempC = Config::kDefaultTempC;
+  // EEPROM read, da die Tests die Werte über den Stub setzen.
+  if (!std::isfinite(data.default_tempC.value)) {
+    data.default_tempC.value = Config::kDefaultTempC;
   }
 };
 float TestRuntimeConfig::get_default_tempC() const {
-  return data.default_tempC;
+  return data.default_tempC.value;
 }
 
-void TestRuntimeConfig::set_default_tempC(float new_default) {
-  data.default_tempC = new_default;
+void TestRuntimeConfig::set_default_tempC(float value) {
+  data.default_tempC.value = value;
+}
+
+void TestRuntimeConfig::set_relais_pulse_short_ms(uint8_t value) {
+  data.RelaisPulseShortMs.value = value;
+}
+
+uint8_t TestRuntimeConfig::get_relais_pulse_short_ms() const {
+  return data.RelaisPulseShortMs.value;
 }
 
 void TestOutputDevices::update() {

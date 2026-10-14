@@ -52,25 +52,54 @@ void DisplayDriver::renderLines() {
     snprintf(m_lineBuffer[3], 21, "Mode:      %.9s", string_of_states[1]);
     break;
 
-  case LCDIntent::default_temp_page:
+  case LCDIntent::menu_page:
     m_display.backlight();
     m_display.display();
-    snprintf(m_lineBuffer[0], 21, "Default Temp %.2f C",
-             m_displayContent.runtimeConfigData.default_tempC);
+    snprintf(m_lineBuffer[0], 21, "Edit Config?");
 
-    snprintf(m_lineBuffer[1], 21, "Press Mode Button");
-    snprintf(m_lineBuffer[2], 21, "     to change      ");
+    snprintf(m_lineBuffer[1], 21, "Mode Button: YES");
+    snprintf(m_lineBuffer[2], 21, "Display Button: NO");
+    break;
+
+
+  case LCDIntent::default_temp_menu: 
+    m_display.backlight();
+    m_display.display(); 
+    snprintf(m_lineBuffer[0], 21, "Edit Default Temp?");
+
+    snprintf(m_lineBuffer[1], 21, "Mode Button: YES");
+    snprintf(m_lineBuffer[2], 21, "Display Button: NO");
+    break;
+
+  case LCDIntent::short_relais_impulse_menu: 
+    m_display.backlight();
+    m_display.display(); 
+    snprintf(m_lineBuffer[0], 21, "Edit short");
+    snprintf(m_lineBuffer[1], 21, "relais pulse?");
+
+    snprintf(m_lineBuffer[2], 21, "Mode Button: YES");
+    snprintf(m_lineBuffer[3], 21, "Display Button: NO");
     break;
 
   case LCDIntent::default_temp_dialog:
     m_display.backlight();
     m_display.display();
     snprintf(m_lineBuffer[0], 21, "Default Temp %.2f C",
-             m_displayContent.runtimeConfigData.default_tempC);
+             m_displayContent.runtimeConfigData.default_tempC.value);
     snprintf(m_lineBuffer[1], 21, "Mode Button: OK");
     snprintf(m_lineBuffer[2], 21, "Display Button: EXIT");
     break;
 
+
+  case LCDIntent::pulse_dialog: 
+    m_display.backlight();
+    m_display.display();
+    snprintf(m_lineBuffer[0], 21, "Pulse: %.2i ms",
+             m_displayContent.runtimeConfigData.RelaisPulseShortMs.value);
+    snprintf(m_lineBuffer[1], 21, "Mode Button: OK");
+    snprintf(m_lineBuffer[2], 21, "Display Button: EXIT");
+    break;
+  
   case LCDIntent::Off:
     m_display.noBacklight();
     m_display.noDisplay();
